@@ -1,12 +1,27 @@
-// ─── CC Recipients (update with real emails when ready) ───────────────────────
-export const CC_EMAILS = [
-  { email: "president@tgpcop.com", name: "President" },
-  { email: "vicepresident@tgpcop.com", name: "Vice President" },
-  { email: "generalsecretary@tgpcop.com", name: "General Secretary" },
-];
+// ─── Supabase & Email Setup ───────────────────────────────────────────────────
+import { supabase } from './supabase';
 
 const SENDER = { name: "TGPCOP Student Council", email: "sb108750@gmail.com" };
 const ADMIN_URL = "https://tgpcop-concil.vercel.app/admin";
+
+// ─── Fetch CC Recipients from Supabase ─────────────────────────────────────
+async function getCCEmails(): Promise<Array<{ email: string; name: string }>> {
+  try {
+    const { data } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'cc_emails')
+      .single();
+
+    if (data && data.value) {
+      return JSON.parse(data.value);
+    }
+    return [];
+  } catch (error) {
+    console.warn("⚠️ Failed to fetch CC emails from settings, using empty list:", error);
+    return [];
+  }
+}
 
 // ─── Helper: call Brevo API ────────────────────────────────────────────────────
 async function sendBrevoEmail(payload: object): Promise<void> {
@@ -46,10 +61,11 @@ export async function sendConfirmationToStudent({
   questionText: string;
 }): Promise<void> {
   try {
+    const ccEmails = await getCCEmails();
     await sendBrevoEmail({
       sender: SENDER,
       to: [{ email: studentEmail, name: studentName }],
-      cc: CC_EMAILS,
+      cc: ccEmails,
       subject: "✅ Your Question Has Been Received — TGPCOP Council",
       htmlContent: `
         <div style="font-family:sans-serif;max-width:600px;margin:auto;background:#0D1B3E;color:white;padding:30px;border-radius:12px;">
@@ -89,10 +105,11 @@ export async function sendQuestionToCouncil({
   memberEmail: string;
 }): Promise<void> {
   try {
+    const ccEmails = await getCCEmails();
     await sendBrevoEmail({
       sender: SENDER,
       to: [{ email: memberEmail, name: directedTo }],
-      cc: CC_EMAILS,
+      cc: ccEmails,
       subject: `📬 New Question from ${studentName}`,
       htmlContent: `
         <div style="font-family:sans-serif;max-width:600px;margin:auto;background:#0D1B3E;color:white;padding:30px;border-radius:12px;">
@@ -131,10 +148,11 @@ export async function sendReplyToStudent({
   adminReply: string;
 }): Promise<void> {
   try {
+    const ccEmails = await getCCEmails();
     await sendBrevoEmail({
       sender: SENDER,
       to: [{ email: studentEmail, name: studentName }],
-      cc: CC_EMAILS,
+      cc: ccEmails,
       subject: "💬 Reply to Your Question — TGPCOP Council",
       htmlContent: `
         <div style="font-family:sans-serif;max-width:600px;margin:auto;background:#0D1B3E;color:white;padding:30px;border-radius:12px;">

@@ -13,7 +13,11 @@ import {
   ExternalLink, 
   Sun,
   Share2,
-  MessageCircle
+  MessageCircle,
+  Mail,
+  User,
+  Trash2,
+  Plus
 } from 'lucide-react';
 
 export const AdminSettings: React.FC = () => {
@@ -25,9 +29,16 @@ export const AdminSettings: React.FC = () => {
   const [originalLogo, setOriginalLogo] = useState('');
   const [originalBanner, setOriginalBanner] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState<'logo' | 'banner' | 'social' | null>(null);
+  const [isSaving, setIsSaving] = useState<'logo' | 'banner' | 'social' | 'cc_emails' | null>(null);
   const [logoError, setLogoError] = useState('');
   const [bannerError, setBannerError] = useState('');
+
+  // CC Emails Management State
+  const [ccEmails, setCcEmails] = useState<Array<{ name: string; email: string }>>([]);
+  const [originalCcEmails, setOriginalCcEmails] = useState<Array<{ name: string; email: string }>>([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newEmail, setNewEmail] = useState({ name: '', email: '' });
+  const [ccEmailError, setCcEmailError] = useState('');
 
   // Social Media Handles State
   const [socialHandles, setSocialHandles] = useState({
@@ -62,6 +73,11 @@ export const AdminSettings: React.FC = () => {
       setBannerUrl(map['banner_url'] || '');
       setOriginalLogo(map['logo_url'] || '');
       setOriginalBanner(map['banner_url'] || '');
+
+      // Load CC emails
+      const ccEmailsData = map['cc_emails'] ? JSON.parse(map['cc_emails']) : [];
+      setCcEmails(ccEmailsData);
+      setOriginalCcEmails(ccEmailsData);
 
       // Load social media handles
       const social = {
@@ -146,6 +162,86 @@ export const AdminSettings: React.FC = () => {
 
   const hasSocialChanges = () => {
     return JSON.stringify(socialHandles) !== JSON.stringify(originalSocial);
+  };
+
+  // ─── CC Email Validation & Management ─────────────────────────────────
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateNewEmail = (): boolean => {
+    setCcEmailError('');
+    
+    if (!newEmail.name.trim()) {
+      setCcEmailError('Name is required (minimum 2 characters)');
+      return false;
+    }
+    if (newEmail.name.trim().length < 2) {
+      setCcEmailError('Name must be at least 2 characters');
+      return false;
+    }
+    if (!newEmail.email.trim()) {
+      setCcEmailError('Email is required');
+      return false;
+    }
+    if (!isValidEmail(newEmail.email)) {
+      setCcEmailError('Invalid email format');
+      return false;
+    }
+    if (ccEmails.some(e => e.email.toLowerCase() === newEmail.email.toLowerCase())) {
+      setCcEmailError('This email is already added');
+      return false;
+    }
+    return true;
+  };
+
+  const handleAddEmail = () => {
+    if (!validateNewEmail()) return;
+    setCcEmails([...ccEmails, { name: newEmail.name.trim(), email: newEmail.email.trim() }]);
+    setNewEmail({ name: '', email: '' });
+    setShowAddForm(false);
+  };
+
+  const handleDeleteEmail = (index: number) => {
+    if (ccEmails.length <= 1) {
+      toast.error('❌ At least 1 CC email is required');
+      return;
+    }
+    setCcEmails(ccEmails.filter((_, i) => i !== index));
+  };
+
+  const saveCcEmails = async () => {
+    if (ccEmails.length === 0) {
+      toast.error('❌ At least 1 CC email is required');
+      return;
+    }
+    if (ccEmails.length > 10) {
+      toast.error('❌ Maximum 10 CC emails allowed');
+      return;
+    }
+
+    setIsSaving('cc_emails');
+    try {
+      const { error } = await supabase.from('settings').upsert({
+        key: 'cc_emails',
+        value: JSON.stringify(ccEmails),
+        updated_at: new Date().toISOString(),
+      });
+      if (error) throw error;
+      
+      await logActivity(myEmail, 'cc_emails_update', `Updated CC emails to ${ccEmails.length} recipients`);
+      setOriginalCcEmails(ccEmails);
+      toast.success('✅ CC emails updated successfully!');
+    } catch (err: any) {
+      toast.error(`❌ Failed to save: ${err.message}`);
+    } finally {
+      setIsSaving(null);
+    }
+  };
+
+  const hasCcEmailChanges = () => {
+    return JSON.stringify(ccEmails) !== JSON.stringify(originalCcEmails);
   };
 
   if (isLoading) {
@@ -442,6 +538,136 @@ export const AdminSettings: React.FC = () => {
           <button
             onClick={() => setSocialHandles(originalSocial)}
             disabled={!hasSocialChanges()}
+            className="flex items-center space-x-1.5 px-4 py-2.5 border border-navy-dark/15 rounded-lg text-navy-dark/60 font-display text-xs font-bold hover:bg-navy-dark/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Reset</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ── CC Email Recipients ───────────────────────────────────────────── */}
+      <div className="bg-white border border-navy-dark/10 rounded-2xl shadow-xs p-6 space-y-5">
+        <div className="flex items-center space-x-2 pb-3 border-b border-navy-dark/5">
+          <Mail className="w-4 h-4 text-orange-burnt" />
+          <h4 className="font-display font-bold text-sm text-navy-dark">CC Email Recipients</h4>
+        </div>
+
+        <p className="text-xs text-navy-dark/50 font-sans leading-relaxed">
+          These email addresses will receive a copy of every student question and admin reply. Manage who receives notifications from the student council portal.
+        </p>
+
+        {/* CC Email List */}
+        <div className="space-y-3">
+          {ccEmails.length > 0 ? (
+            ccEmails.map((item, index) => (
+              <div key={index} className="flex items-center justify-between p-4 bg-navy-dark/3 border border-navy-dark/8 rounded-xl hover:bg-navy-dark/5 transition-colors">
+                <div className="flex items-center space-x-3 flex-1">
+                  <div className="w-8 h-8 rounded-full bg-orange-burnt/15 flex items-center justify-center text-orange-burnt">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-display font-semibold text-sm text-navy-dark">{item.name}</p>
+                    <p className="text-xs text-navy-dark/50 font-mono">{item.email}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleDeleteEmail(index)}
+                  disabled={ccEmails.length <= 1 || isSaving === 'cc_emails'}
+                  className="p-2 text-navy-dark/50 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  title={ccEmails.length <= 1 ? "At least 1 email is required" : "Delete"}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-6 text-navy-dark/40">
+              <Mail className="w-8 h-8 mx-auto mb-2 opacity-30" />
+              <p className="text-sm font-display">No CC emails added yet</p>
+            </div>
+          )}
+        </div>
+
+        {/* Add New Email Form */}
+        {!showAddForm ? (
+          <button
+            onClick={() => setShowAddForm(true)}
+            disabled={ccEmails.length >= 10}
+            className="w-full flex items-center justify-center space-x-2 px-4 py-3 border-2 border-dashed border-orange-burnt/30 rounded-xl text-orange-burnt hover:bg-orange-burnt/5 hover:border-orange-burnt/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-display text-sm font-semibold"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New CC Email</span>
+          </button>
+        ) : (
+          <div className="p-4 bg-orange-burnt/5 border border-orange-burnt/20 rounded-xl space-y-3">
+            <div className="space-y-2">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60">
+                Name
+              </label>
+              <input
+                type="text"
+                value={newEmail.name}
+                onChange={e => { setNewEmail({ ...newEmail, name: e.target.value }); setCcEmailError(''); }}
+                placeholder="e.g., Admin, President"
+                className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={newEmail.email}
+                onChange={e => { setNewEmail({ ...newEmail, email: e.target.value }); setCcEmailError(''); }}
+                placeholder="name@example.com"
+                className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors"
+              />
+            </div>
+            {ccEmailError && (
+              <p className="text-xs text-red-500 font-medium">{ccEmailError}</p>
+            )}
+            <div className="flex items-center space-x-3 pt-2 border-t border-orange-burnt/10">
+              <button
+                onClick={handleAddEmail}
+                className="flex items-center space-x-1.5 px-4 py-2 bg-orange-burnt hover:bg-orange-burnt/90 text-white rounded-lg font-display text-xs font-bold transition-all"
+              >
+                <Check className="w-3.5 h-3.5" />
+                <span>Add Email</span>
+              </button>
+              <button
+                onClick={() => { setShowAddForm(false); setCcEmailError(''); }}
+                className="flex items-center space-x-1.5 px-4 py-2 border border-navy-dark/15 rounded-lg text-navy-dark/60 font-display text-xs font-bold hover:bg-navy-dark/5 transition-colors"
+              >
+                <span>Cancel</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Save Button */}
+        <div className="flex items-center space-x-3 pt-3 border-t border-navy-dark/5">
+          <button
+            onClick={saveCcEmails}
+            disabled={isSaving === 'cc_emails' || !hasCcEmailChanges()}
+            className="flex items-center space-x-1.5 px-5 py-2.5 bg-orange-burnt hover:bg-orange-burnt/90 text-white rounded-lg font-display text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-orange-burnt/15"
+          >
+            {isSaving === 'cc_emails' ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Check className="w-3.5 h-3.5" />
+                <span>Save Changes</span>
+              </>
+            )}
+          </button>
+          <button
+            onClick={() => { setCcEmails(originalCcEmails); setShowAddForm(false); setCcEmailError(''); }}
+            disabled={!hasCcEmailChanges()}
             className="flex items-center space-x-1.5 px-4 py-2.5 border border-navy-dark/15 rounded-lg text-navy-dark/60 font-display text-xs font-bold hover:bg-navy-dark/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <RotateCcw className="w-3.5 h-3.5" />

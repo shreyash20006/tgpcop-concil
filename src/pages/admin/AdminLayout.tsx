@@ -23,7 +23,7 @@ export const AdminLayout: React.FC = () => {
       case '/admin/users':
         return 'User Administration';
       case '/admin/settings':
-        return 'Portal Branding Settings';
+        return 'Portal Settings & Configuration';
       case '/admin/logs':
         return 'Security Audit Trail';
       case '/admin/bugs':

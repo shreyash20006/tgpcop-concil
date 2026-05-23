@@ -60,15 +60,169 @@ export const HeroSection: React.FC = () => {
       floatOffset: number;
     }[] = [];
 
-    // Create 3D geometries
-    const capsuleGeo = new THREE.CapsuleGeometry(0.12, 0.35, 8, 16);
-    const hexagonGeo = new THREE.TorusGeometry(0.25, 0.05, 8, 6); // 6-sided Torus = Chemistry Hexagon
-    const sphereGeo = new THREE.SphereGeometry(0.08, 16, 16);
-
-    const createMortarMesh = (color: THREE.Color) => {
+    // PHARMACY-THEMED 3D GEOMETRIES
+    
+    // 1. Medicine Capsule/Pill
+    const pillGeo = new THREE.CapsuleGeometry(0.12, 0.35, 8, 16);
+    
+    // 2. Medicine Bottle
+    const createMedicineBottle = (color: THREE.Color) => {
+      const bottleGroup = new THREE.Group();
+      const material = new THREE.MeshStandardMaterial({
+        color: color,
+        roughness: 0.1,
+        metalness: 0.8,
+        transparent: true,
+        opacity: 0.9
+      });
+      
+      // Bottle body
+      const bodyGeo = new THREE.CylinderGeometry(0.15, 0.18, 0.5, 16);
+      const body = new THREE.Mesh(bodyGeo, material);
+      bottleGroup.add(body);
+      
+      // Bottle neck
+      const neckGeo = new THREE.CylinderGeometry(0.08, 0.15, 0.15, 16);
+      const neck = new THREE.Mesh(neckGeo, material);
+      neck.position.y = 0.325;
+      bottleGroup.add(neck);
+      
+      // Cap
+      const capMat = new THREE.MeshStandardMaterial({
+        color: 0xf5a623,
+        roughness: 0.3,
+        metalness: 0.7
+      });
+      const capGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.08, 16);
+      const cap = new THREE.Mesh(capGeo, capMat);
+      cap.position.y = 0.44;
+      bottleGroup.add(cap);
+      
+      return bottleGroup;
+    };
+    
+    // 3. DNA Helix
+    const createDNAHelix = (color: THREE.Color) => {
+      const dnaGroup = new THREE.Group();
+      const material = new THREE.MeshStandardMaterial({
+        color: color,
+        roughness: 0.2,
+        metalness: 0.8
+      });
+      
+      const sphereGeo = new THREE.SphereGeometry(0.04, 8, 8);
+      const segments = 12;
+      
+      for (let i = 0; i < segments; i++) {
+        const angle = (i / segments) * Math.PI * 4;
+        const y = (i / segments) * 0.8 - 0.4;
+        
+        // Strand 1
+        const sphere1 = new THREE.Mesh(sphereGeo, material);
+        sphere1.position.set(Math.cos(angle) * 0.15, y, Math.sin(angle) * 0.15);
+        dnaGroup.add(sphere1);
+        
+        // Strand 2 (opposite)
+        const sphere2 = new THREE.Mesh(sphereGeo, material);
+        sphere2.position.set(Math.cos(angle + Math.PI) * 0.15, y, Math.sin(angle + Math.PI) * 0.15);
+        dnaGroup.add(sphere2);
+      }
+      
+      return dnaGroup;
+    };
+    
+    // 4. Molecular Structure (Benzene Ring)
+    const createMolecule = (color: THREE.Color) => {
+      const moleculeGroup = new THREE.Group();
+      const atomMat = new THREE.MeshStandardMaterial({
+        color: color,
+        roughness: 0.2,
+        metalness: 0.8
+      });
+      const bondMat = new THREE.MeshStandardMaterial({
+        color: 0xcccccc,
+        roughness: 0.4,
+        metalness: 0.6
+      });
+      
+      const atomGeo = new THREE.SphereGeometry(0.08, 12, 12);
+      const bondGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.25, 8);
+      
+      // Create hexagonal ring
+      const atoms = 6;
+      const radius = 0.25;
+      
+      for (let i = 0; i < atoms; i++) {
+        const angle = (i / atoms) * Math.PI * 2;
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        
+        // Atom
+        const atom = new THREE.Mesh(atomGeo, atomMat);
+        atom.position.set(x, 0, z);
+        moleculeGroup.add(atom);
+        
+        // Bond to next atom
+        const nextAngle = ((i + 1) / atoms) * Math.PI * 2;
+        const bond = new THREE.Mesh(bondGeo, bondMat);
+        bond.position.set(
+          (x + Math.cos(nextAngle) * radius) / 2,
+          0,
+          (z + Math.sin(nextAngle) * radius) / 2
+        );
+        bond.rotation.z = angle + Math.PI / 2;
+        moleculeGroup.add(bond);
+      }
+      
+      return moleculeGroup;
+    };
+    
+    // 5. Syringe
+    const createSyringe = (color: THREE.Color) => {
+      const syringeGroup = new THREE.Group();
+      
+      // Barrel
+      const barrelMat = new THREE.MeshStandardMaterial({
+        color: color,
+        roughness: 0.1,
+        metalness: 0.7,
+        transparent: true,
+        opacity: 0.8
+      });
+      const barrelGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.5, 16);
+      const barrel = new THREE.Mesh(barrelGeo, barrelMat);
+      syringeGroup.add(barrel);
+      
+      // Plunger
+      const plungerMat = new THREE.MeshStandardMaterial({
+        color: 0xf5a623,
+        roughness: 0.3,
+        metalness: 0.6
+      });
+      const plungerGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.3, 16);
+      const plunger = new THREE.Mesh(plungerGeo, plungerMat);
+      plunger.position.y = 0.4;
+      syringeGroup.add(plunger);
+      
+      // Needle
+      const needleMat = new THREE.MeshStandardMaterial({
+        color: 0xaaaaaa,
+        roughness: 0.1,
+        metalness: 0.95
+      });
+      const needleGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.25, 8);
+      const needle = new THREE.Mesh(needleGeo, needleMat);
+      needle.position.y = -0.375;
+      syringeGroup.add(needle);
+      
+      return syringeGroup;
+    };
+    
+    // 6. Mortar & Pestle (Traditional Pharmacy Symbol)
+    const createMortarPestle = (color: THREE.Color) => {
       const mortarGroup = new THREE.Group();
       
-      // Bowl (hollow cone/cylinder)
+      // Bowl
       const bowlMat = new THREE.MeshStandardMaterial({
         color: color,
         roughness: 0.2,
@@ -78,14 +232,14 @@ export const HeroSection: React.FC = () => {
       const bowlGeo = new THREE.CylinderGeometry(0.25, 0.15, 0.2, 16, 1, true);
       const bowl = new THREE.Mesh(bowlGeo, bowlMat);
       mortarGroup.add(bowl);
-
-      // Bowl base
+      
+      // Base
       const baseGeo = new THREE.CylinderGeometry(0.16, 0.16, 0.03, 16);
       const base = new THREE.Mesh(baseGeo, bowlMat);
       base.position.y = -0.1;
       mortarGroup.add(base);
-
-      // Pestle (diagonal rod)
+      
+      // Pestle
       const pestleMat = new THREE.MeshStandardMaterial({
         color: 0xf5a623,
         roughness: 0.1,
@@ -96,11 +250,11 @@ export const HeroSection: React.FC = () => {
       pestle.position.set(0.08, 0.05, 0);
       pestle.rotation.z = -Math.PI / 4;
       mortarGroup.add(pestle);
-
+      
       return mortarGroup;
     };
 
-    const particleCount = 45;
+    const particleCount = 50;
 
     for (let i = 0; i < particleCount; i++) {
       let particleMesh: THREE.Group | THREE.Mesh;
@@ -111,16 +265,26 @@ export const HeroSection: React.FC = () => {
         metalness: 0.75,
       });
 
-      // Stagger geometries
-      const geoType = i % 4;
+      // Distribute pharmacy-themed objects
+      const geoType = i % 6;
       if (geoType === 0) {
-        particleMesh = new THREE.Mesh(capsuleGeo, material);
+        // Pills/Capsules
+        particleMesh = new THREE.Mesh(pillGeo, material);
       } else if (geoType === 1) {
-        particleMesh = new THREE.Mesh(hexagonGeo, material);
+        // Medicine Bottles
+        particleMesh = createMedicineBottle(color);
       } else if (geoType === 2) {
-        particleMesh = new THREE.Mesh(sphereGeo, material);
+        // DNA Helix
+        particleMesh = createDNAHelix(color);
+      } else if (geoType === 3) {
+        // Molecular Structures
+        particleMesh = createMolecule(color);
+      } else if (geoType === 4) {
+        // Syringes
+        particleMesh = createSyringe(color);
       } else {
-        particleMesh = createMortarMesh(color);
+        // Mortar & Pestle
+        particleMesh = createMortarPestle(color);
       }
 
       // Random position
@@ -207,9 +371,7 @@ export const HeroSection: React.FC = () => {
         containerRef.current.removeChild(renderer.domElement);
       }
       scene.clear();
-      capsuleGeo.dispose();
-      hexagonGeo.dispose();
-      sphereGeo.dispose();
+      pillGeo.dispose();
       renderer.dispose();
     };
   }, []);

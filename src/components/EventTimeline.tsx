@@ -3,8 +3,15 @@ import { motion, useScroll, useSpring } from 'framer-motion';
 import { Calendar, Award, BookOpen, Music, Accessibility } from 'lucide-react';
 import { timelineEvents } from '../data/events';
 
-export const EventTimeline: React.FC = () => {
+interface EventTimelineProps {
+  events?: any[];
+}
+
+export const EventTimeline: React.FC<EventTimelineProps> = ({ events }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Use live database events if provided, otherwise fallback to static timelineEvents
+  const displayEvents = events || timelineEvents;
 
   // Measure scroll progress relative to this timeline section
   const { scrollYProgress } = useScroll({
@@ -20,7 +27,8 @@ export const EventTimeline: React.FC = () => {
   });
 
   const getIcon = (type: string) => {
-    switch (type) {
+    const cleanType = type?.toLowerCase() || '';
+    switch (cleanType) {
       case 'academic':
         return <BookOpen className="w-5 h-5" />;
       case 'cultural':
@@ -34,7 +42,8 @@ export const EventTimeline: React.FC = () => {
   };
 
   const getBadgeColors = (type: string) => {
-    switch (type) {
+    const cleanType = type?.toLowerCase() || '';
+    switch (cleanType) {
       case 'academic':
         return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
       case 'cultural':
@@ -60,8 +69,9 @@ export const EventTimeline: React.FC = () => {
       />
 
       <div className="space-y-16">
-        {timelineEvents.map((event, idx) => {
+        {displayEvents.map((event, idx) => {
           const isEven = idx % 2 === 0;
+          const iconType = event.type || event.category || 'social';
 
           return (
             <div
@@ -74,10 +84,10 @@ export const EventTimeline: React.FC = () => {
                   initial={{ scale: 0.7, opacity: 0 }}
                   whileInView={{ scale: 1, opacity: 1 }}
                   viewport={{ once: true, margin: '-100px' }}
-                  transition={{ type: 'spring', delay: 0.15 }}
+                  transition={{ type: 'spring' as const, delay: 0.15 }}
                   className="w-10 h-10 rounded-full bg-navy-dark border-4 border-orange-burnt flex items-center justify-center text-white shadow-lg shadow-orange-burnt/15"
                 >
-                  {getIcon(event.type)}
+                  {getIcon(iconType)}
                 </motion.div>
               </div>
 
@@ -109,33 +119,40 @@ export const EventTimeline: React.FC = () => {
 
 // Helper card subcomponent to avoid code redundancy
 const TimelineCard: React.FC<{
-  event: typeof timelineEvents[0];
+  event: any;
   isEven: boolean;
   getBadgeColors: (type: string) => string;
 }> = ({ event, isEven, getBadgeColors }) => {
+  const iconType = event.type || event.category || 'social';
+  const displayDate = event.date || (event.deadline ? new Date(event.deadline).toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  }) : '');
+
   return (
     <motion.div
       initial={{ opacity: 0, x: isEven ? -40 : 40 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: '-100px' }}
-      transition={{ type: 'spring', stiffness: 100, damping: 15 }}
+      transition={{ type: 'spring' as const, stiffness: 100, damping: 15 }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
       className="bg-white p-6 rounded-xl shadow-md border border-navy-dark/5 hover:shadow-xl transition-shadow relative"
     >
       {/* Category tag */}
-      <span className={`inline-block text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full border mb-3 ${getBadgeColors(event.type)}`}>
-        {event.type}
+      <span className={`inline-block text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full border mb-3 ${getBadgeColors(iconType)}`}>
+        {iconType}
       </span>
 
       {/* Date */}
       <div className={`flex items-center space-x-1.5 text-orange-burnt font-semibold text-xs mb-2 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
         <Calendar className="w-3.5 h-3.5" />
-        <span>{event.date}</span>
+        <span>{displayDate}</span>
       </div>
 
       {/* Title */}
       <h3 className="font-display font-bold text-lg sm:text-xl text-navy-dark mb-2 leading-snug">
-        {event.title}
+        {event.title || event.name}
       </h3>
 
       {/* Description */}

@@ -1,11 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { NoticeCard } from '../components/NoticeCard';
-import { notices } from '../data/notices';
-import { Megaphone } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { Megaphone, RefreshCw } from 'lucide-react';
 
 export const Notices: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<'All' | 'Academic' | 'Event' | 'Alert' | 'General'>('All');
+  const [notices, setNotices] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchNotices = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('notices')
+        .select('*')
+        .order('is_pinned', { ascending: false })
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setNotices(data || []);
+    } catch (err: any) {
+      console.error('Error fetching notices:', err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotices();
+  }, []);
 
   // Filter notices based on selection
   const filteredNotices = notices.filter(
@@ -81,27 +105,56 @@ export const Notices: React.FC = () => {
           ))}
         </div>
 
-        {/* Pinboard Grid Track */}
-        <motion.div
-          layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          <AnimatePresence mode="popLayout">
-            {filteredNotices.map((notice) => (
-              <NoticeCard key={notice.id} notice={notice} />
+        {/* Dynamic Fetching States */}
+        {isLoading ? (
+          /* SHIMMERING SKELETON CARDS */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map((skeletonIdx) => (
+              <div
+                key={skeletonIdx}
+                className="bg-white rounded-xl border border-navy-dark/5 p-6 space-y-4 shadow-sm animate-pulse"
+              >
+                <div className="flex justify-between items-center">
+                  <div className="h-4 bg-navy-dark/10 w-24 rounded-full" />
+                  <div className="h-4 bg-navy-dark/10 w-16 rounded-full" />
+                </div>
+                <div className="h-6 bg-navy-dark/10 w-3/4 rounded" />
+                <div className="space-y-2 pt-2">
+                  <div className="h-3.5 bg-navy-dark/10 w-full rounded" />
+                  <div className="h-3.5 bg-navy-dark/10 w-5/6 rounded" />
+                  <div className="h-3.5 bg-navy-dark/10 w-4/5 rounded" />
+                </div>
+                <div className="h-10 bg-navy-dark/5 w-full rounded-lg pt-4" />
+              </div>
             ))}
-          </AnimatePresence>
-        </motion.div>
+          </div>
+        ) : (
+          <>
+            {/* Pinboard Grid Track */}
+            <motion.div
+              layout
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            >
+              <AnimatePresence mode="popLayout">
+                {filteredNotices.map((notice) => (
+                  <NoticeCard key={notice.id} notice={notice} />
+                ))}
+              </AnimatePresence>
+            </motion.div>
 
-        {/* Empty State visual */}
-        {filteredNotices.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20 bg-white rounded-xl shadow-sm border border-navy-dark/5"
-          >
-            <p className="text-navy-dark/50 text-base font-display">No notices found in this category.</p>
-          </motion.div>
+            {/* Empty State visual */}
+            {filteredNotices.length === 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-20 bg-white rounded-xl shadow-sm border border-navy-dark/5 max-w-lg mx-auto flex flex-col items-center p-6"
+              >
+                <RefreshCw className="w-12 h-12 text-navy-dark/20 mb-3 animate-spin" style={{ animationDuration: '6s' }} />
+                <h3 className="font-display font-bold text-navy-dark/70 mb-1">Notice Board is Empty</h3>
+                <p className="text-navy-dark/50 text-sm font-sans">No notice board items are currently active in this category.</p>
+              </motion.div>
+            )}
+          </>
         )}
 
       </div>

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, CheckCircle2, ChevronDown, HelpCircle, MessageSquare } from 'lucide-react';
+import { Send, CheckCircle2, ChevronDown, HelpCircle, MessageSquare, Loader2 } from 'lucide-react';
 import { councilMembers } from '../data/council';
+import { supabase } from '../lib/supabase';
+import { sendQuestionEmail } from '../lib/emailjs';
 
 interface FAQItem {
   question: string;
@@ -50,17 +52,42 @@ export const AskForm: React.FC = () => {
     }
   }, [defaultTo]);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.question) return;
 
-    // Simulate database write / EmailJS submit
-    setIsSubmitted(true);
-    setTimeout(() => {
-      // Keep successful screen active
-    }, 500);
+    setIsSubmitting(true);
+    try {
+      // 1. Insert into Supabase
+      const { error } = await supabase.from('questions').insert([
+        {
+          student_name: formData.name,
+          student_year: formData.year,
+          directed_to: formData.directedTo,
+          question_text: formData.question,
+          status: 'pending'
+        }
+      ]);
+
+      if (error) throw error;
+
+      // 2. Trigger EmailJS notification
+      await sendQuestionEmail({
+        to_name: formData.directedTo,
+        student_name: formData.name,
+        student_year: formData.year,
+        question: formData.question
+      });
+
+      setIsSubmitted(true);
+    } catch (err: any) {
+      alert(`Error submitting inquiry: ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const toggleFaq = (index: number) => {
@@ -172,14 +199,24 @@ export const AskForm: React.FC = () => {
                   />
                 </div>
 
-                {/* Submit button */}
-                <button
-                  type="submit"
-                  className="group flex items-center justify-center space-x-2 w-full py-3.5 bg-orange-burnt hover:bg-orange-burnt/95 text-white font-display font-bold rounded-lg text-sm sm:text-base shadow-lg hover:shadow-orange-burnt/25 hover:-translate-y-0.5 transition-all duration-300"
-                >
-                  <span>Submit Question</span>
-                  <Send className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
-                </button>
+                  {/* Submit button */}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="group flex items-center justify-center space-x-2 w-full py-3.5 bg-orange-burnt hover:bg-orange-burnt/95 text-white font-display font-bold rounded-lg text-sm sm:text-base shadow-lg hover:shadow-orange-burnt/25 hover:-translate-y-0.5 transition-all duration-300 disabled:bg-orange-burnt/70 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Submitting Question...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Submit Question</span>
+                        <Send className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
+                      </>
+                    )}
+                  </button>
               </motion.form>
             ) : (
               <motion.div

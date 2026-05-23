@@ -1,12 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EventTimeline } from '../components/EventTimeline';
 import { CompetitionCard } from '../components/CompetitionCard';
-import { competitions } from '../data/events';
-import { CalendarRange, Trophy, CalendarDays } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { CalendarRange, Trophy, CalendarDays, RefreshCw } from 'lucide-react';
 
 export const Events: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'events' | 'competitions'>('events');
+  const [events, setEvents] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchEvents = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setEvents(data || []);
+    } catch (err: any) {
+      console.error('Error fetching events:', err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  // Split database events
+  const timelineEvents = events.filter((e) => e.type === 'event');
+  const competitions = events.filter((e) => e.type === 'competition');
 
   return (
     <div className="pt-28 pb-24 min-h-screen bg-gray-light">
@@ -92,39 +120,100 @@ export const Events: React.FC = () => {
           </div>
         </div>
 
-        {/* Dynamic Display Panel with framer motion slide transitions */}
-        <AnimatePresence mode="wait">
-          {activeTab === 'events' ? (
-            <motion.div
-              key="events-tab"
-              initial={{ opacity: 0, y: 25 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -25 }}
-              transition={{ duration: 0.3 }}
-            >
-              <EventTimeline />
-            </motion.div>
+        {/* Dynamic Display Panel */}
+        {isLoading ? (
+          /* SHIMMERING SKELETON COVERS */
+          activeTab === 'events' ? (
+            <div className="h-96 flex flex-col items-center justify-center text-navy-dark/40">
+              <Loader2 className="w-8 h-8 text-orange-burnt animate-spin mb-3" />
+              <p className="font-display text-xs tracking-widest uppercase">Fetching timeline milestones...</p>
+            </div>
           ) : (
-            <motion.div
-              key="competitions-tab"
-              initial={{ opacity: 0, y: 25 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -25 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Competitions Card Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto py-8">
-                {competitions.map((comp) => (
-                  <CompetitionCard key={comp.id} competition={comp} />
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {[1, 2, 3].map((idx) => (
+                <div
+                  key={idx}
+                  className="bg-white rounded-xl overflow-hidden shadow-sm border border-navy-dark/5 p-6 space-y-4 animate-pulse"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="w-10 h-10 rounded-full bg-navy-dark/10" />
+                    <div className="w-20 h-5 bg-navy-dark/10 rounded-full" />
+                  </div>
+                  <div className="h-6 bg-navy-dark/10 w-2/3 rounded" />
+                  <div className="h-16 bg-navy-dark/5 w-full rounded" />
+                  <div className="h-20 bg-navy-dark/10 w-full rounded-lg" />
+                </div>
+              ))}
+            </div>
+          )
+        ) : (
+          <AnimatePresence mode="wait">
+            {activeTab === 'events' ? (
+              <motion.div
+                key="events-tab"
+                initial={{ opacity: 0, y: 25 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -25 }}
+                transition={{ duration: 0.3 }}
+              >
+                <EventTimeline events={timelineEvents} />
+                
+                {timelineEvents.length === 0 && (
+                  <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-navy-dark/5 max-w-lg mx-auto flex flex-col items-center p-6">
+                    <RefreshCw className="w-12 h-12 text-navy-dark/20 mb-3 animate-spin" style={{ animationDuration: '6s' }} />
+                    <h3 className="font-display font-bold text-navy-dark/70 mb-1">No Timeline Events</h3>
+                    <p className="text-navy-dark/50 text-sm font-sans">Timeline events are currently empty in our records.</p>
+                  </div>
+                )}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="competitions-tab"
+                initial={{ opacity: 0, y: 25 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -25 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Competitions Card Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto py-8">
+                  {competitions.map((comp) => (
+                    <CompetitionCard key={comp.id} competition={comp} />
+                  ))}
+                </div>
+
+                {competitions.length === 0 && (
+                  <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-navy-dark/5 max-w-lg mx-auto flex flex-col items-center p-6">
+                    <RefreshCw className="w-12 h-12 text-navy-dark/20 mb-3 animate-spin" style={{ animationDuration: '6s' }} />
+                    <h3 className="font-display font-bold text-navy-dark/70 mb-1">No Active Competitions</h3>
+                    <p className="text-navy-dark/50 text-sm font-sans">No contests or quizzes are running at this moment. Check back soon!</p>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
 
       </div>
     </div>
   );
 };
+
+// Quick helper to show spinner in skeleton loader
+const Loader2: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg
+    {...props}
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+  </svg>
+);
 
 export default Events;

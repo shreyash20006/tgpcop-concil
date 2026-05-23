@@ -1,15 +1,28 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
-export type Role = 
-  | 'super_admin' 
-  | 'admin' 
-  | 'secretary' 
-  | 'events' 
-  | 'gallery' 
-  | 'questions' 
-  | 'treasurer' 
+export type Role =
+  | 'developer'
+  | 'super_admin'
+  | 'admin'
+  | 'secretary'
+  | 'events'
+  | 'gallery'
+  | 'questions'
+  | 'treasurer'
   | 'limited';
+
+export const ASSIGNABLE_ROLES: Role[] = [
+  'super_admin',
+  'admin',
+  'secretary',
+  'events',
+  'gallery',
+  'questions',
+  'treasurer',
+  'limited',
+  'developer',
+];
 
 export interface AdminUser {
   email: string;
@@ -17,8 +30,13 @@ export interface AdminUser {
   role: Role;
 }
 
+export function isDeveloper(role?: Role | null): boolean {
+  return role === 'developer';
+}
+
 export function getRoleDisplayName(role: Role): string {
   const labels: Record<Role, string> = {
+    developer: 'Developer',
     super_admin: 'Super Admin',
     admin: 'Admin',
     secretary: 'Secretary',
@@ -33,6 +51,7 @@ export function getRoleDisplayName(role: Role): string {
 
 export function getPositionTitle(role: Role): string {
   const titles: Record<Role, string> = {
+    developer: 'Developer',
     super_admin: 'President',
     admin: 'Executive',
     secretary: 'Secretary',
@@ -43,6 +62,11 @@ export function getPositionTitle(role: Role): string {
     limited: 'Council Member',
   };
   return titles[role];
+}
+
+function withDeveloper(roles: Role[]): Role[] {
+  if (roles.includes('developer')) return roles;
+  return [...roles, 'developer'];
 }
 
 export function useRole() {
@@ -85,68 +109,35 @@ export function useRole() {
 
   const can = (action: string): boolean => {
     if (!adminUser) return false;
+    if (adminUser.role === 'developer') return true;
+
     const role = adminUser.role;
 
     const permissions: Record<string, Role[]> = {
-      'view_questions': [
+      view_questions: withDeveloper([
         'super_admin',
         'admin',
         'secretary',
         'questions',
         'limited',
-      ],
-      'reply_questions': [
+      ]),
+      reply_questions: withDeveloper([
         'super_admin',
         'admin',
         'secretary',
         'questions',
-      ],
-      'delete_questions': [
-        'super_admin',
-        'admin',
-      ],
-      'add_notices': [
-        'super_admin',
-        'admin',
-        'secretary',
-      ],
-      'edit_notices': [
-        'super_admin',
-        'admin',
-        'secretary',
-      ],
-      'delete_notices': [
-        'super_admin',
-        'admin',
-      ],
-      'add_events': [
-        'super_admin',
-        'admin',
-        'events',
-      ],
-      'edit_events': [
-        'super_admin',
-        'admin',
-        'events',
-      ],
-      'delete_events': [
-        'super_admin',
-        'admin',
-      ],
-      'upload_gallery': [
-        'super_admin',
-        'admin',
-        'events',
-        'gallery',
-      ],
-      'delete_gallery': [
-        'super_admin',
-        'admin',
-      ],
-      'manage_settings': [
-        'super_admin',
-      ],
-      'view_dashboard': [
+      ]),
+      delete_questions: withDeveloper(['super_admin', 'admin']),
+      add_notices: withDeveloper(['super_admin', 'admin', 'secretary']),
+      edit_notices: withDeveloper(['super_admin', 'admin', 'secretary']),
+      delete_notices: withDeveloper(['super_admin', 'admin']),
+      add_events: withDeveloper(['super_admin', 'admin', 'events']),
+      edit_events: withDeveloper(['super_admin', 'admin', 'events']),
+      delete_events: withDeveloper(['super_admin', 'admin']),
+      upload_gallery: withDeveloper(['super_admin', 'admin', 'events', 'gallery']),
+      delete_gallery: withDeveloper(['super_admin', 'admin']),
+      manage_settings: withDeveloper(['super_admin']),
+      view_dashboard: withDeveloper([
         'super_admin',
         'admin',
         'secretary',
@@ -155,7 +146,10 @@ export function useRole() {
         'questions',
         'treasurer',
         'limited',
-      ],
+      ]),
+      view_database: ['developer'],
+      manage_admins: ['developer'],
+      developer_settings: ['developer'],
     };
 
     return permissions[action]?.includes(role) ?? false;
@@ -166,6 +160,7 @@ export function useRole() {
     loading,
     error,
     can,
+    isDev: isDeveloper(adminUser?.role),
   };
 }
 

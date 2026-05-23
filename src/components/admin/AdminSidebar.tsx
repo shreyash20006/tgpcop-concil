@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { useRole, getRoleDisplayName, getPositionTitle } from '../../hooks/useRole';
+import { useRole, isDeveloper } from '../../hooks/useRole';
 import { 
   LayoutDashboard, 
   Mail, 
@@ -14,7 +14,8 @@ import {
   Sliders,
   Sun,
   Moon,
-  Shield
+  Database,
+  Users,
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -53,6 +54,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     }
   };
 
+  const isDev = isDeveloper(adminUser?.role);
+
   const navItems = [
     {
       path: '/admin/dashboard',
@@ -90,6 +93,20 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       name: 'Portal Settings',
       icon: <Sliders className="w-5 h-5" />,
       permission: 'manage_settings',
+    },
+    {
+      path: '/admin/database',
+      name: 'Database',
+      icon: <Database className="w-5 h-5" />,
+      permission: 'view_database',
+      devOnly: true,
+    },
+    {
+      path: '/admin/manage-admins',
+      name: 'Manage Admins',
+      icon: <Users className="w-5 h-5" />,
+      permission: 'manage_admins',
+      devOnly: true,
     },
   ];
 
@@ -147,20 +164,29 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       <div className="p-4 border-t border-white/10 space-y-3">
         {/* Admin User Info */}
         {!roleLoading && adminUser && (
-          <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-            <div className="flex items-start space-x-2">
-              <div className="w-8 h-8 rounded-full bg-orange-burnt/20 flex items-center justify-center text-orange-burnt shrink-0">
-                <Shield className="w-4 h-4" />
-              </div>
-              <div className="flex-1 min-w-0">
+          <div className="bg-white/5 rounded-lg p-3 border border-white/10 space-y-2">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-display font-semibold text-xs text-white truncate">
-                  👤 {adminUser.name}
+                  {isDev ? '👨‍💻' : '👤'} {adminUser.name}
                 </p>
-                <p className="text-[10px] text-orange-burnt/90 truncate">
-                  {getPositionTitle(adminUser.role)} • {getRoleDisplayName(adminUser.role)}
-                </p>
+                {isDev && (
+                  <span className="text-[8px] font-extrabold uppercase tracking-widest px-1.5 py-0.5 rounded bg-orange-burnt text-white">
+                    DEV
+                  </span>
+                )}
               </div>
+              <p className="text-[10px] text-orange-burnt/90 truncate mt-0.5">
+                {isDev
+                  ? 'Developer • Full Access 🔧'
+                  : `${adminUser.role.replace('_', ' ')} • Admin`}
+              </p>
             </div>
+            {isDev && (
+              <span className="inline-block w-full text-center text-[8px] font-extrabold uppercase tracking-[0.2em] px-2 py-1 rounded-full bg-orange-burnt/25 text-orange-burnt border border-orange-burnt/40">
+                DEV MODE
+              </span>
+            )}
           </div>
         )}
 

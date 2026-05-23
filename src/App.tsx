@@ -27,6 +27,9 @@ import { AdminUsers } from './pages/admin/AdminUsers';
 import { AdminSettings } from './pages/admin/AdminSettings';
 import { AdminLogs } from './pages/admin/AdminLogs';
 import { AdminBugs } from './pages/admin/AdminBugs';
+import { AdminDatabase } from './pages/admin/AdminDatabase';
+import { AdminManageAdmins } from './pages/admin/AdminManageAdmins';
+import { MaintenanceBanner } from './components/MaintenanceBanner';
 
 // A helper component to scroll to top automatically on route changes
 const ScrollToTop: React.FC = () => {
@@ -48,6 +51,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-light font-sans text-navy-dark antialiased">
+      {!isAdminRoute && <MaintenanceBanner />}
       {!isAdminRoute && <Navbar />}
 
       <main className="flex-grow">
@@ -79,6 +83,8 @@ const AppContent: React.FC = () => {
             {/* Super Admin Exclusive Routes */}
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/database" element={<AdminDatabase />} />
+            <Route path="/admin/manage-admins" element={<AdminManageAdmins />} />
             <Route path="/admin/logs" element={<AdminLogs />} />
             <Route path="/admin/bugs" element={<AdminBugs />} />
           </Route>

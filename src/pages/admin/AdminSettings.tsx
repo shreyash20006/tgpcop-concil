@@ -5,6 +5,8 @@ import { useRole } from '../../hooks/useRole';
 import { useToast } from '../../components/admin/Toast';
 import { logActivity } from '../../lib/logs';
 import { ProtectedPage } from '../../components/admin/ProtectedPage';
+import { DeveloperSettings } from '../../components/admin/DeveloperSettings';
+import { isDeveloper } from '../../hooks/useRole';
 import { 
   Sliders, 
   Upload, 
@@ -24,7 +26,8 @@ import {
 
 export const AdminSettings: React.FC = () => {
   const { email: myEmail } = useAuth();
-  const { can } = useRole();
+  const { can, adminUser } = useRole();
+  const isDev = isDeveloper(adminUser?.role);
   const toast = useToast();
 
   const [logoUrl, setLogoUrl] = useState('');
@@ -683,6 +686,8 @@ export const AdminSettings: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {isDev && <DeveloperSettings />}
 
       </div>
     </ProtectedPage>

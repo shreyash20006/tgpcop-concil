@@ -24,6 +24,10 @@ export const AdminLayout: React.FC = () => {
         return 'User Administration';
       case '/admin/settings':
         return 'Portal Settings & Configuration';
+      case '/admin/database':
+        return 'Database Viewer';
+      case '/admin/manage-admins':
+        return 'Manage Admin Roles';
       case '/admin/logs':
         return 'Security Audit Trail';
       case '/admin/bugs':

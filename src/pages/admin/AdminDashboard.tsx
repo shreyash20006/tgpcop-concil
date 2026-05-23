@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { StatsCard } from '../../components/admin/StatsCard';
-import { useRole, getPositionTitle } from '../../hooks/useRole';
+import { useRole, getPositionTitle, isDeveloper } from '../../hooks/useRole';
 import { RequirePermission } from '../../components/admin/RequirePermission';
 import { 
   Megaphone, 
@@ -17,6 +17,7 @@ import { Link } from 'react-router-dom';
 
 export const AdminDashboard: React.FC = () => {
   const { adminUser, can } = useRole();
+  const isDev = isDeveloper(adminUser?.role);
   const isLimited = adminUser?.role === 'limited';
   const isTreasurer = adminUser?.role === 'treasurer';
 
@@ -134,12 +135,28 @@ export const AdminDashboard: React.FC = () => {
       <div className="space-y-8 animate-in fade-in duration-300">
 
         {adminUser && (
-          <div className="bg-white border border-navy-dark/10 rounded-2xl p-6 shadow-xs">
+          <div
+            className={`rounded-2xl p-6 shadow-xs border ${
+              isDev
+                ? 'bg-gradient-to-br from-orange-burnt/10 to-amber-500/5 border-orange-burnt/30'
+                : 'bg-white border-navy-dark/10'
+            }`}
+          >
             <h2 className="font-display font-extrabold text-xl text-navy-dark">
-              Welcome back, {firstName}! 👋
+              {isDev ? (
+                <>Welcome, {firstName}! 🛠️</>
+              ) : (
+                <>Welcome back, {firstName}! 👋</>
+              )}
             </h2>
             <p className="text-sm text-navy-dark/55 font-sans mt-1">
-              Role: {getPositionTitle(adminUser.role)}
+              {isDev ? (
+                <span className="font-semibold text-orange-burnt">
+                  Developer Mode — Full Access
+                </span>
+              ) : (
+                <>Role: {getPositionTitle(adminUser.role)}</>
+              )}
             </p>
           </div>
         )}

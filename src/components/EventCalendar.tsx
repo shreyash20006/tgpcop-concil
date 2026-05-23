@@ -102,7 +102,6 @@ export const EventCalendar: React.FC<EventCalendarProps> = ({ events }) => {
     calendarDays.push({
       day: daysInPrevMonth - i,
       isCurrentMonth: false,
-      isPrevMonth: true,
     });
   }
 
@@ -111,7 +110,6 @@ export const EventCalendar: React.FC<EventCalendarProps> = ({ events }) => {
     calendarDays.push({
       day,
       isCurrentMonth: true,
-      isPrevMonth: false,
     });
   }
 
@@ -121,7 +119,6 @@ export const EventCalendar: React.FC<EventCalendarProps> = ({ events }) => {
     calendarDays.push({
       day,
       isCurrentMonth: false,
-      isPrevMonth: false,
     });
   }
 
@@ -179,7 +176,7 @@ export const EventCalendar: React.FC<EventCalendarProps> = ({ events }) => {
         {/* Calendar Days Grid */}
         <div className="grid grid-cols-7 gap-2">
           {calendarDays.map((dayInfo, index) => {
-            const { day, isCurrentMonth, isPrevMonth } = dayInfo;
+            const { day, isCurrentMonth } = dayInfo;
             const hasEvent = isCurrentMonth && hasEvents(day);
             const isTodayDate = isCurrentMonth && isToday(day);
             const isSelectedDate = isCurrentMonth && isSelected(day);

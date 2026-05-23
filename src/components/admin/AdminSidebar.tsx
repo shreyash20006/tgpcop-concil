@@ -1,61 +1,72 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Mail, Megaphone, Calendar, LogOut, GraduationCap, LayoutDashboard } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  Mail, 
+  Megaphone, 
+  Calendar, 
+  Image as ImageIcon, 
+  Globe, 
+  LogOut, 
+  GraduationCap 
+} from 'lucide-react';
 
 interface AdminSidebarProps {
-  activeTab: 'dashboard' | 'questions' | 'notices' | 'events';
   pendingQuestionsCount?: number;
+  onClose?: () => void;
 }
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({
-  activeTab,
   pendingQuestionsCount = 0,
+  onClose,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     if (window.confirm("Are you sure you want to sign out?")) {
       const { error } = await supabase.auth.signOut();
       if (!error) {
-        navigate('/admin/login', { replace: true });
+        if (onClose) onClose();
+        navigate('/admin', { replace: true });
       }
     }
   };
 
   const navItems = [
     {
-      id: 'dashboard' as const,
       path: '/admin/dashboard',
-      name: 'Dashboard Overview',
+      name: 'Dashboard',
       icon: <LayoutDashboard className="w-5 h-5" />,
     },
     {
-      id: 'questions' as const,
       path: '/admin/questions',
-      name: 'Questions Hub',
+      name: 'Questions',
       icon: <Mail className="w-5 h-5" />,
       badge: pendingQuestionsCount > 0 ? pendingQuestionsCount : null,
     },
     {
-      id: 'notices' as const,
       path: '/admin/notices',
-      name: 'Notices Board',
+      name: 'Notices',
       icon: <Megaphone className="w-5 h-5" />,
     },
     {
-      id: 'events' as const,
       path: '/admin/events',
-      name: 'Events & Contests',
+      name: 'Events',
       icon: <Calendar className="w-5 h-5" />,
+    },
+    {
+      path: '/admin/gallery',
+      name: 'Gallery',
+      icon: <ImageIcon className="w-5 h-5" />,
     },
   ];
 
   return (
-    <div className="w-64 bg-navy-dark text-white flex flex-col justify-between h-screen sticky top-0 border-r border-white/5 shrink-0 z-20">
-      
-      {/* Upper Logo Section */}
+    <div className="w-[240px] bg-navy-dark text-white flex flex-col justify-between h-full border-r border-white/5 shrink-0">
       <div>
+        {/* Top Branding Section */}
         <div className="p-6 border-b border-white/10 flex items-center space-x-3">
           <div className="w-10 h-10 rounded-full bg-orange-burnt flex items-center justify-center text-white shadow-lg shrink-0">
             <GraduationCap className="w-6 h-6" />
@@ -64,24 +75,25 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
             <span className="font-display font-extrabold text-lg tracking-tight block leading-none">
               TGPCOP
             </span>
-            <span className="text-[9px] text-orange-burnt block tracking-widest uppercase font-bold mt-0.5">
-              Admin Console
+            <span className="text-[9px] text-orange-burnt block tracking-widest uppercase font-bold mt-1">
+              Admin Panel
             </span>
           </div>
         </div>
 
         {/* Sidebar Nav Items */}
-        <nav className="p-4 space-y-2 mt-6">
+        <nav className="py-6 space-y-1">
           {navItems.map((item) => {
-            const isActive = activeTab === item.id;
+            const isActive = location.pathname === item.path;
             return (
               <Link
-                key={item.id}
+                key={item.path}
                 to={item.path}
-                className={`w-full flex items-center justify-between px-4 py-3.5 rounded-lg font-display text-sm font-semibold transition-all duration-200 outline-none ${
+                onClick={onClose}
+                className={`w-full flex items-center justify-between px-6 py-3 font-display text-sm font-semibold transition-all duration-200 outline-none relative ${
                   isActive
-                    ? 'bg-orange-burnt text-white shadow-md shadow-orange-burnt/20'
-                    : 'text-white/70 hover:bg-white/5 hover:text-white'
+                    ? 'text-orange-burnt bg-white/[0.03] border-l-4 border-orange-burnt'
+                    : 'text-white/70 hover:bg-orange-burnt/10 hover:text-orange-burnt border-l-4 border-transparent'
                 }`}
               >
                 <div className="flex items-center space-x-3">
@@ -89,7 +101,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                   <span>{item.name}</span>
                 </div>
                 {item.badge !== null && item.badge !== undefined && (
-                  <span className="bg-orange-burnt border border-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  <span className="bg-orange-burnt border border-white/10 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full min-w-5 text-center shadow">
                     {item.badge}
                   </span>
                 )}
@@ -99,25 +111,28 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         </nav>
       </div>
 
-      {/* Footer Profile & Logout */}
-      <div className="p-4 border-t border-white/10">
-        <div className="flex items-center justify-between">
-          <div className="overflow-hidden mr-2">
-            <span className="text-[10px] uppercase font-bold text-white/40 block">Authenticated Admin</span>
-            <span className="text-xs text-white/80 font-medium truncate block">
-              council@tgpcop.edu
-            </span>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="p-2 rounded-lg bg-white/5 hover:bg-red-600 hover:text-white transition-colors text-white/60"
-            title="Sign Out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+      {/* Footer Navigation & Logout Operations */}
+      <div className="p-4 border-t border-white/10 space-y-2">
+        {/* View Website External Link */}
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-display text-xs font-bold text-white/60 hover:bg-white/5 hover:text-white transition-all outline-none"
+        >
+          <Globe className="w-4 h-4 text-orange-burnt" />
+          <span>🌐 View Website</span>
+        </a>
 
+        {/* Sign Out Button */}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-display text-xs font-bold text-red-400 hover:bg-red-950/20 hover:text-red-300 transition-all outline-none"
+        >
+          <LogOut className="w-4 h-4 shrink-0" />
+          <span>🚪 Logout</span>
+        </button>
+      </div>
     </div>
   );
 };

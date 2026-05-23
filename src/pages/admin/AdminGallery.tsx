@@ -298,23 +298,38 @@ export const AdminGallery: React.FC = () => {
                     <div className="w-20 h-20 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 shadow-inner group-hover:scale-105 transition-transform duration-300">
                       <Music className="w-10 h-10" />
                     </div>
+                  ) : photo.media_type === 'video' ? (
+                    /* Video Preview with Poster */
+                    <div className="w-full h-full relative">
+                      <video
+                        src={photo.media_url}
+                        poster={thumbnailSrc}
+                        preload="metadata"
+                        className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+                        muted
+                        playsInline
+                        onMouseEnter={(e) => e.currentTarget.play()}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.pause();
+                          e.currentTarget.currentTime = 0;
+                        }}
+                      />
+                      
+                      {/* Play overlay for video */}
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity pointer-events-none">
+                        <div className="w-12 h-12 rounded-full bg-orange-burnt text-white flex items-center justify-center shadow-lg transform group-hover:scale-108 transition-transform">
+                          <Play className="w-5 h-5 fill-white ml-0.5" />
+                        </div>
+                      </div>
+                    </div>
                   ) : (
-                    /* Image / Video Poster covers */
+                    /* Image covers */
                     <div className="w-full h-full relative">
                       <img
                         src={thumbnailSrc}
                         alt={photo.title}
                         className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
                       />
-                      
-                      {/* Play overlay for video */}
-                      {photo.media_type === 'video' && (
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
-                          <div className="w-12 h-12 rounded-full bg-orange-burnt text-white flex items-center justify-center shadow-lg transform group-hover:scale-108 transition-transform">
-                            <Play className="w-5 h-5 fill-white ml-0.5" />
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>

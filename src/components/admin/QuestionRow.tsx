@@ -2,21 +2,13 @@ import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Check, MessageSquare, Trash2, Loader2, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from './Toast';
-import { sendReplyToStudent } from '../../lib/brevo';
 
 interface QuestionRowProps {
   question: any;
   onRefresh: () => void;
-  canReply?: boolean;
-  canDelete?: boolean;
 }
 
-export const QuestionRow: React.FC<QuestionRowProps> = ({
-  question,
-  onRefresh,
-  canReply = true,
-  canDelete = true,
-}) => {
+export const QuestionRow: React.FC<QuestionRowProps> = ({ question, onRefresh }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [replyText, setReplyText] = useState(question.admin_reply || '');
   const [isReplying, setIsReplying] = useState(false);
@@ -60,7 +52,6 @@ export const QuestionRow: React.FC<QuestionRowProps> = ({
 
     setIsReplying(true);
     try {
-      // 1. Save reply to Supabase
       const { error } = await supabase
         .from('questions')
         .update({
@@ -70,19 +61,7 @@ export const QuestionRow: React.FC<QuestionRowProps> = ({
         .eq('id', question.id);
 
       if (error) throw error;
-
-      // 2. Send reply email to student (if email exists)
-      if (question.student_email) {
-        await sendReplyToStudent({
-          studentName: question.student_name,
-          studentEmail: question.student_email,
-          directedTo: question.directed_to,
-          questionText: question.question_text,
-          adminReply: replyText,
-        });
-      }
-
-      toast.success("✅ Reply submitted & email sent to student!");
+      toast.success("✅ Reply submitted successfully!");
       onRefresh();
       setIsExpanded(false);
     } catch (err: any) {
@@ -140,11 +119,6 @@ export const QuestionRow: React.FC<QuestionRowProps> = ({
           <span className="font-display font-bold text-sm text-navy-dark">
             {question.student_name}
           </span>
-          {question.student_email && (
-            <span className="block text-[10px] text-navy-dark/45 font-sans mt-0.5">
-              {question.student_email}
-            </span>
-          )}
         </td>
 
         {/* Student Year */}
@@ -177,7 +151,7 @@ export const QuestionRow: React.FC<QuestionRowProps> = ({
 
         {/* Actions Button Panel */}
         <td className="px-6 py-4 whitespace-nowrap text-right text-xs font-semibold space-x-2">
-          {canReply && question.status === 'pending' && (
+          {question.status === 'pending' && (
             <button
               onClick={handleMarkSeen}
               disabled={isUpdatingStatus}
@@ -195,31 +169,27 @@ export const QuestionRow: React.FC<QuestionRowProps> = ({
             </button>
           )}
 
-          {canReply && (
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="inline-flex items-center space-x-1 py-1.5 px-3 rounded-lg bg-orange-burnt/10 text-orange-burnt hover:bg-orange-burnt hover:text-white transition-colors"
-              title="Inline Reply"
-            >
-              <MessageSquare className="w-3.5 h-3.5" />
-              <span>{question.status === 'answered' ? 'Edit Reply' : 'Reply'}</span>
-            </button>
-          )}
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="inline-flex items-center space-x-1 py-1.5 px-3 rounded-lg bg-orange-burnt/10 text-orange-burnt hover:bg-orange-burnt hover:text-white transition-colors"
+            title="Inline Reply"
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>{question.status === 'answered' ? 'Edit Reply' : 'Reply'}</span>
+          </button>
 
-          {canDelete && (
-            <button
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="inline-flex items-center p-1.5 rounded-lg text-navy-dark/40 hover:bg-red-50 hover:text-red-600 transition-colors"
-              title="Delete Permanently"
-            >
-              {isDeleting ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Trash2 className="w-3.5 h-3.5" />
-              )}
-            </button>
-          )}
+          <button
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="inline-flex items-center p-1.5 rounded-lg text-navy-dark/40 hover:bg-red-50 hover:text-red-600 transition-colors"
+            title="Delete Permanently"
+          >
+            {isDeleting ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Trash2 className="w-3.5 h-3.5" />
+            )}
+          </button>
         </td>
       </tr>
 
@@ -237,7 +207,6 @@ export const QuestionRow: React.FC<QuestionRowProps> = ({
                 </p>
               </div>
 
-              {canReply && (
               <form onSubmit={handleReplySubmit} className="space-y-3">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-navy-dark/40 block">
                   Admin Reply / Response
@@ -278,7 +247,6 @@ export const QuestionRow: React.FC<QuestionRowProps> = ({
                   </button>
                 </div>
               </form>
-              )}
             </div>
           </td>
         </tr>

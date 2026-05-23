@@ -1,225 +1,217 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
-import { PublicPageShell } from '../components/PublicPageShell';
-import { Modal } from '../components/admin/Modal';
-import { YEAR_OPTIONS, MENTOR_YEARS, MENTOR_SPECIALIZATIONS } from '../constants/formOptions';
-import { sendMentorRequestEmails } from '../lib/brevo';
-import { Users, Loader2, Clock, BookOpen } from 'lucide-react';
+import {
+  Handshake, Loader2, CheckCircle2, GraduationCap, Clock, BookOpen,
+  Search, X, User
+} from 'lucide-react';
+
+const SPECIALIZATIONS = ['All', 'Pharmacology', 'Pharmaceutics', 'Chemistry', 'Research', 'Placements'];
 
 export const Mentors: React.FC = () => {
   const [mentors, setMentors] = useState<any[]>([]);
+  const [filtered, setFiltered] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [yearFilter, setYearFilter] = useState('All');
   const [specFilter, setSpecFilter] = useState('All');
-  const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<any>(null);
-  const [form, setForm] = useState({
-    junior_name: '',
-    junior_email: '',
-    junior_year: YEAR_OPTIONS[0],
-    message: '',
-  });
-  const [submitting, setSubmitting] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Request modal
+  const [selectedMentor, setSelectedMentor] = useState<any>(null);
+  const [reqName, setReqName] = useState('');
+  const [reqEmail, setReqEmail] = useState('');
+  const [reqYear, setReqYear] = useState('');
+  const [reqMessage, setReqMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
 
   useEffect(() => {
-    supabase
-      .from('mentors')
-      .select('*')
-      .eq('is_available', true)
-      .order('name')
-      .then(({ data }) => {
-        setMentors(data || []);
-        setLoading(false);
-      });
+    const fetch = async () => {
+      const { data } = await supabase.from('mentors').select('*').eq('is_available', true).order('created_at', { ascending: false });
+      setMentors(data || []);
+      setIsLoading(false);
+    };
+    fetch();
   }, []);
 
-  const filtered = mentors.filter((m) => {
-    const yearOk =
-      yearFilter === 'All' || m.year?.includes(yearFilter.replace('All', ''));
-    const specOk =
-      specFilter === 'All' ||
-      m.specialization?.toLowerCase() === specFilter.toLowerCase();
-    return yearOk && specOk;
-  });
+  useEffect(() => {
+    let result = [...mentors];
+    if (yearFilter !== 'All') result = result.filter(m => m.year === yearFilter);
+    if (specFilter !== 'All') result = result.filter(m => m.specialization.toLowerCase() === specFilter.toLowerCase());
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(m => m.name.toLowerCase().includes(q) || m.specialization.toLowerCase().includes(q));
+    }
+    setFiltered(result);
+  }, [mentors, yearFilter, specFilter, searchQuery]);
 
-  const sendRequest = async (e: React.FormEvent) => {
+  const handleConnect = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selected) return;
-    setSubmitting(true);
-    await supabase.from('mentor_requests').insert([
-      {
-        mentor_id: selected.id,
-        junior_name: form.junior_name.trim(),
-        junior_email: form.junior_email.trim(),
-        junior_year: form.junior_year,
-        message: form.message.trim(),
-        status: 'pending',
-      },
-    ]);
-    await sendMentorRequestEmails({
-      mentorName: selected.name,
-      mentorEmail: selected.email,
-      juniorName: form.junior_name,
-      juniorEmail: form.junior_email,
-      message: form.message,
-    });
-    setSent(true);
-    setSubmitting(false);
+    if (!reqName || !reqEmail || !reqYear || !selectedMentor) return;
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase.from('mentor_requests').insert({
+        mentor_id: selectedMentor.id,
+        junior_name: reqName, junior_email: reqEmail,
+        junior_year: reqYear, message: reqMessage,
+      });
+      if (error) throw error;
+      setRequestSent(true);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const closeModal = () => {
+    setSelectedMentor(null);
+    setReqName(''); setReqEmail(''); setReqYear(''); setReqMessage('');
+    setRequestSent(false);
   };
 
   return (
     <div className="pt-28 pb-24 min-h-screen bg-gray-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <PublicPageShell
-          title="🤝 Find Your Mentor"
-          subtitle="Connect with senior students for guidance and support"
-          icon={<Users className="w-6 h-6" />}
-        >
-          <div className="flex flex-wrap gap-2 justify-center mb-4">
-            {MENTOR_YEARS.map((y) => (
-              <button
-                key={y}
-                onClick={() => setYearFilter(y)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
-                  yearFilter === y ? 'bg-navy-dark text-white' : 'bg-white border border-navy-dark/10'
-                }`}
-              >
-                {y}
-              </button>
-            ))}
+        {/* Hero */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
+          <div className="w-16 h-16 rounded-2xl bg-orange-burnt/10 flex items-center justify-center mx-auto mb-4">
+            <Handshake className="w-8 h-8 text-orange-burnt" />
           </div>
-          <div className="flex flex-wrap gap-2 justify-center mb-8">
-            {MENTOR_SPECIALIZATIONS.map((s) => (
-              <button
-                key={s}
-                onClick={() => setSpecFilter(s)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
-                  specFilter === s ? 'bg-orange-burnt text-white' : 'bg-white border border-navy-dark/10'
-                }`}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
+          <h1 className="font-display font-extrabold text-3xl sm:text-5xl text-navy-dark mb-3">Find Your Mentor</h1>
+          <p className="text-navy-dark/60 text-sm sm:text-base font-sans max-w-lg mx-auto">Connect with senior students for academic guidance, career advice, and personal support.</p>
+        </motion.div>
 
-          {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-orange-burnt" />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((m) => (
-                <motion.div
-                  key={m.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="bg-white rounded-2xl border border-navy-dark/10 p-5 shadow-sm flex flex-col"
-                >
-                  <div className="w-16 h-16 rounded-full bg-orange-burnt/10 mx-auto overflow-hidden flex items-center justify-center">
-                    {m.photo_url ? (
-                      <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <Users className="w-8 h-8 text-orange-burnt" />
-                    )}
+        {/* Filters */}
+        <div className="flex flex-wrap items-center gap-3 mb-8 justify-center">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-navy-dark/30" />
+            <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search mentors..."
+              className="pl-10 pr-4 py-2 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors w-56" />
+          </div>
+          <select value={yearFilter} onChange={e => setYearFilter(e.target.value)}
+            className="px-4 py-2 rounded-lg border border-navy-dark/15 outline-none text-sm font-sans text-navy-dark bg-white">
+            <option value="All">All Years</option>
+            <option value="B.Pharm III">B.Pharm III</option>
+            <option value="B.Pharm IV">B.Pharm IV</option>
+            <option value="M.Pharm">M.Pharm</option>
+          </select>
+          {SPECIALIZATIONS.map(s => (
+            <button key={s} onClick={() => setSpecFilter(s)}
+              className={`px-3 py-1.5 rounded-full font-display text-xs font-bold transition-all ${specFilter === s ? 'bg-navy-dark text-white' : 'bg-white text-navy-dark/60 border border-navy-dark/10 hover:border-orange-burnt'}`}>
+              {s}
+            </button>
+          ))}
+        </div>
+
+        {/* Mentor Grid */}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20"><Loader2 className="w-10 h-10 text-orange-burnt animate-spin" /></div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-2xl border border-navy-dark/10">
+            <Handshake className="w-12 h-12 text-navy-dark/15 mx-auto mb-3" />
+            <h3 className="font-display font-bold text-navy-dark/60">No mentors found</h3>
+          </div>
+        ) : (
+          <motion.div initial="hidden" animate="visible"
+            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.07 } } }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filtered.map(mentor => (
+              <motion.div key={mentor.id}
+                variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
+                whileHover={{ y: -6 }}
+                className="bg-white rounded-xl border border-navy-dark/5 shadow-sm p-5 flex flex-col items-center text-center">
+                <div className="w-20 h-20 rounded-full bg-navy-dark/5 overflow-hidden mb-4">
+                  {mentor.photo_url ? (
+                    <img src={mentor.photo_url} alt={mentor.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-burnt/10 to-navy-dark/5">
+                      <User className="w-8 h-8 text-navy-dark/20" />
+                    </div>
+                  )}
+                </div>
+                <h3 className="font-display font-bold text-base text-navy-dark">{mentor.name}</h3>
+                <div className="flex items-center space-x-1 text-navy-dark/50 text-xs mb-2">
+                  <GraduationCap className="w-3.5 h-3.5" /><span>{mentor.year}</span>
+                </div>
+                <div className="flex items-center space-x-1 text-orange-burnt text-xs font-semibold mb-1">
+                  <BookOpen className="w-3.5 h-3.5" /><span>{mentor.specialization}</span>
+                </div>
+                {mentor.available_time && (
+                  <div className="flex items-center space-x-1 text-navy-dark/40 text-[10px] mb-3">
+                    <Clock className="w-3 h-3" /><span>{mentor.available_time}</span>
                   </div>
-                  <h3 className="font-display font-bold text-center text-navy-dark mt-3">{m.name}</h3>
-                  <p className="text-xs text-center text-navy-dark/50">{m.year}</p>
-                  <div className="mt-3 space-y-1 text-xs text-navy-dark/70">
-                    <p className="flex items-center gap-1">
-                      <BookOpen className="w-3.5 h-3.5 text-orange-burnt" /> {m.specialization}
-                    </p>
-                    <p className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-orange-burnt" /> {m.available_time}
-                    </p>
-                  </div>
-                  <p className="text-xs text-navy-dark/60 mt-3 flex-grow italic">{m.bio}</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelected(m);
-                      setSent(false);
-                      setForm({
-                        junior_name: '',
-                        junior_email: '',
-                        junior_year: YEAR_OPTIONS[0],
-                        message: '',
-                      });
-                    }}
-                    className="mt-4 w-full py-2.5 bg-orange-burnt text-white font-bold rounded-lg text-sm"
-                  >
-                    Connect →
-                  </button>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </PublicPageShell>
+                )}
+                {mentor.bio && <p className="text-xs text-navy-dark/55 font-sans leading-relaxed mb-4 flex-grow">{mentor.bio}</p>}
+                <button onClick={() => setSelectedMentor(mentor)}
+                  className="w-full py-2 rounded-lg bg-navy-dark hover:bg-orange-burnt text-white font-display text-xs font-bold transition-colors flex items-center justify-center space-x-1.5">
+                  <Handshake className="w-3.5 h-3.5" /><span>Connect →</span>
+                </button>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
       </div>
 
-      <Modal
-        isOpen={!!selected}
-        onClose={() => setSelected(null)}
-        title={selected ? `Connect with ${selected.name}` : ''}
-        icon={<Users className="w-5 h-5" />}
-      >
-        {sent ? (
-          <p className="text-center py-6 font-display font-bold text-emerald-600">
-            Request sent to {selected?.name}!
-          </p>
-        ) : (
-          <form onSubmit={sendRequest} className="space-y-3">
-            <input
-              required
-              placeholder="Your Name *"
-              value={form.junior_name}
-              onChange={(e) => setForm({ ...form, junior_name: e.target.value })}
-              className="w-full px-3 py-2.5 rounded-lg border border-navy-dark/15 text-sm"
-            />
-            <input
-              type="email"
-              required
-              placeholder="Your Email *"
-              value={form.junior_email}
-              onChange={(e) => setForm({ ...form, junior_email: e.target.value })}
-              className="w-full px-3 py-2.5 rounded-lg border border-navy-dark/15 text-sm"
-            />
-            <select
-              value={form.junior_year}
-              onChange={(e) => setForm({ ...form, junior_year: e.target.value })}
-              className="w-full px-3 py-2.5 rounded-lg border border-navy-dark/15 text-sm bg-white"
-            >
-              {YEAR_OPTIONS.map((y) => (
-                <option key={y}>{y}</option>
-              ))}
-            </select>
-            <textarea
-              rows={3}
-              placeholder="Message"
-              value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
-              className="w-full px-3 py-2.5 rounded-lg border border-navy-dark/15 text-sm resize-none"
-            />
-            <div className="flex gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setSelected(null)}
-                className="flex-1 py-2 border border-navy-dark/15 rounded-lg text-sm font-semibold"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="flex-1 py-2 bg-orange-burnt text-white rounded-lg text-sm font-bold"
-              >
-                Send Request →
-              </button>
-            </div>
-          </form>
+      {/* Connect Modal */}
+      <AnimatePresence>
+        {selectedMentor && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+            <div onClick={closeModal} className="absolute inset-0" />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl border border-navy-dark/10 overflow-hidden z-10">
+              <div className="bg-navy-dark text-white px-6 py-4 flex items-center justify-between">
+                <h4 className="font-display font-extrabold text-sm">Connect with {selectedMentor.name}</h4>
+                <button onClick={closeModal} className="p-1 rounded-lg hover:bg-white/10"><X className="w-4 h-4" /></button>
+              </div>
+
+              {requestSent ? (
+                <div className="p-8 text-center">
+                  <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
+                  <h3 className="font-display font-extrabold text-lg text-navy-dark mb-2">Request Sent! 🎉</h3>
+                  <p className="text-navy-dark/60 text-sm font-sans">Your mentorship request has been sent to <strong>{selectedMentor.name}</strong>.</p>
+                </div>
+              ) : (
+                <form onSubmit={handleConnect} className="p-6 space-y-4">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60 mb-1.5">Your Name *</label>
+                    <input type="text" required value={reqName} onChange={e => setReqName(e.target.value)} placeholder="Full name"
+                      className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60 mb-1.5">Your Email *</label>
+                    <input type="email" required value={reqEmail} onChange={e => setReqEmail(e.target.value)} placeholder="your@email.com"
+                      className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60 mb-1.5">Your Year *</label>
+                    <select required value={reqYear} onChange={e => setReqYear(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark bg-white transition-colors">
+                      <option value="">Select Year</option>
+                      <option value="B.Pharm I">B.Pharm I</option>
+                      <option value="B.Pharm II">B.Pharm II</option>
+                      <option value="B.Pharm III">B.Pharm III</option>
+                      <option value="D.Pharm I">D.Pharm I</option>
+                      <option value="D.Pharm II">D.Pharm II</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60 mb-1.5">Message</label>
+                    <textarea value={reqMessage} onChange={e => setReqMessage(e.target.value)} rows={3} placeholder="Tell the mentor what you need help with..."
+                      className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors resize-none" />
+                  </div>
+                  <div className="flex space-x-3">
+                    <button type="button" onClick={closeModal} className="flex-1 py-2.5 rounded-lg border border-navy-dark/15 text-navy-dark/60 font-display text-xs font-bold hover:bg-navy-dark/5 transition-colors">Cancel</button>
+                    <button type="submit" disabled={isSubmitting} className="flex-1 py-2.5 rounded-lg bg-orange-burnt hover:bg-orange-burnt/90 text-white font-display text-xs font-bold shadow-md transition-colors flex items-center justify-center space-x-1.5">
+                      {isSubmitting ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>Sending...</span></> : <span>Send Request →</span>}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </motion.div>
+          </div>
         )}
-      </Modal>
+      </AnimatePresence>
     </div>
   );
 };

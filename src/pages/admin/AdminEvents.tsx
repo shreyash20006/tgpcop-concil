@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { useRole } from '../../hooks/useRole';
-import { RequirePermission } from '../../components/admin/RequirePermission';
 import { DataTable } from '../../components/admin/DataTable';
 import { EventModal } from '../../components/admin/EventModal';
 import { useToast } from '../../components/admin/Toast';
@@ -22,9 +20,7 @@ const EventCardMobile: React.FC<{
   eventItem: any; 
   onEdit: (e: any) => void; 
   onDelete: (id: string) => void;
-  canEdit: boolean;
-  canDelete: boolean;
-}> = ({ eventItem, onEdit, onDelete, canEdit, canDelete }) => {
+}> = ({ eventItem, onEdit, onDelete }) => {
   const getTypeBadgeColor = (type: string) => {
     switch (type?.toLowerCase()) {
       case 'competition':
@@ -100,9 +96,8 @@ const EventCardMobile: React.FC<{
         </div>
       </div>
 
-      {(canEdit || canDelete) && (
+      {/* Card CRUD controls */}
       <div className="flex items-center gap-2 pt-2 border-t border-navy-dark/5">
-        {canEdit && (
         <button
           onClick={() => onEdit(eventItem)}
           className="flex-grow inline-flex items-center justify-center space-x-1.5 py-1.5 px-3 rounded-lg bg-navy-dark/5 text-navy-dark hover:bg-navy-dark hover:text-white text-xs font-semibold transition-colors"
@@ -110,26 +105,18 @@ const EventCardMobile: React.FC<{
           <Edit className="w-3.5 h-3.5" />
           <span>Edit Details</span>
         </button>
-        )}
-        {canDelete && (
         <button
           onClick={() => onDelete(eventItem.id)}
           className="p-1.5 rounded-lg text-navy-dark/45 hover:bg-red-50 hover:text-red-600 transition-colors border border-navy-dark/5"
         >
           <Trash2 className="w-4 h-4" />
         </button>
-        )}
       </div>
-      )}
     </div>
   );
 };
 
 export const AdminEvents: React.FC = () => {
-  const { can } = useRole();
-  const canAdd = can('add_events');
-  const canEdit = can('edit_events');
-  const canDelete = can('delete_events');
   const [events, setEvents] = useState<any[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -224,7 +211,6 @@ export const AdminEvents: React.FC = () => {
   ];
 
   return (
-    <RequirePermission permission="add_events">
     <div className="space-y-6 animate-in fade-in duration-300">
       
       {/* Dynamic Tab Filter Bar & Add Buttons */}
@@ -251,7 +237,6 @@ export const AdminEvents: React.FC = () => {
           })}
         </div>
 
-        {canAdd && (
         <button
           onClick={handleAddNew}
           className="w-full sm:w-auto flex items-center justify-center space-x-1.5 px-4.5 py-2.5 bg-orange-burnt hover:bg-orange-burnt/95 text-white rounded-lg font-display text-xs font-bold shadow-md shadow-orange-burnt/20 hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0"
@@ -259,7 +244,6 @@ export const AdminEvents: React.FC = () => {
           <Plus className="w-4 h-4" />
           <span>Add New Event</span>
         </button>
-        )}
       </div>
 
       {/* Events DataTable list */}
@@ -354,7 +338,6 @@ export const AdminEvents: React.FC = () => {
 
               {/* Action column */}
               <td className="px-6 py-4 whitespace-nowrap text-right text-xs font-semibold space-x-2">
-                {canEdit && (
                 <button
                   onClick={() => handleEdit(item)}
                   className="inline-flex items-center space-x-1 py-1.5 px-3 rounded-lg bg-navy-dark/5 text-navy-dark hover:bg-navy-dark hover:text-white transition-colors"
@@ -362,15 +345,12 @@ export const AdminEvents: React.FC = () => {
                   <Edit className="w-3.5 h-3.5" />
                   <span>Edit</span>
                 </button>
-                )}
-                {canDelete && (
                 <button
                   onClick={() => handleDelete(item.id)}
                   className="inline-flex items-center p-1.5 rounded-lg text-navy-dark/40 hover:bg-red-50 hover:text-red-600 transition-colors"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
-                )}
               </td>
             </tr>
           );
@@ -381,24 +361,19 @@ export const AdminEvents: React.FC = () => {
             eventItem={item}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            canEdit={canEdit}
-            canDelete={canDelete}
           />
         )}
       />
 
       {/* Modal publisher */}
-      {canAdd && (
       <EventModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onRefresh={fetchEvents}
         eventToEdit={eventToEdit}
       />
-      )}
 
     </div>
-    </RequirePermission>
   );
 };
 

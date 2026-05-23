@@ -362,34 +362,16 @@ export const GalleryGrid: React.FC = () => {
                     >
                       {/* Image cover / Video poster */}
                       <div className="relative h-56 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
-                        {item.media_type === 'video' ? (
-                          /* Video Preview with Poster */
-                          <video
-                            src={getCloudinaryMediaUrl(item.media_url, 'video')}
-                            poster={thumbnail}
-                            preload="metadata"
-                            className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-350"
-                            muted
-                            playsInline
-                            onMouseEnter={(e) => e.currentTarget.play()}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.pause();
-                              e.currentTarget.currentTime = 0;
-                            }}
-                          />
-                        ) : (
-                          /* Image */
-                          <img
-                            src={thumbnail}
-                            alt={item.title}
-                            className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-350"
-                            loading="lazy"
-                          />
-                        )}
+                        <img
+                          src={thumbnail}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-350"
+                          loading="lazy"
+                        />
 
                         {/* Video Play Circle Overlay */}
                         {item.media_type === 'video' && (
-                          <div className="absolute inset-0 bg-black/25 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity pointer-events-none">
+                          <div className="absolute inset-0 bg-black/25 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
                             <div className="w-12 h-12 rounded-full bg-orange-burnt text-white flex items-center justify-center shadow-lg transform group-hover:scale-108 transition-all">
                               <Play className="w-5 h-5 fill-white ml-0.5" />
                             </div>

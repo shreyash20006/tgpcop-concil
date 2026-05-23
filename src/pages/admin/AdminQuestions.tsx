@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { useRole } from '../../hooks/useRole';
-import { RequirePermission } from '../../components/admin/RequirePermission';
 import { DataTable } from '../../components/admin/DataTable';
 import { QuestionRow } from '../../components/admin/QuestionRow';
 import { councilMembers } from '../../data/council';
 import { useToast } from '../../components/admin/Toast';
-import { sendReplyToStudent } from '../../lib/brevo';
 import { 
   Mail, 
   AlertCircle, 
@@ -17,18 +14,15 @@ import {
   Check,
   MessageSquare,
   Trash2,
-  Loader2,
-  Eye
+  Loader2
 } from 'lucide-react';
 
 /* ========================================================
  * MOBILE COLLAPSIBLE CARD COMPONENT FOR QUESTIONS
  * ======================================================== */
-const QuestionCardMobile: React.FC<{ question: any; onRefresh: () => void; canReply: boolean; canDelete: boolean }> = ({
+const QuestionCardMobile: React.FC<{ question: any; onRefresh: () => void }> = ({
   question,
   onRefresh,
-  canReply,
-  canDelete,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [replyText, setReplyText] = useState(question.admin_reply || '');
@@ -73,7 +67,6 @@ const QuestionCardMobile: React.FC<{ question: any; onRefresh: () => void; canRe
 
     setIsReplying(true);
     try {
-      // 1. Save reply to Supabase
       const { error } = await supabase
         .from('questions')
         .update({
@@ -83,19 +76,7 @@ const QuestionCardMobile: React.FC<{ question: any; onRefresh: () => void; canRe
         .eq('id', question.id);
 
       if (error) throw error;
-
-      // 2. Send reply email to student (if email exists)
-      if (question.student_email) {
-        await sendReplyToStudent({
-          studentName: question.student_name,
-          studentEmail: question.student_email,
-          directedTo: question.directed_to,
-          questionText: question.question_text,
-          adminReply: replyText,
-        });
-      }
-
-      toast.success("✅ Reply submitted & email sent to student!");
+      toast.success("✅ Reply submitted successfully!");
       onRefresh();
       setIsExpanded(false);
     } catch (err: any) {
@@ -166,7 +147,7 @@ const QuestionCardMobile: React.FC<{ question: any; onRefresh: () => void; canRe
 
       {/* Action panel triggers */}
       <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-navy-dark/5">
-        {canReply && question.status === 'pending' && (
+        {question.status === 'pending' && (
           <button
             onClick={handleMarkSeen}
             disabled={isUpdatingStatus}
@@ -177,29 +158,25 @@ const QuestionCardMobile: React.FC<{ question: any; onRefresh: () => void; canRe
           </button>
         )}
 
-        {canReply && (
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="flex-1 inline-flex items-center justify-center space-x-1 py-1.5 px-3 rounded-lg bg-orange-burnt/10 text-orange-burnt hover:bg-orange-burnt hover:text-white text-xs font-semibold transition-colors"
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            <span>{question.status === 'answered' ? 'Edit Reply' : 'Reply'}</span>
-          </button>
-        )}
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex-1 inline-flex items-center justify-center space-x-1 py-1.5 px-3 rounded-lg bg-orange-burnt/10 text-orange-burnt hover:bg-orange-burnt hover:text-white text-xs font-semibold transition-colors"
+        >
+          <MessageSquare className="w-3.5 h-3.5" />
+          <span>{question.status === 'answered' ? 'Edit Reply' : 'Reply'}</span>
+        </button>
 
-        {canDelete && (
-          <button
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="p-1.5 rounded-lg text-navy-dark/45 hover:bg-red-50 hover:text-red-600 transition-colors border border-navy-dark/5"
-          >
-            {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-          </button>
-        )}
+        <button
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="p-1.5 rounded-lg text-navy-dark/45 hover:bg-red-50 hover:text-red-600 transition-colors border border-navy-dark/5"
+        >
+          {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+        </button>
       </div>
 
       {/* Inline Collapsible Reply Drawer Box */}
-      {canReply && isExpanded && (
+      {isExpanded && (
         <div className="mt-4 pt-4 border-t border-navy-dark/5 space-y-3 bg-gray-50/50 p-4 rounded-xl">
           <span className="text-[9px] font-bold uppercase tracking-widest text-navy-dark/40 block">
             Admin Response / Reply
@@ -240,10 +217,6 @@ const QuestionCardMobile: React.FC<{ question: any; onRefresh: () => void; canRe
 
 export const AdminQuestions: React.FC = () => {
   const { refreshBadge } = useOutletContext<{ refreshBadge: () => void }>();
-  const { can, adminUser } = useRole();
-  const canReply = can('reply_questions');
-  const canDelete = can('delete_questions');
-  const isViewOnly = adminUser?.role === 'limited';
   const [questions, setQuestions] = useState<any[]>([]);
   const [filteredQuestions, setFilteredQuestions] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -327,17 +300,7 @@ export const AdminQuestions: React.FC = () => {
   ];
 
   return (
-    <RequirePermission permission="view_questions">
     <div className="space-y-6 animate-in fade-in duration-300">
-
-      {isViewOnly && (
-        <div className="flex items-center gap-2 px-4 py-3 bg-amber-500/10 border border-amber-500/25 rounded-xl">
-          <Eye className="w-4 h-4 text-amber-600 shrink-0" />
-          <span className="text-xs font-display font-bold text-amber-700 uppercase tracking-wider">
-            View Only — You cannot reply to or delete questions
-          </span>
-        </div>
-      )}
       
       {/* Metrics Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -389,24 +352,19 @@ export const AdminQuestions: React.FC = () => {
           <QuestionRow 
             key={item.id} 
             question={item} 
-            onRefresh={fetchQuestions}
-            canReply={canReply}
-            canDelete={canDelete}
+            onRefresh={fetchQuestions} 
           />
         )}
         renderCardMobile={(item) => (
           <QuestionCardMobile 
             key={item.id} 
             question={item} 
-            onRefresh={fetchQuestions}
-            canReply={canReply}
-            canDelete={canDelete}
+            onRefresh={fetchQuestions} 
           />
         )}
       />
 
     </div>
-    </RequirePermission>
   );
 };
 

@@ -16,6 +16,15 @@ import { Notices } from './pages/Notices';
 import { Events } from './pages/Events';
 import { Gallery } from './pages/Gallery';
 import { ReportBug } from './pages/ReportBug';
+import { EventRegister } from './pages/EventRegister';
+import { Vote } from './pages/Vote';
+import { EventFeedback } from './pages/EventFeedback';
+import { Achievements } from './pages/Achievements';
+import { Newsletter } from './pages/Newsletter';
+import { Complaint } from './pages/Complaint';
+import { Mentors } from './pages/Mentors';
+
+// Import admin pages
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminQuestions } from './pages/admin/AdminQuestions';
@@ -27,16 +36,6 @@ import { AdminUsers } from './pages/admin/AdminUsers';
 import { AdminSettings } from './pages/admin/AdminSettings';
 import { AdminLogs } from './pages/admin/AdminLogs';
 import { AdminBugs } from './pages/admin/AdminBugs';
-import { AdminDatabase } from './pages/admin/AdminDatabase';
-import { AdminManageAdmins } from './pages/admin/AdminManageAdmins';
-import { MaintenanceBanner } from './components/MaintenanceBanner';
-import { EventRegistration } from './pages/EventRegistration';
-import { Vote } from './pages/Vote';
-import { EventFeedback } from './pages/EventFeedback';
-import { Achievements } from './pages/Achievements';
-import { Newsletter } from './pages/Newsletter';
-import { Complaint } from './pages/Complaint';
-import { Mentors } from './pages/Mentors';
 import { AdminRegistrations } from './pages/admin/AdminRegistrations';
 import { AdminPolls } from './pages/admin/AdminPolls';
 import { AdminFeedback } from './pages/admin/AdminFeedback';
@@ -65,7 +64,6 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-light font-sans text-navy-dark antialiased">
-      {!isAdminRoute && <MaintenanceBanner />}
       {!isAdminRoute && <Navbar />}
 
       <main className="flex-grow">
@@ -78,7 +76,7 @@ const AppContent: React.FC = () => {
           <Route path="/events" element={<Events />} />
           <Route path="/media" element={<Gallery />} />
           <Route path="/report" element={<ReportBug />} />
-          <Route path="/register/:eventId" element={<EventRegistration />} />
+          <Route path="/register/:eventId" element={<EventRegister />} />
           <Route path="/vote" element={<Vote />} />
           <Route path="/feedback/:eventId" element={<EventFeedback />} />
           <Route path="/achievements" element={<Achievements />} />
@@ -101,20 +99,19 @@ const AppContent: React.FC = () => {
             <Route path="/admin/notices" element={<AdminNotices />} />
             <Route path="/admin/events" element={<AdminEvents />} />
             <Route path="/admin/gallery" element={<AdminGallery />} />
-            {/* Super Admin Exclusive Routes */}
-            <Route path="/admin/users" element={<AdminUsers />} />
-            <Route path="/admin/settings" element={<AdminSettings />} />
-            <Route path="/admin/database" element={<AdminDatabase />} />
-            <Route path="/admin/manage-admins" element={<AdminManageAdmins />} />
-            <Route path="/admin/logs" element={<AdminLogs />} />
-            <Route path="/admin/bugs" element={<AdminBugs />} />
             <Route path="/admin/registrations" element={<AdminRegistrations />} />
             <Route path="/admin/polls" element={<AdminPolls />} />
             <Route path="/admin/feedback" element={<AdminFeedback />} />
             <Route path="/admin/achievements" element={<AdminAchievements />} />
             <Route path="/admin/newsletter" element={<AdminNewsletter />} />
-            <Route path="/admin/complaints" element={<AdminComplaints />} />
             <Route path="/admin/mentors" element={<AdminMentors />} />
+            
+            {/* Super Admin Exclusive Routes */}
+            <Route path="/admin/complaints" element={<AdminComplaints />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/logs" element={<AdminLogs />} />
+            <Route path="/admin/bugs" element={<AdminBugs />} />
           </Route>
         </Routes>
       </main>

@@ -6,16 +6,9 @@ import { Menu, X, GraduationCap, ChevronDown } from 'lucide-react';
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
+  const [isMobileMoreOpen, setIsMobileMoreOpen] = useState(false);
+  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
   const location = useLocation();
-
-  const moreLinks = [
-    { name: '🏆 Achievements', path: '/achievements' },
-    { name: '🗳️ Vote Now', path: '/vote' },
-    { name: '🤝 Mentors', path: '/mentors' },
-    { name: '📰 Newsletter', path: '/newsletter' },
-    { name: '🆘 Report Issue', path: '/complaint' },
-  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,6 +31,16 @@ export const Navbar: React.FC = () => {
     { name: 'Events', path: '/events' },
     { name: 'Gallery', path: '/media' },
   ];
+
+  const moreLinks = [
+    { name: 'Achievements', path: '/achievements', icon: '🏆', desc: 'Student hall of fame' },
+    { name: 'Vote Now', path: '/vote', icon: '🗳️', desc: 'Participate in active polls' },
+    { name: 'Mentors', path: '/mentors', icon: '🤝', desc: 'Connect with senior guides' },
+    { name: 'Newsletter', path: '/newsletter', icon: '📰', desc: 'Monthly publications' },
+    { name: 'Report Issue', path: '/complaint', icon: '🆘', desc: 'File anonymous complaint', highlight: true },
+  ];
+
+  const isMoreActive = moreLinks.some((link) => location.pathname === link.path);
 
   return (
     <>
@@ -75,7 +78,7 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-6">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
               return (
@@ -85,9 +88,7 @@ export const Navbar: React.FC = () => {
                   className={({ isActive }) =>
                     `relative font-display font-medium text-sm transition-colors duration-200 hover:text-orange-burnt px-1 py-2 ${
                       isActive
-                        ? isScrolled
-                          ? 'text-orange-burnt'
-                          : 'text-orange-burnt'
+                        ? 'text-orange-burnt'
                         : isScrolled
                         ? 'text-navy-dark/80'
                         : 'text-white/80'
@@ -106,34 +107,62 @@ export const Navbar: React.FC = () => {
               );
             })}
 
+            {/* Desktop More Dropdown */}
             <div
               className="relative"
-              onMouseEnter={() => setMoreOpen(true)}
-              onMouseLeave={() => setMoreOpen(false)}
+              onMouseEnter={() => setIsMoreDropdownOpen(true)}
+              onMouseLeave={() => setIsMoreDropdownOpen(false)}
             >
               <button
-                type="button"
-                className={`flex items-center gap-1 font-display font-medium text-sm px-1 py-2 transition-colors hover:text-orange-burnt ${
-                  isScrolled ? 'text-navy-dark/80' : 'text-white/80'
+                className={`flex items-center space-x-1 font-display font-medium text-sm transition-colors duration-200 hover:text-orange-burnt px-1 py-2 outline-none ${
+                  isMoreActive
+                    ? 'text-orange-burnt font-semibold'
+                    : isScrolled
+                    ? 'text-navy-dark/80'
+                    : 'text-white/80'
                 }`}
               >
-                More <ChevronDown className="w-4 h-4" />
+                <span>More</span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                    isMoreDropdownOpen ? 'rotate-180' : ''
+                  }`}
+                />
               </button>
+
               <AnimatePresence>
-                {moreOpen && (
+                {isMoreDropdownOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: 8 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    className="absolute top-full left-0 mt-1 w-48 bg-white rounded-xl shadow-xl border border-navy-dark/10 py-2 z-50"
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl py-2 border border-gray-100 z-50 overflow-hidden text-navy-dark"
                   >
-                    {moreLinks.map((link) => (
+                    {moreLinks.map((subLink) => (
                       <Link
-                        key={link.path}
-                        to={link.path}
-                        className="block px-4 py-2.5 text-sm text-navy-dark hover:bg-orange-burnt/10 hover:text-orange-burnt font-medium"
+                        key={subLink.path}
+                        to={subLink.path}
+                        onClick={() => setIsMoreDropdownOpen(false)}
+                        className={`block px-4 py-2.5 hover:bg-orange-burnt/5 transition-colors ${
+                          subLink.highlight ? 'bg-red-50/40 hover:bg-red-50/60' : ''
+                        }`}
                       >
-                        {link.name}
+                        <div className="flex items-start space-x-3">
+                          <span className="text-lg mt-0.5">{subLink.icon}</span>
+                          <div>
+                            <span
+                              className={`block text-xs font-semibold ${
+                                subLink.highlight ? 'text-red-500 font-bold' : 'text-navy-dark hover:text-orange-burnt'
+                              }`}
+                            >
+                              {subLink.name}
+                            </span>
+                            <span className="block text-[10px] text-gray-500 leading-tight mt-0.5">
+                              {subLink.desc}
+                            </span>
+                          </div>
+                        </div>
                       </Link>
                     ))}
                   </motion.div>
@@ -189,10 +218,10 @@ export const Navbar: React.FC = () => {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed right-0 top-0 bottom-0 w-[280px] bg-navy-dark text-white p-6 z-50 shadow-2xl flex flex-col justify-between md:hidden"
+              className="fixed right-0 top-0 bottom-0 w-[280px] bg-navy-dark text-white p-6 z-50 shadow-2xl flex flex-col justify-between md:hidden overflow-y-auto"
             >
               <div>
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-6">
                   <span className="font-display font-bold text-lg text-orange-burnt">
                     TGPCOP Council
                   </span>
@@ -204,7 +233,7 @@ export const Navbar: React.FC = () => {
                   </button>
                 </div>
 
-                <nav className="flex flex-col space-y-4">
+                <nav className="flex flex-col space-y-3">
                   {navLinks.map((link) => {
                     const isActive = location.pathname === link.path;
                     return (
@@ -212,7 +241,7 @@ export const Navbar: React.FC = () => {
                         key={link.path}
                         to={link.path}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`font-display font-medium text-lg py-2 border-b border-white/10 flex items-center justify-between ${
+                        className={`font-display font-medium text-base py-2 border-b border-white/15 flex items-center justify-between ${
                           isActive ? 'text-orange-burnt font-bold' : 'text-white/80'
                         }`}
                       >
@@ -223,21 +252,56 @@ export const Navbar: React.FC = () => {
                       </Link>
                     );
                   })}
-                  <p className="text-[10px] font-bold uppercase text-white/40 pt-4">More</p>
-                  {moreLinks.map((link) => (
-                    <Link
-                      key={link.path}
-                      to={link.path}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="font-display font-medium text-base py-2 text-white/80 hover:text-orange-burnt"
+
+                  {/* Expandable Mobile "More" Items */}
+                  <div className="border-b border-white/15">
+                    <button
+                      onClick={() => setIsMobileMoreOpen(!isMobileMoreOpen)}
+                      className={`w-full font-display font-medium text-base py-2 flex items-center justify-between outline-none ${
+                        isMoreActive ? 'text-orange-burnt font-bold' : 'text-white/80'
+                      }`}
                     >
-                      {link.name}
-                    </Link>
-                  ))}
+                      <span>More Features</span>
+                      <ChevronDown
+                        className={`w-4 h-4 transition-transform duration-200 ${
+                          isMobileMoreOpen ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+
+                    <AnimatePresence>
+                      {isMobileMoreOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="pl-4 pb-2 space-y-2 overflow-hidden flex flex-col text-sm"
+                        >
+                          {moreLinks.map((subLink) => {
+                            const isSubActive = location.pathname === subLink.path;
+                            return (
+                              <Link
+                                key={subLink.path}
+                                to={subLink.path}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={`py-1.5 flex items-center space-x-2 transition-colors ${
+                                  isSubActive ? 'text-orange-burnt font-bold' : 'text-white/70 hover:text-white'
+                                }`}
+                              >
+                                <span>{subLink.icon}</span>
+                                <span>{subLink.name}</span>
+                              </Link>
+                            );
+                          })}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </nav>
               </div>
 
-              <div>
+              <div className="mt-8">
                 <Link
                   to="/admin"
                   onClick={() => setIsMobileMenuOpen(false)}

@@ -20,28 +20,24 @@ export const AdminLayout: React.FC = () => {
         return 'Events & Competitions';
       case '/admin/gallery':
         return 'Photo Gallery Management';
-      case '/admin/users':
-        return 'User Administration';
-      case '/admin/settings':
-        return 'Portal Settings & Configuration';
-      case '/admin/database':
-        return 'Database Viewer';
-      case '/admin/manage-admins':
-        return 'Manage Admin Roles';
       case '/admin/registrations':
         return 'Event Registrations';
       case '/admin/polls':
-        return 'Polls & Voting';
+        return 'Polls & Voting Management';
       case '/admin/feedback':
         return 'Event Feedback Analytics';
       case '/admin/achievements':
-        return 'Hall of Fame Management';
+        return 'Hall of Fame achievements';
       case '/admin/newsletter':
-        return 'Newsletter Management';
+        return 'Newsletter Publisher';
       case '/admin/complaints':
         return 'Anonymous Complaints';
       case '/admin/mentors':
-        return 'Mentorship Program';
+        return 'Mentorship Connect Program';
+      case '/admin/users':
+        return 'User Administration';
+      case '/admin/settings':
+        return 'Portal Branding Settings';
       case '/admin/logs':
         return 'Security Audit Trail';
       case '/admin/bugs':

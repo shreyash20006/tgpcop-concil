@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useSpring } from 'framer-motion';
-import { Calendar, Award, BookOpen, Music, Accessibility } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Calendar, Award, BookOpen, Music, Accessibility, ArrowRight } from 'lucide-react';
 import { timelineEvents } from '../data/events';
 
 interface EventTimelineProps {
@@ -130,6 +131,9 @@ const TimelineCard: React.FC<{
     year: 'numeric'
   }) : '');
 
+  const seatsLeft = (event.capacity || 100) - (event.registered_count || 0);
+  const isFull = seatsLeft <= 0;
+
   return (
     <motion.div
       initial={{ opacity: 0, x: isEven ? -40 : 40 }}
@@ -139,10 +143,15 @@ const TimelineCard: React.FC<{
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
       className="bg-white p-6 rounded-xl shadow-md border border-navy-dark/5 hover:shadow-xl transition-shadow relative"
     >
-      {/* Category tag */}
-      <span className={`inline-block text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full border mb-3 ${getBadgeColors(iconType)}`}>
-        {iconType}
-      </span>
+      <div className={`flex items-center justify-between mb-3 ${isEven ? 'md:flex-row-reverse' : 'flex-row'}`}>
+        {/* Category tag */}
+        <span className={`inline-block text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${getBadgeColors(iconType)}`}>
+          {iconType}
+        </span>
+        <span className={`text-[10px] font-bold ${isFull ? 'text-red-500' : 'text-emerald-600'}`}>
+          {isFull ? '🔴 Full' : `🟢 ${seatsLeft} seats left`}
+        </span>
+      </div>
 
       {/* Date */}
       <div className={`flex items-center space-x-1.5 text-orange-burnt font-semibold text-xs mb-2 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
@@ -151,14 +160,34 @@ const TimelineCard: React.FC<{
       </div>
 
       {/* Title */}
-      <h3 className="font-display font-bold text-lg sm:text-xl text-navy-dark mb-2 leading-snug">
+      <h3 className={`font-display font-bold text-lg sm:text-xl text-navy-dark mb-2 leading-snug ${isEven ? 'md:text-right' : 'md:text-left'}`}>
         {event.title || event.name}
       </h3>
 
       {/* Description */}
-      <p className="text-navy-dark/80 text-sm leading-relaxed font-sans">
+      <p className={`text-navy-dark/80 text-sm leading-relaxed font-sans mb-5 ${isEven ? 'md:text-right' : 'md:text-left'}`}>
         {event.description}
       </p>
+
+      {/* Action Button */}
+      <div className={`flex ${isEven ? 'md:justify-end' : 'justify-start'}`}>
+        {isFull ? (
+          <button
+            disabled
+            className="px-4 py-2 bg-navy-dark/10 text-navy-dark/40 font-display text-[11px] font-bold uppercase tracking-wider rounded-lg cursor-not-allowed"
+          >
+            Full
+          </button>
+        ) : (
+          <Link
+            to={`/register/${event.id}`}
+            className="inline-flex items-center space-x-1.5 px-4 py-2 bg-orange-burnt hover:bg-orange-burnt/95 text-white font-display text-[11px] font-bold uppercase tracking-wider rounded-lg shadow-sm hover:shadow-orange-burnt/10 active:scale-98 transition-all"
+          >
+            <span>Register Now</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        )}
+      </div>
     </motion.div>
   );
 };

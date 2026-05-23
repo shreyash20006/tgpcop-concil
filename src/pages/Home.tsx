@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { HeroSection } from '../components/HeroSection';
 import { MarqueeStrip } from '../components/MarqueeStrip';
-import { HomeFeatureSections } from '../components/HomeFeatureSections';
+import { supabase } from '../lib/supabase';
 import {
   FileText,
   HelpCircle,
@@ -13,9 +13,150 @@ import {
   Award,
   ArrowRight,
   ShieldAlert,
+  GraduationCap,
+  CheckCircle2,
+  CalendarDays,
+  MapPin,
+  Clock,
+  Sparkles
 } from 'lucide-react';
 
+const CATEGORY_COLORS: Record<string, string> = {
+  academic: 'bg-blue-50 text-blue-600 border-blue-200',
+  sports: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+  cultural: 'bg-purple-50 text-purple-600 border-purple-200',
+  research: 'bg-cyan-50 text-cyan-600 border-cyan-200',
+  competition: 'bg-amber-50 text-amber-600 border-amber-200',
+};
+
 export const Home: React.FC = () => {
+  const [activePoll, setActivePoll] = useState<any>(null);
+  const [pollVotes, setPollVotes] = useState<any[]>([]);
+  const [selectedOption, setSelectedOption] = useState<string>('');
+  const [votingEmail, setVotingEmail] = useState<string>('');
+  const [hasVoted, setHasVoted] = useState<boolean>(false);
+  const [isSubmittingVote, setIsSubmittingVote] = useState<boolean>(false);
+
+  const [recentAchievements, setRecentAchievements] = useState<any[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchPollData = async () => {
+      try {
+        const { data: pollData } = await supabase
+          .from('polls')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (pollData) {
+          setActivePoll(pollData);
+          const votedPolls = JSON.parse(localStorage.getItem('tgpcop_voted_polls') || '[]');
+          if (votedPolls.includes(pollData.id)) {
+            setHasVoted(true);
+          }
+          
+          const { data: votesData } = await supabase
+            .from('votes')
+            .select('selected_option')
+            .eq('poll_id', pollData.id);
+          
+          setPollVotes(votesData || []);
+        }
+      } catch (err) {
+        console.error('Error fetching home active poll:', err);
+      }
+    };
+
+    const fetchAchievementsAndEvents = async () => {
+      try {
+        const { data: achievements } = await supabase
+          .from('achievements')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(3);
+        setRecentAchievements(achievements || []);
+
+        const { data: events } = await supabase
+          .from('events')
+          .select('*')
+          .eq('is_active', true)
+          .order('date', { ascending: true })
+          .limit(3);
+        setUpcomingEvents(events || []);
+      } catch (err) {
+        console.error('Error fetching home achievements/events:', err);
+      }
+    };
+
+    fetchPollData();
+    fetchAchievementsAndEvents();
+  }, []);
+
+  const handleVoteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activePoll || !selectedOption || !votingEmail) return;
+
+    setIsSubmittingVote(true);
+    try {
+      const { data: existingVote } = await supabase
+        .from('votes')
+        .select('id')
+        .eq('poll_id', activePoll.id)
+        .eq('email', votingEmail.trim().toLowerCase())
+        .maybeSingle();
+
+      if (existingVote) {
+        alert('You have already voted in this poll with this email!');
+        const votedPolls = JSON.parse(localStorage.getItem('tgpcop_voted_polls') || '[]');
+        if (!votedPolls.includes(activePoll.id)) {
+          votedPolls.push(activePoll.id);
+          localStorage.setItem('tgpcop_voted_polls', JSON.stringify(votedPolls));
+        }
+        setHasVoted(true);
+        setIsSubmittingVote(false);
+        return;
+      }
+
+      const { error } = await supabase.from('votes').insert({
+        poll_id: activePoll.id,
+        email: votingEmail.trim().toLowerCase(),
+        selected_option: selectedOption,
+      });
+
+      if (error) throw error;
+
+      const votedPolls = JSON.parse(localStorage.getItem('tgpcop_voted_polls') || '[]');
+      votedPolls.push(activePoll.id);
+      localStorage.setItem('tgpcop_voted_polls', JSON.stringify(votedPolls));
+
+      setHasVoted(true);
+      
+      const { data: votesData } = await supabase
+        .from('votes')
+        .select('selected_option')
+        .eq('poll_id', activePoll.id);
+      setPollVotes(votesData || []);
+
+    } catch (err: any) {
+      console.error('Error casting vote:', err.message);
+      alert('Failed to cast vote: ' + err.message);
+    } finally {
+      setIsSubmittingVote(false);
+    }
+  };
+
+  const getOptionPercentage = (option: string) => {
+    if (pollVotes.length === 0) return 0;
+    const matchCount = pollVotes.filter(v => v.selected_option === option).length;
+    return Math.round((matchCount / pollVotes.length) * 100);
+  };
+
+  const getOptionVotes = (option: string) => {
+    return pollVotes.filter(v => v.selected_option === option).length;
+  };
   // Stagger Container
   const containerVariants = {
     hidden: {},
@@ -78,8 +219,6 @@ export const Home: React.FC = () => {
 
       {/* 2. Horizontal Marquee Announcements */}
       <MarqueeStrip />
-
-      <HomeFeatureSections />
 
       {/* 3. About the Council (2-Column Grid) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
@@ -234,6 +373,311 @@ export const Home: React.FC = () => {
             ))}
           </motion.div>
         </div>
+      </section>
+
+      {/* 5. Active Poll Section */}
+      {activePoll && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-b border-navy-dark/5">
+          <div className="glass-panel border border-navy-dark/15 rounded-3xl p-8 md:p-12 shadow-xl bg-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-burnt/5 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              {/* Left Info Column */}
+              <div className="lg:col-span-6 space-y-6">
+                <div className="inline-flex items-center space-x-2 text-orange-burnt text-xs font-bold uppercase tracking-widest bg-orange-burnt/5 px-3 py-1 rounded-full border border-orange-burnt/10">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Live Student Voting</span>
+                </div>
+                <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-navy-dark leading-tight">
+                  {activePoll.title}
+                </h2>
+                {activePoll.description && (
+                  <p className="text-navy-dark/70 text-sm font-sans leading-relaxed">
+                    {activePoll.description}
+                  </p>
+                )}
+                <div className="flex items-center space-x-2 text-navy-dark/50 text-xs font-sans">
+                  <span>🗳️ {pollVotes.length} total votes casted</span>
+                  {activePoll.end_date && (
+                    <>
+                      <span>•</span>
+                      <span>Ends on: {new Date(activePoll.end_date).toLocaleDateString()}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Interactive Form/Results Column */}
+              <div className="lg:col-span-6">
+                {hasVoted ? (
+                  <div className="bg-navy-dark/5 border border-navy-dark/5 rounded-2xl p-6 space-y-5">
+                    <div className="flex items-center space-x-2 text-emerald-600 font-display font-bold text-sm">
+                      <CheckCircle2 className="w-5 h-5 shrink-0" />
+                      <span>Thank you! Your voice has been recorded.</span>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {activePoll.options.map((opt: string) => {
+                        const pct = getOptionPercentage(opt);
+                        const votes = getOptionVotes(opt);
+                        return (
+                          <div key={opt} className="space-y-1">
+                            <div className="flex items-center justify-between text-xs sm:text-sm font-semibold text-navy-dark">
+                              <span>{opt}</span>
+                              <span className="text-orange-burnt">{pct}% ({votes} votes)</span>
+                            </div>
+                            <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${pct}%` }}
+                                transition={{ duration: 0.8, ease: 'easeOut' }}
+                                className="h-full bg-gradient-to-r from-orange-burnt to-gold-accent rounded-full"
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleVoteSubmit} className="space-y-4">
+                    <div className="space-y-3">
+                      {activePoll.options.map((opt: string) => (
+                        <label
+                          key={opt}
+                          className={`flex items-center space-x-3 p-4 rounded-xl border transition-all cursor-pointer ${
+                            selectedOption === opt
+                              ? 'border-orange-burnt bg-orange-burnt/5 text-orange-burnt'
+                              : 'border-navy-dark/10 hover:border-orange-burnt/30 text-navy-dark'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="poll-option"
+                            value={opt}
+                            checked={selectedOption === opt}
+                            onChange={() => setSelectedOption(opt)}
+                            className="text-orange-burnt focus:ring-orange-burnt"
+                          />
+                          <span className="font-display font-semibold text-xs sm:text-sm">{opt}</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                      <input
+                        type="email"
+                        placeholder="Enter your student email"
+                        required
+                        value={votingEmail}
+                        onChange={(e) => setVotingEmail(e.target.value)}
+                        className="flex-grow px-4 py-3 rounded-xl border border-navy-dark/10 text-xs sm:text-sm focus:outline-none focus:border-orange-burnt font-sans"
+                      />
+                      <button
+                        type="submit"
+                        disabled={isSubmittingVote || !selectedOption}
+                        className="px-6 py-3 bg-orange-burnt hover:bg-orange-burnt/95 text-white font-display text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-orange-burnt/15 disabled:opacity-50 transition-all active:scale-98 shrink-0"
+                      >
+                        {isSubmittingVote ? 'Voting...' : 'Cast Vote'}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 6. Recent Achievements Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 border-b border-navy-dark/5">
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-12">
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2 text-orange-burnt text-xs font-bold uppercase tracking-widest">
+              <span className="w-6 h-[1.5px] bg-orange-burnt" />
+              <span>Hall of Fame</span>
+            </div>
+            <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-navy-dark">
+              Celebrating Student Triumphs
+            </h2>
+            <p className="text-navy-dark/60 text-xs sm:text-sm font-sans max-w-lg">
+              Recognizing our brightest minds and active game-changers making us proud inside and outside Nagpur.
+            </p>
+          </div>
+          <Link
+            to="/achievements"
+            className="inline-flex items-center space-x-2 text-orange-burnt font-display font-bold hover:text-navy-dark transition-colors group mt-4 md:mt-0"
+          >
+            <span>View Achievements Wall</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        {recentAchievements.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-2xl border border-navy-dark/10">
+            <Trophy className="w-10 h-10 text-navy-dark/15 mx-auto mb-3" />
+            <h3 className="font-display font-bold text-navy-dark/60 text-sm">No achievements posted yet</h3>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {recentAchievements.map((item) => (
+              <motion.div
+                key={item.id}
+                whileHover={{ y: -6, boxShadow: '0 15px 30px -10px rgba(0,0,0,0.1)' }}
+                className="bg-white rounded-2xl border border-navy-dark/5 shadow-sm overflow-hidden flex flex-col transition-all duration-300"
+              >
+                {item.image_url ? (
+                  <div className="h-48 bg-navy-dark/5 overflow-hidden">
+                    <img src={item.image_url} alt={item.student_name} className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="h-36 bg-gradient-to-br from-navy-dark/5 to-orange-burnt/5 flex items-center justify-center">
+                    <Trophy className="w-12 h-12 text-orange-burnt/30" />
+                  </div>
+                )}
+                <div className="p-6 flex-grow flex flex-col">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className={`text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${CATEGORY_COLORS[item.category?.toLowerCase()] || 'bg-gray-50 text-gray-500 border-gray-200'}`}>
+                      {item.category}
+                    </span>
+                  </div>
+                  <h3 className="font-display font-bold text-base text-navy-dark mb-1">{item.student_name}</h3>
+                  <div className="flex items-center space-x-1.5 text-navy-dark/50 text-xs mb-3">
+                    <GraduationCap className="w-4 h-4 text-orange-burnt" />
+                    <span>{item.year}</span>
+                  </div>
+                  <p className="text-sm font-display font-semibold text-orange-burnt mb-2">{item.title}</p>
+                  {item.description && (
+                    <p className="text-xs text-navy-dark/65 font-sans leading-relaxed flex-grow">
+                      {item.description}
+                    </p>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* 7. Upcoming Events Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-12">
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2 text-orange-burnt text-xs font-bold uppercase tracking-widest">
+              <span className="w-6 h-[1.5px] bg-orange-burnt" />
+              <span>What's Next</span>
+            </div>
+            <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-navy-dark">
+              Upcoming Events & Competitions
+            </h2>
+            <p className="text-navy-dark/60 text-xs sm:text-sm font-sans max-w-lg">
+              Block your dates! Join active scientific quizzes, cultural drives, or sports symposiums happening on campus.
+            </p>
+          </div>
+          <Link
+            to="/events"
+            className="inline-flex items-center space-x-2 text-orange-burnt font-display font-bold hover:text-navy-dark transition-colors group mt-4 md:mt-0"
+          >
+            <span>Explore Events Timeline</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        {upcomingEvents.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-2xl border border-navy-dark/10">
+            <Calendar className="w-10 h-10 text-navy-dark/15 mx-auto mb-3" />
+            <h3 className="font-display font-bold text-navy-dark/60 text-sm">No upcoming events scheduled</h3>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {upcomingEvents.map((event) => {
+              const seatsLeft = (event.capacity || 100) - (event.registered_count || 0);
+              const isFull = seatsLeft <= 0;
+              const progressPct = Math.min(100, ((event.registered_count || 0) / (event.capacity || 100)) * 100);
+
+              return (
+                <div
+                  key={event.id}
+                  className="bg-white rounded-2xl border border-navy-dark/5 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow"
+                >
+                  <div>
+                    {/* Header Image/Banner */}
+                    <div className="h-44 bg-navy-dark/95 relative overflow-hidden flex items-center justify-center">
+                      {event.image_url ? (
+                        <img src={event.image_url} alt={event.title} className="w-full h-full object-cover opacity-85" />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-navy-dark via-navy-dark/90 to-orange-burnt/25 flex flex-col p-6 justify-between">
+                          <span className="text-[10px] font-bold tracking-widest text-orange-burnt uppercase border border-orange-burnt/35 rounded-full px-3 py-1 self-start">
+                            {event.type === 'competition' ? '🏆 Competition' : '📅 Event'}
+                          </span>
+                          <span className="text-white font-display font-bold text-lg leading-tight line-clamp-2">
+                            {event.title}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-6 space-y-4">
+                      {/* Meta stats */}
+                      <div className="space-y-2 text-xs text-navy-dark/70 font-sans">
+                        <div className="flex items-center space-x-2">
+                          <CalendarDays className="w-4 h-4 text-orange-burnt" />
+                          <span>{new Date(event.date).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</span>
+                        </div>
+                        {event.time && (
+                          <div className="flex items-center space-x-2">
+                            <Clock className="w-4 h-4 text-orange-burnt" />
+                            <span>{event.time}</span>
+                          </div>
+                        )}
+                        {event.location && (
+                          <div className="flex items-center space-x-2">
+                            <MapPin className="w-4 h-4 text-orange-burnt" />
+                            <span className="truncate">{event.location}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Capacity progress bar */}
+                      <div className="space-y-1.5 pt-2">
+                        <div className="flex justify-between items-center text-[10px] font-semibold">
+                          <span className={`${isFull ? 'text-red-500 font-bold' : 'text-emerald-600'}`}>
+                            {isFull ? '🔴 House Full' : `🟢 ${seatsLeft} seats left`}
+                          </span>
+                          <span className="text-navy-dark/50">Capacity: {event.capacity || 100}</span>
+                        </div>
+                        <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            style={{ width: `${progressPct}%` }}
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              isFull ? 'bg-red-500' : 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                            }`}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 pt-0">
+                    <Link
+                      to={event.type === 'competition' ? `/register/${event.id}` : `/register/${event.id}`}
+                      className={`w-full text-center py-3 rounded-xl font-display text-xs font-bold uppercase tracking-wider transition-all block ${
+                        isFull
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-orange-burnt hover:bg-orange-burnt/95 text-white shadow-lg shadow-orange-burnt/15 active:scale-98'
+                      }`}
+                      onClick={(e) => {
+                        if (isFull) e.preventDefault();
+                      }}
+                    >
+                      {isFull ? 'Sold Out' : 'Register Now →'}
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
     </div>
   );

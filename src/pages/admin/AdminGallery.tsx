@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { useRole } from '../../hooks/useRole';
-import { RequirePermission } from '../../components/admin/RequirePermission';
 import { Modal } from '../../components/admin/Modal';
 import { MediaPreviewBox } from '../../components/admin/MediaPreviewBox';
 import { getCloudinaryThumbnail } from '../../lib/cloudinary';
@@ -20,10 +18,6 @@ import {
 } from 'lucide-react';
 
 export const AdminGallery: React.FC = () => {
-  const { can } = useRole();
-  const canUpload = can('upload_gallery');
-  const canDelete = can('delete_gallery');
-  const canEdit = canUpload;
   const [photos, setPhotos] = useState<any[]>([]);
   const [filteredPhotos, setFilteredPhotos] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'All' | 'Events' | 'Competitions' | 'Campus Life' | 'General'>('All');
@@ -236,7 +230,6 @@ export const AdminGallery: React.FC = () => {
   };
 
   return (
-    <RequirePermission permission="upload_gallery">
     <div className="space-y-6 animate-in fade-in duration-300">
       
       {/* Header Panel */}
@@ -253,15 +246,13 @@ export const AdminGallery: React.FC = () => {
           </div>
         </div>
 
-        {canUpload && (
         <button
           onClick={handleAddNew}
           className="flex items-center space-x-1.5 px-4.5 py-2.5 bg-orange-burnt hover:bg-orange-burnt/95 text-white rounded-lg font-display text-xs font-bold shadow-md shadow-orange-burnt/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
         >
           <Plus className="w-4 h-4" />
-          <span>Add Photo</span>
+          <span>Add Media</span>
         </button>
-        )}
       </div>
 
       {/* Category Filter tabs */}
@@ -307,38 +298,23 @@ export const AdminGallery: React.FC = () => {
                     <div className="w-20 h-20 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 shadow-inner group-hover:scale-105 transition-transform duration-300">
                       <Music className="w-10 h-10" />
                     </div>
-                  ) : photo.media_type === 'video' ? (
-                    /* Video Preview with Poster */
-                    <div className="w-full h-full relative">
-                      <video
-                        src={photo.media_url}
-                        poster={thumbnailSrc}
-                        preload="metadata"
-                        className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
-                        muted
-                        playsInline
-                        onMouseEnter={(e) => e.currentTarget.play()}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.pause();
-                          e.currentTarget.currentTime = 0;
-                        }}
-                      />
-                      
-                      {/* Play overlay for video */}
-                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity pointer-events-none">
-                        <div className="w-12 h-12 rounded-full bg-orange-burnt text-white flex items-center justify-center shadow-lg transform group-hover:scale-108 transition-transform">
-                          <Play className="w-5 h-5 fill-white ml-0.5" />
-                        </div>
-                      </div>
-                    </div>
                   ) : (
-                    /* Image covers */
+                    /* Image / Video Poster covers */
                     <div className="w-full h-full relative">
                       <img
                         src={thumbnailSrc}
                         alt={photo.title}
                         className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
                       />
+                      
+                      {/* Play overlay for video */}
+                      {photo.media_type === 'video' && (
+                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
+                          <div className="w-12 h-12 rounded-full bg-orange-burnt text-white flex items-center justify-center shadow-lg transform group-hover:scale-108 transition-transform">
+                            <Play className="w-5 h-5 fill-white ml-0.5" />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -361,9 +337,7 @@ export const AdminGallery: React.FC = () => {
                   </div>
 
                   {/* Actions overlay panel */}
-                  {(canEdit || canDelete) && (
                   <div className="flex items-center gap-2 pt-2 border-t border-navy-dark/5">
-                    {canEdit && (
                     <button
                       onClick={() => handleEdit(photo)}
                       className="flex-grow inline-flex items-center justify-center space-x-1.5 py-1.5 px-3 rounded-lg bg-navy-dark/5 text-navy-dark hover:bg-navy-dark hover:text-white text-xs font-semibold transition-colors"
@@ -371,8 +345,6 @@ export const AdminGallery: React.FC = () => {
                       <Edit className="w-3.5 h-3.5" />
                       <span>Edit Details</span>
                     </button>
-                    )}
-                    {canDelete && (
                     <button
                       onClick={() => handleDelete(photo.id)}
                       className="p-1.5 rounded-lg text-navy-dark/45 hover:bg-red-50 hover:text-red-600 transition-colors border border-navy-dark/5"
@@ -380,9 +352,7 @@ export const AdminGallery: React.FC = () => {
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
-                    )}
                   </div>
-                  )}
                 </div>
               </div>
             );
@@ -402,7 +372,6 @@ export const AdminGallery: React.FC = () => {
       )}
 
       {/* modal publisher drawer */}
-      {canUpload && (
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -512,10 +481,8 @@ export const AdminGallery: React.FC = () => {
           </div>
         </form>
       </Modal>
-      )}
 
     </div>
-    </RequirePermission>
   );
 };
 

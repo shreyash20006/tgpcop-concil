@@ -1,104 +1,105 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
-import { PublicPageShell } from '../components/PublicPageShell';
-import { parseJsonArray } from '../lib/parseJson';
-import { Newspaper, Loader2, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
-
-interface NewsletterSection {
-  heading: string;
-  content: string;
-}
+import { Newspaper, Loader2, Download, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
 
 export const Newsletter: React.FC = () => {
-  const [items, setItems] = useState<any[]>([]);
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [newsletters, setNewsletters] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase
-      .from('newsletters')
-      .select('*')
-      .eq('is_published', true)
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        setItems(data || []);
-        setLoading(false);
-      });
+    const fetch = async () => {
+      const { data } = await supabase
+        .from('newsletters')
+        .select('*')
+        .eq('is_published', true)
+        .order('created_at', { ascending: false });
+      setNewsletters(data || []);
+      setIsLoading(false);
+    };
+    fetch();
   }, []);
 
   return (
-    <PublicPageShell
-      title="📰 Council Newsletter"
-      subtitle="Monthly updates from Student Council"
-      icon={<Newspaper className="w-6 h-6" />}
-    >
-      {loading ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="w-10 h-10 animate-spin text-orange-burnt" />
-        </div>
-      ) : items.length === 0 ? (
-        <p className="text-center text-navy-dark/50 py-16">No newsletters published yet.</p>
-      ) : (
-        <div className="space-y-4">
-          {items.map((n) => {
-            const sections = parseJsonArray<NewsletterSection>(n.content);
-            const isOpen = expanded === n.id;
-            return (
-              <div key={n.id} className="bg-white rounded-2xl border border-navy-dark/10 overflow-hidden shadow-sm">
-                <div className="p-5">
-                  <h3 className="font-display font-bold text-lg text-navy-dark">
-                    📰 {n.month || n.title}
-                  </h3>
-                  <p className="text-sm text-navy-dark/60 mt-1 line-clamp-2">
-                    {sections[0]?.content?.slice(0, 120) || n.title}
-                  </p>
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    <button
-                      type="button"
-                      onClick={() => setExpanded(isOpen ? null : n.id)}
-                      className="inline-flex items-center gap-1 px-4 py-2 bg-orange-burnt text-white text-xs font-bold rounded-lg"
-                    >
-                      Read Online
-                      {isOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                    </button>
-                    {n.pdf_url && (
-                      <a
-                        href={n.pdf_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-4 py-2 border border-navy-dark/15 text-xs font-bold rounded-lg text-navy-dark"
-                      >
-                        Download PDF <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-                <AnimatePresence>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="border-t border-navy-dark/10 px-5 pb-5 space-y-4"
-                    >
-                      {sections.map((s, i) => (
-                        <div key={i}>
-                          <h4 className="font-display font-bold text-sm text-orange-burnt">{s.heading}</h4>
-                          <p className="text-sm text-navy-dark/70 mt-1 whitespace-pre-line leading-relaxed">
-                            {s.content}
-                          </p>
+    <div className="pt-28 pb-24 min-h-screen bg-gray-light">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+        {/* Hero */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
+          <div className="w-14 h-14 rounded-2xl bg-orange-burnt/10 flex items-center justify-center mx-auto mb-4">
+            <Newspaper className="w-7 h-7 text-orange-burnt" />
+          </div>
+          <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-navy-dark mb-3">Council Newsletter</h1>
+          <p className="text-navy-dark/60 text-sm sm:text-base font-sans max-w-lg mx-auto">Monthly updates, event recaps, and highlights from the Student Council.</p>
+        </motion.div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20"><Loader2 className="w-10 h-10 text-orange-burnt animate-spin" /></div>
+        ) : newsletters.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-2xl border border-navy-dark/10">
+            <Newspaper className="w-12 h-12 text-navy-dark/15 mx-auto mb-3" />
+            <h3 className="font-display font-bold text-navy-dark/60">No Newsletters Published Yet</h3>
+            <p className="text-navy-dark/40 text-sm font-sans">The first edition is on its way!</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {newsletters.map((nl, i) => {
+              const sections: { heading: string; content: string }[] = typeof nl.sections === 'string' ? JSON.parse(nl.sections) : (nl.sections || []);
+              const isExpanded = expandedId === nl.id;
+
+              return (
+                <motion.div key={nl.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+                  className="bg-white rounded-2xl border border-navy-dark/10 shadow-sm overflow-hidden">
+                  <div className="p-5 sm:p-6">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-grow">
+                        <div className="flex items-center space-x-2 text-navy-dark/40 text-xs mb-1.5">
+                          <Calendar className="w-3.5 h-3.5" /><span>{nl.month}</span>
                         </div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </PublicPageShell>
+                        <h3 className="font-display font-extrabold text-lg text-navy-dark">{nl.title}</h3>
+                      </div>
+                      <div className="flex items-center space-x-2 shrink-0">
+                        {nl.pdf_url && (
+                          <a href={nl.pdf_url} download target="_blank" rel="noopener noreferrer"
+                            className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-orange-burnt text-white text-xs font-bold hover:bg-orange-burnt/90 transition-colors">
+                            <Download className="w-3.5 h-3.5" /><span>PDF</span>
+                          </a>
+                        )}
+                        <button onClick={() => setExpandedId(isExpanded ? null : nl.id)}
+                          className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-navy-dark/5 text-navy-dark text-xs font-bold hover:bg-navy-dark/10 transition-colors">
+                          {isExpanded ? <><ChevronUp className="w-3.5 h-3.5" /><span>Close</span></> : <><ChevronDown className="w-3.5 h-3.5" /><span>Read</span></>}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {isExpanded && sections.length > 0 && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-5 sm:px-6 pb-6 pt-2 space-y-5 border-t border-navy-dark/5">
+                          {sections.map((sec, j) => (
+                            <div key={j}>
+                              <h4 className="font-display font-bold text-sm text-orange-burnt mb-2">{sec.heading}</h4>
+                              <p className="text-navy-dark/70 text-sm font-sans leading-relaxed whitespace-pre-wrap">{sec.content}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

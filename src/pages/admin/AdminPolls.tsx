@@ -1,178 +1,232 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { RequirePermission } from '../../components/admin/RequirePermission';
-import { Modal } from '../../components/admin/Modal';
 import { useToast } from '../../components/admin/Toast';
-import { parseJsonArray } from '../../lib/parseJson';
-import { Vote, Plus, Trash2 } from 'lucide-react';
+import { logActivity } from '../../lib/logs';
+import { useAuth } from '../../components/admin/ProtectedRoute';
+import { Vote, Plus, Loader2, Trash2, X, Edit, Power } from 'lucide-react';
 
 export const AdminPolls: React.FC = () => {
   const toast = useToast();
+  const showToast = (msg: string, type: 'success' | 'error') => {
+    if (type === 'success') toast.success(msg);
+    else toast.error(msg);
+  };
+  const { email } = useAuth();
   const [polls, setPolls] = useState<any[]>([]);
-  const [votes, setVotes] = useState<any[]>([]);
-  const [open, setOpen] = useState(false);
-  const [edit, setEdit] = useState<any>(null);
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    options: ['', ''],
-    end_date: '',
-    is_active: true,
-  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
-  const load = async () => {
-    const [{ data: p }, { data: v }] = await Promise.all([
-      supabase.from('polls').select('*').order('created_at', { ascending: false }),
-      supabase.from('votes').select('*'),
-    ]);
-    setPolls(p || []);
-    setVotes(v || []);
-  };
+  // Create/Edit form
+  const [editId, setEditId] = useState<string | null>(null);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [options, setOptions] = useState<string[]>(['', '']);
+  const [endDate, setEndDate] = useState('');
+  const [isActive, setIsActive] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => { load(); }, []);
+  // Vote results
+  const [pollResults, setPollResults] = useState<Record<string, Record<string, number>>>({});
 
-  const save = async () => {
-    const options = form.options.filter((o) => o.trim());
-    if (!form.title || options.length < 2) {
-      toast.error('Title and at least 2 options required');
-      return;
+  const fetchPolls = async () => {
+    setIsLoading(true);
+    const { data } = await supabase.from('polls').select('*').order('created_at', { ascending: false });
+    setPolls(data || []);
+
+    // Fetch vote counts for each poll
+    const results: Record<string, Record<string, number>> = {};
+    for (const p of (data || [])) {
+      const { data: votes } = await supabase.from('votes').select('selected_option').eq('poll_id', p.id);
+      const counts: Record<string, number> = {};
+      const opts: string[] = typeof p.options === 'string' ? JSON.parse(p.options) : (p.options || []);
+      opts.forEach(o => { counts[o] = 0; });
+      (votes || []).forEach(v => { counts[v.selected_option] = (counts[v.selected_option] || 0) + 1; });
+      results[p.id] = counts;
     }
-    const payload = {
-      title: form.title,
-      description: form.description,
-      options,
-      end_date: form.end_date || null,
-      is_active: form.is_active,
-    };
-    if (edit) {
-      await supabase.from('polls').update(payload).eq('id', edit.id);
-    } else {
-      await supabase.from('polls').insert([payload]);
+    setPollResults(results);
+    setIsLoading(false);
+  };
+
+  useEffect(() => { fetchPolls(); }, []);
+
+  const openCreate = () => {
+    setEditId(null); setTitle(''); setDescription(''); setOptions(['', '']); setEndDate(''); setIsActive(true);
+    setShowModal(true);
+  };
+
+  const openEdit = (p: any) => {
+    setEditId(p.id); setTitle(p.title); setDescription(p.description || '');
+    setOptions(typeof p.options === 'string' ? JSON.parse(p.options) : (p.options || ['', '']));
+    setEndDate(p.end_date ? new Date(p.end_date).toISOString().split('T')[0] : '');
+    setIsActive(p.is_active);
+    setShowModal(true);
+  };
+
+  const handleSave = async () => {
+    const validOptions = options.filter(o => o.trim());
+    if (!title || validOptions.length < 2) { showToast('Title and at least 2 options required', 'error'); return; }
+    setIsSaving(true);
+    try {
+      const payload = { title, description, options: validOptions, end_date: endDate || null, is_active: isActive };
+      if (editId) {
+        const { error } = await supabase.from('polls').update(payload).eq('id', editId);
+        if (error) throw error;
+        await logActivity(email, 'poll_update', `Updated poll: ${title}`);
+        showToast('Poll updated!', 'success');
+      } else {
+        const { error } = await supabase.from('polls').insert(payload);
+        if (error) throw error;
+        await logActivity(email, 'poll_create', `Created poll: ${title}`);
+        showToast('Poll created!', 'success');
+      }
+      setShowModal(false); fetchPolls();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    } finally {
+      setIsSaving(false);
     }
-    toast.success('Poll saved');
-    setOpen(false);
-    setEdit(null);
-    load();
   };
 
-  const remove = async (id: string) => {
-    if (!confirm('Delete poll?')) return;
-    await supabase.from('polls').delete().eq('id', id);
-    load();
+  const handleDelete = async (p: any) => {
+    if (!confirm(`Delete poll "${p.title}"?`)) return;
+    await supabase.from('polls').delete().eq('id', p.id);
+    await logActivity(email, 'poll_delete', `Deleted poll: ${p.title}`);
+    showToast('Poll deleted', 'success');
+    fetchPolls();
   };
 
-  const counts = (pollId: string, len: number) => {
-    const c = Array(len).fill(0);
-    votes.filter((v) => v.poll_id === pollId).forEach((v) => {
-      if (v.option_index >= 0 && v.option_index < len) c[v.option_index]++;
-    });
-    return c;
+  const toggleActive = async (p: any) => {
+    await supabase.from('polls').update({ is_active: !p.is_active }).eq('id', p.id);
+    showToast(p.is_active ? 'Poll closed' : 'Poll activated', 'success');
+    fetchPolls();
   };
 
   return (
-    <RequirePermission permission="manage_polls">
-      <div className="space-y-6">
-        <div className="flex justify-between items-center bg-white p-5 rounded-2xl border">
-          <h3 className="font-display font-bold flex items-center gap-2">
-            <Vote className="w-5 h-5 text-orange-burnt" /> 🗳️ Polls
-          </h3>
-          <button
-            onClick={() => {
-              setEdit(null);
-              setForm({ title: '', description: '', options: ['', ''], end_date: '', is_active: true });
-              setOpen(true);
-            }}
-            className="flex items-center gap-1 px-4 py-2 bg-orange-burnt text-white text-xs font-bold rounded-lg"
-          >
-            <Plus className="w-4 h-4" /> Create Poll
-          </button>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center space-x-3">
+          <Vote className="w-6 h-6 text-orange-burnt" />
+          <h2 className="font-display font-extrabold text-xl text-navy-dark">Polls & Voting</h2>
         </div>
-        {polls.map((poll) => {
-          const options = parseJsonArray<string>(poll.options);
-          const c = counts(poll.id, options.length);
-          const total = c.reduce((a, b) => a + b, 0);
-          return (
-            <div key={poll.id} className="bg-white rounded-2xl border p-5 space-y-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="font-display font-bold">{poll.title}</h4>
-                  <p className="text-xs text-navy-dark/50">{poll.description}</p>
-                  <span className={`text-[10px] font-bold uppercase ${poll.is_active ? 'text-emerald-600' : 'text-navy-dark/40'}`}>
-                    {poll.is_active ? 'Active' : 'Closed'}
-                  </span>
+        <button onClick={openCreate}
+          className="flex items-center space-x-1.5 px-4 py-2 rounded-lg bg-orange-burnt text-white font-display text-xs font-bold hover:bg-orange-burnt/90 transition-colors shadow-md">
+          <Plus className="w-4 h-4" /><span>Create Poll</span>
+        </button>
+      </div>
+
+      {isLoading ? <div className="py-20 text-center"><Loader2 className="w-8 h-8 animate-spin text-orange-burnt mx-auto" /></div> : polls.length === 0 ? (
+        <div className="text-center py-16 bg-white rounded-xl border border-navy-dark/10"><Vote className="w-10 h-10 text-navy-dark/15 mx-auto mb-2" /><p className="text-navy-dark/40 text-sm">No polls yet</p></div>
+      ) : (
+        <div className="space-y-4">
+          {polls.map(p => {
+            const opts: string[] = typeof p.options === 'string' ? JSON.parse(p.options) : (p.options || []);
+            const results = pollResults[p.id] || {};
+            const totalVotes = Object.values(results).reduce((a: number, b: number) => a + b, 0);
+
+            return (
+              <div key={p.id} className="bg-white rounded-xl border border-navy-dark/10 shadow-sm p-5">
+                <div className="flex items-start justify-between flex-wrap gap-2 mb-3">
+                  <div>
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h3 className="font-display font-bold text-base text-navy-dark">{p.title}</h3>
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${p.is_active ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-red-50 text-red-500 border border-red-200'}`}>
+                        {p.is_active ? 'Active' : 'Closed'}
+                      </span>
+                    </div>
+                    {p.description && <p className="text-navy-dark/50 text-xs font-sans">{p.description}</p>}
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <button onClick={() => toggleActive(p)} className={`p-1.5 rounded-lg transition-colors ${p.is_active ? 'hover:bg-red-50 text-red-400' : 'hover:bg-emerald-50 text-emerald-500'}`} title={p.is_active ? 'Close' : 'Activate'}>
+                      <Power className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg hover:bg-blue-50 text-blue-500"><Edit className="w-4 h-4" /></button>
+                    <button onClick={() => handleDelete(p)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-400"><Trash2 className="w-4 h-4" /></button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      setEdit(poll);
-                      setForm({
-                        title: poll.title,
-                        description: poll.description || '',
-                        options: [...options, ''],
-                        end_date: poll.end_date?.slice(0, 16) || '',
-                        is_active: poll.is_active,
-                      });
-                      setOpen(true);
-                    }}
-                    className="text-xs font-bold text-orange-burnt"
-                  >
-                    Edit
-                  </button>
-                  <button onClick={() => remove(poll.id)} className="text-red-500">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+
+                {/* Vote Results */}
+                <div className="space-y-2 mt-4">
+                  {opts.map(opt => {
+                    const count = results[opt] || 0;
+                    const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+                    return (
+                      <div key={opt} className="flex items-center space-x-3">
+                        <span className="text-xs font-sans text-navy-dark w-28 truncate">{opt}</span>
+                        <div className="flex-grow h-5 bg-navy-dark/5 rounded-full overflow-hidden">
+                          <div className="h-full bg-orange-burnt/70 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                        </div>
+                        <span className="text-[10px] font-mono text-navy-dark/50 w-16 text-right">{pct}% ({count})</span>
+                      </div>
+                    );
+                  })}
+                  <p className="text-[10px] text-navy-dark/40 font-mono text-right">Total: {totalVotes} votes</p>
                 </div>
               </div>
-              {options.map((opt, i) => {
-                const pct = total ? Math.round((c[i] / total) * 100) : 0;
-                return (
-                  <div key={i}>
-                    <div className="flex justify-between text-xs font-semibold">
-                      <span>{opt}</span>
-                      <span>{pct}% ({c[i]})</span>
-                    </div>
-                    <div className="h-2 bg-navy-dark/10 rounded-full overflow-hidden">
-                      <div className="h-full bg-orange-burnt" style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
-              <p className="text-xs text-navy-dark/40">Total voters: {total}</p>
-            </div>
-          );
-        })}
-      </div>
-      <Modal isOpen={open} onClose={() => setOpen(false)} title={edit ? 'Edit Poll' : 'Create Poll'} icon={<Vote className="w-5 h-5" />}>
-        <div className="space-y-3">
-          <input placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm" />
-          <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm" rows={2} />
-          {form.options.map((o, i) => (
-            <div key={i} className="flex gap-2">
-              <input
-                placeholder={`Option ${i + 1}`}
-                value={o}
-                onChange={(e) => {
-                  const opts = [...form.options];
-                  opts[i] = e.target.value;
-                  setForm({ ...form, options: opts });
-                }}
-                className="flex-1 px-3 py-2 border rounded-lg text-sm"
-              />
-              {form.options.length > 2 && (
-                <button type="button" onClick={() => setForm({ ...form, options: form.options.filter((_, j) => j !== i) })}>×</button>
-              )}
-            </div>
-          ))}
-          <button type="button" onClick={() => setForm({ ...form, options: [...form.options, ''] })} className="text-xs font-bold text-orange-burnt">+ Add option</button>
-          <input type="datetime-local" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm" />
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />
-            Active
-          </label>
-          <button onClick={save} className="w-full py-2.5 bg-orange-burnt text-white font-bold rounded-lg">Save</button>
+            );
+          })}
         </div>
-      </Modal>
-    </RequirePermission>
+      )}
+
+      {/* Create/Edit Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div onClick={() => setShowModal(false)} className="absolute inset-0" />
+          <div className="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl z-10 overflow-hidden">
+            <div className="bg-navy-dark text-white px-6 py-4 flex items-center justify-between">
+              <h4 className="font-display font-extrabold text-sm">{editId ? 'Edit Poll' : 'Create New Poll'}</h4>
+              <button onClick={() => setShowModal(false)} className="p-1 rounded-lg hover:bg-white/10"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60 mb-1.5">Title *</label>
+                <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Poll title"
+                  className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60 mb-1.5">Description</label>
+                <input type="text" value={description} onChange={e => setDescription(e.target.value)} placeholder="Optional description"
+                  className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60 mb-1.5">Options *</label>
+                <div className="space-y-2">
+                  {options.map((opt, i) => (
+                    <div key={i} className="flex items-center space-x-2">
+                      <input type="text" value={opt} onChange={e => { const n = [...options]; n[i] = e.target.value; setOptions(n); }}
+                        placeholder={`Option ${i + 1}`} className="flex-grow px-4 py-2 rounded-lg border border-navy-dark/15 outline-none text-sm" />
+                      {options.length > 2 && (
+                        <button onClick={() => setOptions(options.filter((_, j) => j !== i))} className="p-1 text-red-400 hover:bg-red-50 rounded"><X className="w-4 h-4" /></button>
+                      )}
+                    </div>
+                  ))}
+                  <button onClick={() => setOptions([...options, ''])} className="text-orange-burnt text-xs font-bold font-display hover:underline">+ Add Option</button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60 mb-1.5">End Date</label>
+                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 outline-none text-sm bg-white" />
+                </div>
+                <div className="flex items-end pb-1">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} className="accent-orange-burnt w-4 h-4" />
+                    <span className="text-sm font-sans text-navy-dark font-medium">Active</span>
+                  </label>
+                </div>
+              </div>
+              <div className="flex space-x-3 pt-2">
+                <button onClick={() => setShowModal(false)} className="flex-1 py-2.5 rounded-lg border border-navy-dark/15 text-navy-dark/60 font-display text-xs font-bold">Cancel</button>
+                <button onClick={handleSave} disabled={isSaving}
+                  className="flex-1 py-2.5 rounded-lg bg-orange-burnt text-white font-display text-xs font-bold shadow-md disabled:opacity-50 flex items-center justify-center space-x-1.5">
+                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>{editId ? 'Update' : 'Create'} Poll</span>}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

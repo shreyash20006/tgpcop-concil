@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EventTimeline } from '../components/EventTimeline';
 import { CompetitionCard } from '../components/CompetitionCard';
-import { EventCalendar } from '../components/EventCalendar';
 import { supabase } from '../lib/supabase';
-import { CalendarRange, Trophy, CalendarDays, RefreshCw, Calendar } from 'lucide-react';
+import { CalendarRange, Trophy, CalendarDays, RefreshCw } from 'lucide-react';
 
 export const Events: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'calendar' | 'events' | 'competitions'>('calendar');
+  const [activeTab, setActiveTab] = useState<'events' | 'competitions'>('events');
   const [events, setEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -49,9 +48,7 @@ export const Events: React.FC = () => {
             transition={{ type: 'spring' }}
             className="w-12 h-12 rounded-full bg-orange-burnt/10 flex items-center justify-center text-orange-burnt"
           >
-            {activeTab === 'calendar' ? (
-              <Calendar className="w-6 h-6" />
-            ) : activeTab === 'events' ? (
+            {activeTab === 'events' ? (
               <CalendarRange className="w-6 h-6" />
             ) : (
               <Trophy className="w-6 h-6" />
@@ -73,7 +70,7 @@ export const Events: React.FC = () => {
               transition={{ delay: 0.1 }}
               className="font-display font-extrabold text-3xl sm:text-5xl text-navy-dark leading-tight uppercase"
             >
-              {activeTab === 'calendar' ? 'EVENTS CALENDAR' : activeTab === 'events' ? 'EVENTS TIMELINE' : 'ACTIVE COMPETITIONS'}
+              {activeTab === 'events' ? 'EVENTS TIMELINE' : 'ACTIVE COMPETITIONS'}
             </motion.h1>
             
             {/* Animated Underline */}
@@ -97,32 +94,21 @@ export const Events: React.FC = () => {
 
         {/* Toggle Selector Tabs */}
         <div className="flex items-center justify-center mb-12">
-          <div className="bg-navy-dark/5 p-1.5 rounded-xl flex flex-wrap justify-center space-x-1 border border-navy-dark/5 backdrop-blur-md">
-            <button
-              onClick={() => setActiveTab('calendar')}
-              className={`flex items-center space-x-2 px-4 sm:px-6 py-3 rounded-lg font-display text-xs sm:text-sm font-bold tracking-wide transition-all duration-300 ${
-                activeTab === 'calendar'
-                  ? 'bg-navy-dark text-white shadow-md'
-                  : 'text-navy-dark/75 hover:bg-navy-dark/5 hover:text-navy-dark'
-              }`}
-            >
-              <Calendar className="w-4 h-4 text-orange-burnt" />
-              <span>Calendar</span>
-            </button>
+          <div className="bg-navy-dark/5 p-1.5 rounded-xl flex space-x-1 border border-navy-dark/5 backdrop-blur-md">
             <button
               onClick={() => setActiveTab('events')}
-              className={`flex items-center space-x-2 px-4 sm:px-6 py-3 rounded-lg font-display text-xs sm:text-sm font-bold tracking-wide transition-all duration-300 ${
+              className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-display text-xs sm:text-sm font-bold tracking-wide transition-all duration-300 ${
                 activeTab === 'events'
                   ? 'bg-navy-dark text-white shadow-md'
                   : 'text-navy-dark/75 hover:bg-navy-dark/5 hover:text-navy-dark'
               }`}
             >
               <CalendarDays className="w-4 h-4 text-orange-burnt" />
-              <span>Timeline</span>
+              <span>Upcoming Events</span>
             </button>
             <button
               onClick={() => setActiveTab('competitions')}
-              className={`flex items-center space-x-2 px-4 sm:px-6 py-3 rounded-lg font-display text-xs sm:text-sm font-bold tracking-wide transition-all duration-300 ${
+              className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-display text-xs sm:text-sm font-bold tracking-wide transition-all duration-300 ${
                 activeTab === 'competitions'
                   ? 'bg-navy-dark text-white shadow-md'
                   : 'text-navy-dark/75 hover:bg-navy-dark/5 hover:text-navy-dark'
@@ -137,12 +123,7 @@ export const Events: React.FC = () => {
         {/* Dynamic Display Panel */}
         {isLoading ? (
           /* SHIMMERING SKELETON COVERS */
-          activeTab === 'calendar' ? (
-            <div className="h-96 flex flex-col items-center justify-center text-navy-dark/40">
-              <Loader2 className="w-8 h-8 text-orange-burnt animate-spin mb-3" />
-              <p className="font-display text-xs tracking-widest uppercase">Loading calendar...</p>
-            </div>
-          ) : activeTab === 'events' ? (
+          activeTab === 'events' ? (
             <div className="h-96 flex flex-col items-center justify-center text-navy-dark/40">
               <Loader2 className="w-8 h-8 text-orange-burnt animate-spin mb-3" />
               <p className="font-display text-xs tracking-widest uppercase">Fetching timeline milestones...</p>
@@ -167,17 +148,7 @@ export const Events: React.FC = () => {
           )
         ) : (
           <AnimatePresence mode="wait">
-            {activeTab === 'calendar' ? (
-              <motion.div
-                key="calendar-tab"
-                initial={{ opacity: 0, y: 25 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -25 }}
-                transition={{ duration: 0.3 }}
-              >
-                <EventCalendar events={events} />
-              </motion.div>
-            ) : activeTab === 'events' ? (
+            {activeTab === 'events' ? (
               <motion.div
                 key="events-tab"
                 initial={{ opacity: 0, y: 25 }}
@@ -206,7 +177,7 @@ export const Events: React.FC = () => {
                 {/* Competitions Card Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto py-8">
                   {competitions.map((comp) => (
-                    <CompetitionCard key={comp.id} event={comp} />
+                    <CompetitionCard key={comp.id} competition={comp} />
                   ))}
                 </div>
 

@@ -301,15 +301,32 @@ export const AdminGallery: React.FC = () => {
                   ) : (
                     /* Image / Video Poster covers */
                     <div className="w-full h-full relative">
-                      <img
-                        src={thumbnailSrc}
-                        alt={photo.title}
-                        className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
-                      />
+                      {photo.media_type === 'video' ? (
+                        <video
+                          src={photo.media_url}
+                          poster={thumbnailSrc.endsWith('.jpg') ? thumbnailSrc : undefined}
+                          muted
+                          playsInline
+                          loop
+                          onMouseEnter={(e) => (e.target as HTMLVideoElement).play().catch(() => {})}
+                          onMouseLeave={(e) => {
+                            const v = e.target as HTMLVideoElement;
+                            v.pause();
+                            v.currentTime = 0;
+                          }}
+                          className="w-full h-full object-cover group-hover:scale-102 transition-all duration-300"
+                        />
+                      ) : (
+                        <img
+                          src={thumbnailSrc}
+                          alt={photo.title}
+                          className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+                        />
+                      )}
                       
                       {/* Play overlay for video */}
                       {photo.media_type === 'video' && (
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-opacity duration-300 group-hover:opacity-0 pointer-events-none">
                           <div className="w-12 h-12 rounded-full bg-orange-burnt text-white flex items-center justify-center shadow-lg transform group-hover:scale-108 transition-transform">
                             <Play className="w-5 h-5 fill-white ml-0.5" />
                           </div>

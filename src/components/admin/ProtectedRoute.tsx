@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { Loader2, ShieldAlert, LogOut } from 'lucide-react';
 
 interface AuthContextType {
-  role: 'super_admin' | 'admin' | 'moderator' | 'notice_manager' | 'content_editor' | null;
+  role: 'super_admin' | 'admin' | 'moderator' | 'notice_manager' | 'content_editor' | 'developer' | null;
   email: string | null;
   userId: string | null;
   isSuspended: boolean;

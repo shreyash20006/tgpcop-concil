@@ -9,7 +9,7 @@ import {
   Loader2, Eye, EyeOff, X, Check
 } from 'lucide-react';
 
-const ROLES = ['admin', 'moderator', 'notice_manager', 'content_editor'] as const;
+const ROLES = ['admin', 'moderator', 'notice_manager', 'content_editor', 'developer'] as const;
 type Role = typeof ROLES[number];
 
 const RoleBadge: React.FC<{ role: string }> = ({ role }) => {
@@ -19,6 +19,7 @@ const RoleBadge: React.FC<{ role: string }> = ({ role }) => {
     moderator: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
     notice_manager: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
     content_editor: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20',
+    developer: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20',
   };
   return (
     <span className={`inline-block text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${map[role] || 'bg-gray-100 text-gray-500 border-gray-200'}`}>

@@ -604,14 +604,14 @@ export const Home: React.FC = () => {
                     {/* Header Image/Banner */}
                     <div className="h-44 bg-navy-dark/95 relative overflow-hidden flex items-center justify-center">
                       {event.image_url ? (
-                        <img src={event.image_url} alt={event.title} className="w-full h-full object-cover opacity-85" />
+                        <img src={event.image_url} alt={event.name} className="w-full h-full object-cover opacity-85" />
                       ) : (
                         <div className="absolute inset-0 bg-gradient-to-br from-navy-dark via-navy-dark/90 to-orange-burnt/25 flex flex-col p-6 justify-between">
                           <span className="text-[10px] font-bold tracking-widest text-orange-burnt uppercase border border-orange-burnt/35 rounded-full px-3 py-1 self-start">
                             {event.type === 'competition' ? '🏆 Competition' : '📅 Event'}
                           </span>
                           <span className="text-white font-display font-bold text-lg leading-tight line-clamp-2">
-                            {event.title}
+                            {event.name}
                           </span>
                         </div>
                       )}

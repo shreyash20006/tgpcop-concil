@@ -18,7 +18,7 @@ export const AdminRegistrations: React.FC = () => {
 
   useEffect(() => {
     const fetch = async () => {
-      const { data } = await supabase.from('events').select('id, title, capacity, registered_count').order('created_at', { ascending: false });
+      const { data } = await supabase.from('events').select('id, name, capacity, registered_count').order('created_at', { ascending: false });
       setEvents(data || []);
       setIsLoading(false);
     };
@@ -46,7 +46,7 @@ export const AdminRegistrations: React.FC = () => {
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `registrations_${selectedEvent?.title || 'event'}.csv`; a.click();
+    const a = document.createElement('a'); a.href = url; a.download = `registrations_${selectedEvent?.name || 'event'}.csv`; a.click();
     URL.revokeObjectURL(url);
     showToast('CSV downloaded!', 'success');
   };
@@ -67,7 +67,7 @@ export const AdminRegistrations: React.FC = () => {
           <select value={selectedEventId} onChange={e => setSelectedEventId(e.target.value)}
             className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans bg-white">
             <option value="">— Choose an event —</option>
-            {events.map(ev => <option key={ev.id} value={ev.id}>{ev.title} ({ev.registered_count || 0}/{ev.capacity || '∞'})</option>)}
+            {events.map(ev => <option key={ev.id} value={ev.id}>{ev.name} ({ev.registered_count || 0}/{ev.capacity || '∞'})</option>)}
           </select>
         )}
 

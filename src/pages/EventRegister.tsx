@@ -73,15 +73,15 @@ export const EventRegister: React.FC = () => {
       // Send Brevo confirmation email
       try {
         await sendAdminNotification({
-          subject: `🎉 Registration Confirmed: ${event.title}`,
+          subject: `🎉 Registration Confirmed: ${event.name}`,
           title: 'Event Registration Successful',
           bodyHtml: `
             <p>Dear <b>${fullName}</b>,</p>
-            <p>Your registration for the upcoming event <b>${event.title}</b> has been successfully recorded!</p>
+            <p>Your registration for the upcoming event <b>${event.name}</b> has been successfully recorded!</p>
             <hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:15px 0;" />
             <p><b>Registration Summary:</b></p>
             <ul>
-              <li><b>Event:</b> ${event.title}</li>
+              <li><b>Event:</b> ${event.name}</li>
               <li><b>Registrant:</b> ${fullName}</li>
               <li><b>Year:</b> ${year}</li>
               <li><b>WhatsApp:</b> ${whatsapp || '—'}</li>
@@ -137,7 +137,7 @@ export const EventRegister: React.FC = () => {
         >
           <div className="flex items-start justify-between flex-wrap gap-3 mb-4">
             <div>
-              <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-navy-dark leading-tight mb-2">{event.title}</h1>
+              <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-navy-dark leading-tight mb-2">{event.name}</h1>
               <div className="flex items-center space-x-3 text-navy-dark/50 text-sm">
                 <div className="flex items-center space-x-1"><CalendarDays className="w-4 h-4" /><span>{new Date(event.event_date || event.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span></div>
               </div>
@@ -176,7 +176,7 @@ export const EventRegister: React.FC = () => {
               <CheckCircle2 className="w-8 h-8 text-emerald-600" />
             </div>
             <h3 className="font-display font-extrabold text-xl text-navy-dark mb-2">You're Registered! 🎉</h3>
-            <p className="text-navy-dark/60 text-sm font-sans mb-1">Welcome to <strong>{event.title}</strong>.</p>
+            <p className="text-navy-dark/60 text-sm font-sans mb-1">Welcome to <strong>{event.name}</strong>.</p>
             <p className="text-navy-dark/40 text-xs font-sans">A confirmation has been sent to <strong>{email}</strong>.</p>
           </motion.div>
         ) : (

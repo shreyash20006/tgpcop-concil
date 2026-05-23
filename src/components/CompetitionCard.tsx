@@ -94,7 +94,7 @@ export const CompetitionCard: React.FC<CompetitionCardProps> = ({ competition })
 
           {/* Title */}
           <h3 className="font-display font-bold text-xl text-navy-dark mb-3 leading-snug">
-            {competition.title}
+            {competition.name}
           </h3>
 
           {/* Description */}

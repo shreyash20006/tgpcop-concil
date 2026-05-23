@@ -11,7 +11,7 @@ export const AdminFeedback: React.FC = () => {
 
   useEffect(() => {
     const fetch = async () => {
-      const { data } = await supabase.from('events').select('id, title').order('created_at', { ascending: false });
+      const { data } = await supabase.from('events').select('id, name').order('created_at', { ascending: false });
       setEvents(data || []);
       setIsLoading(false);
     };
@@ -49,7 +49,7 @@ export const AdminFeedback: React.FC = () => {
           <select value={selectedEventId} onChange={e => setSelectedEventId(e.target.value)}
             className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm bg-white">
             <option value="">— Choose an event —</option>
-            {events.map(ev => <option key={ev.id} value={ev.id}>{ev.title}</option>)}
+            {events.map(ev => <option key={ev.id} value={ev.id}>{ev.name}</option>)}
           </select>
         )}
       </div>

@@ -67,7 +67,7 @@ export const EventFeedback: React.FC = () => {
               <CheckCircle2 className="w-8 h-8 text-emerald-600" />
             </div>
             <h3 className="font-display font-extrabold text-xl text-navy-dark mb-2">🙏 Thank You!</h3>
-            <p className="text-navy-dark/60 text-sm font-sans">Your feedback for <strong>{event.title}</strong> has been recorded.</p>
+            <p className="text-navy-dark/60 text-sm font-sans">Your feedback for <strong>{event.name}</strong> has been recorded.</p>
           </motion.div>
         ) : (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-navy-dark/10 p-6 sm:p-8 shadow-sm">
@@ -75,7 +75,7 @@ export const EventFeedback: React.FC = () => {
               <MessageSquare className="w-5 h-5 text-orange-burnt" />
               <h2 className="font-display font-extrabold text-lg text-navy-dark">Event Feedback</h2>
             </div>
-            <p className="text-navy-dark/50 text-sm font-sans mb-6 pb-4 border-b border-navy-dark/5">Share your experience of <strong className="text-navy-dark">{event.title}</strong></p>
+            <p className="text-navy-dark/50 text-sm font-sans mb-6 pb-4 border-b border-navy-dark/5">Share your experience of <strong className="text-navy-dark">{event.name}</strong></p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>

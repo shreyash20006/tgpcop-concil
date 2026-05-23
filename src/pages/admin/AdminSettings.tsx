@@ -3,7 +3,23 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../components/admin/ProtectedRoute';
 import { useToast } from '../../components/admin/Toast';
 import { logActivity } from '../../lib/logs';
-import { Sliders, Upload, ImageIcon, Loader2, Check, RotateCcw, ExternalLink, Sun } from 'lucide-react';
+import { 
+  Sliders, 
+  Upload, 
+  ImageIcon, 
+  Loader2, 
+  Check, 
+  RotateCcw, 
+  ExternalLink, 
+  Sun,
+  Share2,
+  Instagram,
+  Facebook,
+  Twitter,
+  Linkedin,
+  Youtube,
+  MessageCircle
+} from 'lucide-react';
 
 export const AdminSettings: React.FC = () => {
   const { email: myEmail } = useAuth();
@@ -14,9 +30,27 @@ export const AdminSettings: React.FC = () => {
   const [originalLogo, setOriginalLogo] = useState('');
   const [originalBanner, setOriginalBanner] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState<'logo' | 'banner' | null>(null);
+  const [isSaving, setIsSaving] = useState<'logo' | 'banner' | 'social' | null>(null);
   const [logoError, setLogoError] = useState('');
   const [bannerError, setBannerError] = useState('');
+
+  // Social Media Handles State
+  const [socialHandles, setSocialHandles] = useState({
+    instagram: '',
+    facebook: '',
+    twitter: '',
+    linkedin: '',
+    youtube: '',
+    whatsapp_group: '',
+  });
+  const [originalSocial, setOriginalSocial] = useState({
+    instagram: '',
+    facebook: '',
+    twitter: '',
+    linkedin: '',
+    youtube: '',
+    whatsapp_group: '',
+  });
 
   const logoImgRef = useRef<HTMLImageElement>(null);
   const bannerImgRef = useRef<HTMLImageElement>(null);
@@ -28,10 +62,23 @@ export const AdminSettings: React.FC = () => {
       if (error) throw error;
       const map: Record<string, string> = {};
       (data || []).forEach((row: any) => { map[row.key] = row.value; });
+      
       setLogoUrl(map['logo_url'] || '');
       setBannerUrl(map['banner_url'] || '');
       setOriginalLogo(map['logo_url'] || '');
       setOriginalBanner(map['banner_url'] || '');
+
+      // Load social media handles
+      const social = {
+        instagram: map['social_instagram'] || '',
+        facebook: map['social_facebook'] || '',
+        twitter: map['social_twitter'] || '',
+        linkedin: map['social_linkedin'] || '',
+        youtube: map['social_youtube'] || '',
+        whatsapp_group: map['social_whatsapp_group'] || '',
+      };
+      setSocialHandles(social);
+      setOriginalSocial(social);
     } catch (err: any) {
       toast.error('❌ Failed to load settings: ' + err.message);
     } finally {
@@ -75,6 +122,35 @@ export const AdminSettings: React.FC = () => {
     } finally {
       setIsSaving(null);
     }
+  };
+
+  const saveSocialHandles = async () => {
+    setIsSaving('social');
+    try {
+      const updates = [
+        { key: 'social_instagram', value: socialHandles.instagram },
+        { key: 'social_facebook', value: socialHandles.facebook },
+        { key: 'social_twitter', value: socialHandles.twitter },
+        { key: 'social_linkedin', value: socialHandles.linkedin },
+        { key: 'social_youtube', value: socialHandles.youtube },
+        { key: 'social_whatsapp_group', value: socialHandles.whatsapp_group },
+      ].map(item => ({ ...item, updated_at: new Date().toISOString() }));
+
+      const { error } = await supabase.from('settings').upsert(updates);
+      if (error) throw error;
+
+      await logActivity(myEmail, 'social_media_update', 'Updated social media handles');
+      setOriginalSocial(socialHandles);
+      toast.success('✅ Social media handles updated successfully!');
+    } catch (err: any) {
+      toast.error(`❌ Failed to save: ${err.message}`);
+    } finally {
+      setIsSaving(null);
+    }
+  };
+
+  const hasSocialChanges = () => {
+    return JSON.stringify(socialHandles) !== JSON.stringify(originalSocial);
   };
 
   if (isLoading) {
@@ -229,6 +305,138 @@ export const AdminSettings: React.FC = () => {
           <button
             onClick={() => { setBannerUrl(originalBanner); setBannerError(''); }}
             disabled={bannerUrl === originalBanner}
+            className="flex items-center space-x-1.5 px-4 py-2.5 border border-navy-dark/15 rounded-lg text-navy-dark/60 font-display text-xs font-bold hover:bg-navy-dark/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Reset</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ── Social Media Handles ──────────────────────────────────────────── */}
+      <div className="bg-white border border-navy-dark/10 rounded-2xl shadow-xs p-6 space-y-5">
+        <div className="flex items-center space-x-2 pb-3 border-b border-navy-dark/5">
+          <Share2 className="w-4 h-4 text-orange-burnt" />
+          <h4 className="font-display font-bold text-sm text-navy-dark">Social Media Handles</h4>
+        </div>
+
+        <p className="text-xs text-navy-dark/50 font-sans leading-relaxed">
+          Add your social media profile URLs and WhatsApp group invite link. These will be displayed in the footer and contact sections.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Instagram */}
+          <div className="space-y-2">
+            <label className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-wider text-navy-dark/60">
+              <Instagram className="w-3.5 h-3.5 text-pink-500" />
+              <span>Instagram</span>
+            </label>
+            <input
+              type="url"
+              value={socialHandles.instagram}
+              onChange={e => setSocialHandles({ ...socialHandles, instagram: e.target.value })}
+              placeholder="https://instagram.com/tgpcop_council"
+              className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors"
+            />
+          </div>
+
+          {/* Facebook */}
+          <div className="space-y-2">
+            <label className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-wider text-navy-dark/60">
+              <Facebook className="w-3.5 h-3.5 text-blue-600" />
+              <span>Facebook</span>
+            </label>
+            <input
+              type="url"
+              value={socialHandles.facebook}
+              onChange={e => setSocialHandles({ ...socialHandles, facebook: e.target.value })}
+              placeholder="https://facebook.com/tgpcop"
+              className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors"
+            />
+          </div>
+
+          {/* Twitter */}
+          <div className="space-y-2">
+            <label className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-wider text-navy-dark/60">
+              <Twitter className="w-3.5 h-3.5 text-sky-500" />
+              <span>Twitter / X</span>
+            </label>
+            <input
+              type="url"
+              value={socialHandles.twitter}
+              onChange={e => setSocialHandles({ ...socialHandles, twitter: e.target.value })}
+              placeholder="https://twitter.com/tgpcop_council"
+              className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors"
+            />
+          </div>
+
+          {/* LinkedIn */}
+          <div className="space-y-2">
+            <label className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-wider text-navy-dark/60">
+              <Linkedin className="w-3.5 h-3.5 text-blue-700" />
+              <span>LinkedIn</span>
+            </label>
+            <input
+              type="url"
+              value={socialHandles.linkedin}
+              onChange={e => setSocialHandles({ ...socialHandles, linkedin: e.target.value })}
+              placeholder="https://linkedin.com/company/tgpcop"
+              className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors"
+            />
+          </div>
+
+          {/* YouTube */}
+          <div className="space-y-2">
+            <label className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-wider text-navy-dark/60">
+              <Youtube className="w-3.5 h-3.5 text-red-600" />
+              <span>YouTube</span>
+            </label>
+            <input
+              type="url"
+              value={socialHandles.youtube}
+              onChange={e => setSocialHandles({ ...socialHandles, youtube: e.target.value })}
+              placeholder="https://youtube.com/@tgpcop"
+              className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors"
+            />
+          </div>
+
+          {/* WhatsApp Group */}
+          <div className="space-y-2">
+            <label className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-wider text-navy-dark/60">
+              <MessageCircle className="w-3.5 h-3.5 text-green-600" />
+              <span>WhatsApp Group</span>
+            </label>
+            <input
+              type="url"
+              value={socialHandles.whatsapp_group}
+              onChange={e => setSocialHandles({ ...socialHandles, whatsapp_group: e.target.value })}
+              placeholder="https://chat.whatsapp.com/invite-link"
+              className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-3 pt-3 border-t border-navy-dark/5">
+          <button
+            onClick={saveSocialHandles}
+            disabled={isSaving === 'social' || !hasSocialChanges()}
+            className="flex items-center space-x-1.5 px-5 py-2.5 bg-orange-burnt hover:bg-orange-burnt/90 text-white rounded-lg font-display text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-orange-burnt/15"
+          >
+            {isSaving === 'social' ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Check className="w-3.5 h-3.5" />
+                <span>Save Social Handles</span>
+              </>
+            )}
+          </button>
+          <button
+            onClick={() => setSocialHandles(originalSocial)}
+            disabled={!hasSocialChanges()}
             className="flex items-center space-x-1.5 px-4 py-2.5 border border-navy-dark/15 rounded-lg text-navy-dark/60 font-display text-xs font-bold hover:bg-navy-dark/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <RotateCcw className="w-3.5 h-3.5" />

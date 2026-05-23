@@ -156,11 +156,10 @@ export const App: React.FC = () => {
   // Global Lenis smooth scroll engine initialization
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.0, // Snappier and more responsive transit
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Premium exponential ease-out
+      lerp: 0.08, // Premium physics-based buttery smooth interpolation
       infinite: false,
-      wheelMultiplier: 1.1, // Highly fluid wheel response
-      syncTouch: false, // Prevent touch hijacking for native 120Hz smooth scrolling on mobile/trackpads
+      wheelMultiplier: 1.25, // Optimized responsiveness for mouse wheel scrolls
+      syncTouch: false, // Retain high-refresh rate native touch physics on trackpads/mobile
     });
 
     // Request Animation Frame loop

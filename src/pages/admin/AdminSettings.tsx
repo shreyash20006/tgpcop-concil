@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../components/admin/ProtectedRoute';
+import { useRole } from '../../hooks/useRole';
 import { useToast } from '../../components/admin/Toast';
 import { logActivity } from '../../lib/logs';
+import { ProtectedPage } from '../../components/admin/ProtectedPage';
 import { 
   Sliders, 
   Upload, 
@@ -22,6 +24,7 @@ import {
 
 export const AdminSettings: React.FC = () => {
   const { email: myEmail } = useAuth();
+  const { can } = useRole();
   const toast = useToast();
 
   const [logoUrl, setLogoUrl] = useState('');
@@ -254,7 +257,12 @@ export const AdminSettings: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 max-w-3xl">
+    <ProtectedPage 
+      hasAccess={can('manage_settings')}
+      title="Access Restricted"
+      description={'Only the President can manage settings.\nContact president@tgpcop.com'}
+    >
+      <div className="space-y-6 animate-in fade-in duration-300 max-w-3xl">
 
       {/* Header */}
       <div className="flex items-center space-x-3 bg-white border border-navy-dark/10 p-5 rounded-2xl shadow-xs">
@@ -676,7 +684,8 @@ export const AdminSettings: React.FC = () => {
         </div>
       </div>
 
-    </div>
+      </div>
+    </ProtectedPage>
   );
 };
 

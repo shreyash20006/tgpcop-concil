@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from './ProtectedRoute';
+import { useRole, getRoleDisplayName, getPositionTitle } from '../../hooks/useRole';
 import { 
   LayoutDashboard, 
   Mail, 
@@ -11,12 +11,10 @@ import {
   Globe, 
   LogOut, 
   GraduationCap,
-  Users,
   Sliders,
-  ClipboardList,
-  Bug,
   Sun,
-  Moon
+  Moon,
+  Shield
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -30,7 +28,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { role } = useAuth();
+  const { adminUser, loading: roleLoading, can } = useRole();
   const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
 
   const toggleDarkMode = () => {
@@ -60,55 +58,40 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       path: '/admin/dashboard',
       name: 'Dashboard',
       icon: <LayoutDashboard className="w-5 h-5" />,
+      permission: 'view_dashboard',
     },
     {
       path: '/admin/questions',
       name: 'Questions',
       icon: <Mail className="w-5 h-5" />,
       badge: pendingQuestionsCount > 0 ? pendingQuestionsCount : null,
+      permission: 'view_questions',
     },
     {
       path: '/admin/notices',
       name: 'Notices',
       icon: <Megaphone className="w-5 h-5" />,
+      permission: 'add_notices',
     },
     {
       path: '/admin/events',
       name: 'Events',
       icon: <Calendar className="w-5 h-5" />,
+      permission: 'add_events',
     },
     {
       path: '/admin/gallery',
       name: 'Gallery',
       icon: <ImageIcon className="w-5 h-5" />,
+      permission: 'upload_gallery',
+    },
+    {
+      path: '/admin/settings',
+      name: 'Portal Settings',
+      icon: <Sliders className="w-5 h-5" />,
+      permission: 'manage_settings',
     },
   ];
-
-  // Append Super Admin only tabs
-  if (role === 'super_admin') {
-    navItems.push(
-      {
-        path: '/admin/users',
-        name: 'User Management',
-        icon: <Users className="w-5 h-5" />,
-      },
-      {
-        path: '/admin/settings',
-        name: 'Portal Settings',
-        icon: <Sliders className="w-5 h-5" />,
-      },
-      {
-        path: '/admin/logs',
-        name: 'Activity Logs',
-        icon: <ClipboardList className="w-5 h-5" />,
-      },
-      {
-        path: '/admin/bugs',
-        name: 'Bug Reports',
-        icon: <Bug className="w-5 h-5" />,
-      }
-    );
-  }
 
   return (
     <div className="w-[240px] bg-navy-dark text-white flex flex-col justify-between h-full border-r border-white/5 shrink-0 overflow-y-auto">
@@ -130,36 +113,57 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
         {/* Sidebar Nav Items */}
         <nav className="py-6 space-y-1">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={onClose}
-                className={`w-full flex items-center justify-between px-6 py-3 font-display text-sm font-semibold transition-all duration-200 outline-none relative border-l-4 ${
-                  isActive
-                    ? 'text-orange-burnt bg-white/[0.03] border-orange-burnt'
-                    : 'text-white/70 hover:bg-orange-burnt/10 hover:text-orange-burnt border-transparent'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  {item.icon}
-                  <span>{item.name}</span>
-                </div>
-                {item.badge !== null && item.badge !== undefined && (
-                  <span className="bg-orange-burnt border border-white/10 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full min-w-5 text-center shadow">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+          {navItems
+            .filter((item) => can(item.permission))
+            .map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={onClose}
+                  className={`w-full flex items-center justify-between px-6 py-3 font-display text-sm font-semibold transition-all duration-200 outline-none relative border-l-4 ${
+                    isActive
+                      ? 'text-orange-burnt bg-white/[0.03] border-orange-burnt'
+                      : 'text-white/70 hover:bg-orange-burnt/10 hover:text-orange-burnt border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    {item.icon}
+                    <span>{item.name}</span>
+                  </div>
+                  {item.badge !== null && item.badge !== undefined && (
+                    <span className="bg-orange-burnt border border-white/10 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full min-w-5 text-center shadow">
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
         </nav>
       </div>
 
-      {/* Footer Navigation & Theme/Logout Operations */}
-      <div className="p-4 border-t border-white/10 space-y-1">
+      {/* Footer Navigation & User Info */}
+      <div className="p-4 border-t border-white/10 space-y-3">
+        {/* Admin User Info */}
+        {!roleLoading && adminUser && (
+          <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+            <div className="flex items-start space-x-2">
+              <div className="w-8 h-8 rounded-full bg-orange-burnt/20 flex items-center justify-center text-orange-burnt shrink-0">
+                <Shield className="w-4 h-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-display font-semibold text-xs text-white truncate">
+                  👤 {adminUser.name}
+                </p>
+                <p className="text-[10px] text-orange-burnt/90 truncate">
+                  {getPositionTitle(adminUser.role)} • {getRoleDisplayName(adminUser.role)}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Dark Mode Toggle */}
         <button
           onClick={toggleDarkMode}

@@ -66,7 +66,21 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           }
         }
 
-        // Fetch current profile role and suspension status
+        // Prefer admin_roles (RBAC) then fall back to profiles
+        const { data: adminRole } = await supabase
+          .from('admin_roles')
+          .select('role')
+          .eq('email', user.email)
+          .single();
+
+        if (adminRole?.role) {
+          if (active) {
+            setRole(adminRole.role);
+            setIsSuspended(false);
+          }
+          return;
+        }
+
         const { data: profile, error } = await supabase
           .from('profiles')
           .select('*')

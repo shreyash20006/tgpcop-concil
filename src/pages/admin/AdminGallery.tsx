@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { useRole } from '../../hooks/useRole';
+import { RequirePermission } from '../../components/admin/RequirePermission';
 import { Modal } from '../../components/admin/Modal';
 import { MediaPreviewBox } from '../../components/admin/MediaPreviewBox';
 import { getCloudinaryThumbnail } from '../../lib/cloudinary';
@@ -18,6 +20,10 @@ import {
 } from 'lucide-react';
 
 export const AdminGallery: React.FC = () => {
+  const { can } = useRole();
+  const canUpload = can('upload_gallery');
+  const canDelete = can('delete_gallery');
+  const canEdit = canUpload;
   const [photos, setPhotos] = useState<any[]>([]);
   const [filteredPhotos, setFilteredPhotos] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'All' | 'Events' | 'Competitions' | 'Campus Life' | 'General'>('All');
@@ -230,6 +236,7 @@ export const AdminGallery: React.FC = () => {
   };
 
   return (
+    <RequirePermission permission="upload_gallery">
     <div className="space-y-6 animate-in fade-in duration-300">
       
       {/* Header Panel */}
@@ -246,13 +253,15 @@ export const AdminGallery: React.FC = () => {
           </div>
         </div>
 
+        {canUpload && (
         <button
           onClick={handleAddNew}
           className="flex items-center space-x-1.5 px-4.5 py-2.5 bg-orange-burnt hover:bg-orange-burnt/95 text-white rounded-lg font-display text-xs font-bold shadow-md shadow-orange-burnt/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
         >
           <Plus className="w-4 h-4" />
-          <span>Add Media</span>
+          <span>Add Photo</span>
         </button>
+        )}
       </div>
 
       {/* Category Filter tabs */}
@@ -352,7 +361,9 @@ export const AdminGallery: React.FC = () => {
                   </div>
 
                   {/* Actions overlay panel */}
+                  {(canEdit || canDelete) && (
                   <div className="flex items-center gap-2 pt-2 border-t border-navy-dark/5">
+                    {canEdit && (
                     <button
                       onClick={() => handleEdit(photo)}
                       className="flex-grow inline-flex items-center justify-center space-x-1.5 py-1.5 px-3 rounded-lg bg-navy-dark/5 text-navy-dark hover:bg-navy-dark hover:text-white text-xs font-semibold transition-colors"
@@ -360,6 +371,8 @@ export const AdminGallery: React.FC = () => {
                       <Edit className="w-3.5 h-3.5" />
                       <span>Edit Details</span>
                     </button>
+                    )}
+                    {canDelete && (
                     <button
                       onClick={() => handleDelete(photo.id)}
                       className="p-1.5 rounded-lg text-navy-dark/45 hover:bg-red-50 hover:text-red-600 transition-colors border border-navy-dark/5"
@@ -367,7 +380,9 @@ export const AdminGallery: React.FC = () => {
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
+                    )}
                   </div>
+                  )}
                 </div>
               </div>
             );
@@ -387,6 +402,7 @@ export const AdminGallery: React.FC = () => {
       )}
 
       {/* modal publisher drawer */}
+      {canUpload && (
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -496,8 +512,10 @@ export const AdminGallery: React.FC = () => {
           </div>
         </form>
       </Modal>
+      )}
 
     </div>
+    </RequirePermission>
   );
 };
 

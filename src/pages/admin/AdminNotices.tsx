@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { useRole } from '../../hooks/useRole';
+import { RequirePermission } from '../../components/admin/RequirePermission';
 import { DataTable } from '../../components/admin/DataTable';
 import { NoticeModal } from '../../components/admin/NoticeModal';
 import { useToast } from '../../components/admin/Toast';
@@ -22,7 +24,9 @@ const NoticeCardMobile: React.FC<{
   notice: any; 
   onEdit: (n: any) => void; 
   onDelete: (id: string) => void;
-}> = ({ notice, onEdit, onDelete }) => {
+  canEdit: boolean;
+  canDelete: boolean;
+}> = ({ notice, onEdit, onDelete, canEdit, canDelete }) => {
   const getCategoryBadgeColor = (category: string) => {
     switch (category?.toLowerCase()) {
       case 'academic':
@@ -102,8 +106,9 @@ const NoticeCardMobile: React.FC<{
         </div>
       </div>
 
-      {/* Card CRUD action controls */}
+      {(canEdit || canDelete) && (
       <div className="flex items-center gap-2 pt-2 border-t border-navy-dark/5">
+        {canEdit && (
         <button
           onClick={() => onEdit(notice)}
           className="flex-grow inline-flex items-center justify-center space-x-1.5 py-1.5 px-3 rounded-lg bg-navy-dark/5 text-navy-dark hover:bg-navy-dark hover:text-white text-xs font-semibold transition-colors"
@@ -111,18 +116,26 @@ const NoticeCardMobile: React.FC<{
           <Edit className="w-3.5 h-3.5" />
           <span>Edit Notice</span>
         </button>
+        )}
+        {canDelete && (
         <button
           onClick={() => onDelete(notice.id)}
           className="p-1.5 rounded-lg text-navy-dark/45 hover:bg-red-50 hover:text-red-600 transition-colors border border-navy-dark/5"
         >
           <Trash2 className="w-4 h-4" />
         </button>
+        )}
       </div>
+      )}
     </div>
   );
 };
 
 export const AdminNotices: React.FC = () => {
+  const { can } = useRole();
+  const canAdd = can('add_notices');
+  const canEdit = can('edit_notices');
+  const canDelete = can('delete_notices');
   const [notices, setNotices] = useState<any[]>([]);
   const [filteredNotices, setFilteredNotices] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -230,6 +243,7 @@ export const AdminNotices: React.FC = () => {
   ];
 
   return (
+    <RequirePermission permission="add_notices">
     <div className="space-y-6 animate-in fade-in duration-300">
       
       {/* Notices Header trigger */}
@@ -244,6 +258,7 @@ export const AdminNotices: React.FC = () => {
           </div>
         </div>
 
+        {canAdd && (
         <button
           onClick={handleAddNew}
           className="flex items-center space-x-1.5 px-4.5 py-2.5 bg-orange-burnt hover:bg-orange-burnt/95 text-white rounded-lg font-display text-xs font-bold shadow-md shadow-orange-burnt/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
@@ -251,6 +266,7 @@ export const AdminNotices: React.FC = () => {
           <Plus className="w-4 h-4" />
           <span>Add New Notice</span>
         </button>
+        )}
       </div>
 
       {/* Notices DataTable list */}
@@ -350,6 +366,7 @@ export const AdminNotices: React.FC = () => {
 
               {/* Actions columns */}
               <td className="px-6 py-4 whitespace-nowrap text-right text-xs font-semibold space-x-2">
+                {canEdit && (
                 <button
                   onClick={() => handleEdit(item)}
                   className="inline-flex items-center space-x-1 py-1.5 px-3 rounded-lg bg-navy-dark/5 text-navy-dark hover:bg-navy-dark hover:text-white transition-colors"
@@ -357,12 +374,15 @@ export const AdminNotices: React.FC = () => {
                   <Edit className="w-3.5 h-3.5" />
                   <span>Edit</span>
                 </button>
+                )}
+                {canDelete && (
                 <button
                   onClick={() => handleDelete(item.id)}
                   className="inline-flex items-center p-1.5 rounded-lg text-navy-dark/40 hover:bg-red-50 hover:text-red-600 transition-colors"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
+                )}
               </td>
             </tr>
           );
@@ -373,19 +393,24 @@ export const AdminNotices: React.FC = () => {
             notice={item}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            canEdit={canEdit}
+            canDelete={canDelete}
           />
         )}
       />
 
       {/* Modal publisher */}
+      {canAdd && (
       <NoticeModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onRefresh={fetchNotices}
         noticeToEdit={noticeToEdit}
       />
+      )}
 
     </div>
+    </RequirePermission>
   );
 };
 

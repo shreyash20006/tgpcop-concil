@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Modal } from '../../components/admin/Modal';
 import { MediaPreviewBox } from '../../components/admin/MediaPreviewBox';
 import { getCloudinaryThumbnail } from '../../lib/cloudinary';
+import { useToast } from '../../components/admin/Toast';
 import { 
   Image as ImageIcon, 
   Plus, 
@@ -26,6 +27,8 @@ export const AdminGallery: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [photoToEdit, setPhotoToEdit] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [hasUrlError, setHasUrlError] = useState(false);
+  const toast = useToast();
 
   // Form State
   const [formData, setFormData] = useState({
@@ -80,6 +83,7 @@ export const AdminGallery: React.FC = () => {
         media_type: 'image',
       });
     }
+    setHasUrlError(false);
   }, [photoToEdit, isModalOpen]);
 
   const handleDelete = async (id: string) => {
@@ -90,9 +94,10 @@ export const AdminGallery: React.FC = () => {
     try {
       const { error } = await supabase.from('gallery').delete().eq('id', id);
       if (error) throw error;
+      toast.success("✅ Media deleted successfully!");
       fetchPhotos();
     } catch (err: any) {
-      alert(`Error deleting media: ${err.message}`);
+      toast.error(`❌ Action failed! ${err.message}`);
     }
   };
 
@@ -110,11 +115,46 @@ export const AdminGallery: React.FC = () => {
     e.preventDefault();
     if (!formData.title || !formData.media_url) return;
 
+    // Strict validation check before saving
+    const trimmedUrl = formData.media_url.trim();
+
+    const isHttps = trimmedUrl.toLowerCase().startsWith('https://');
+    let isFormatValid = true;
+
+    if (formData.media_type === 'video') {
+      isFormatValid = trimmedUrl.toLowerCase().includes('.mp4') || 
+                      trimmedUrl.toLowerCase().includes('.mov') || 
+                      trimmedUrl.toLowerCase().includes('.avi');
+    } else if (formData.media_type === 'audio') {
+      isFormatValid = trimmedUrl.toLowerCase().includes('.mp3') || 
+                      trimmedUrl.toLowerCase().includes('.wav') || 
+                      trimmedUrl.toLowerCase().includes('.m4a');
+    }
+
+    if (hasUrlError || !isHttps || !isFormatValid) {
+      toast.error("❌ Upload failed! Check the URL and try again.");
+      return;
+    }
+
     setIsSaving(true);
     try {
+      // Auto optimize Cloudinary links on save
+      let optimizedUrl = trimmedUrl;
+      if (optimizedUrl.includes('cloudinary.com')) {
+        if (formData.media_type === 'image') {
+          if (!optimizedUrl.includes('/w_800,q_auto,f_auto/')) {
+            optimizedUrl = optimizedUrl.replace('/upload/', '/upload/w_800,q_auto,f_auto/');
+          }
+        } else if (formData.media_type === 'video') {
+          if (!optimizedUrl.includes('/w_800,q_auto,vc_auto/')) {
+            optimizedUrl = optimizedUrl.replace('/upload/', '/upload/w_800,q_auto,vc_auto/');
+          }
+        }
+      }
+
       const dataPayload = {
         title: formData.title,
-        media_url: formData.media_url,
+        media_url: optimizedUrl,
         category: formData.category,
         media_type: formData.media_type,
       };
@@ -127,6 +167,7 @@ export const AdminGallery: React.FC = () => {
           .eq('id', photoToEdit.id);
 
         if (error) throw error;
+        toast.success("✅ Media updated successfully!");
       } else {
         // INSERT record
         const { error } = await supabase
@@ -134,12 +175,13 @@ export const AdminGallery: React.FC = () => {
           .insert([dataPayload]);
 
         if (error) throw error;
+        toast.success("✅ Media added successfully!");
       }
 
       fetchPhotos();
       setIsModalOpen(false);
     } catch (err: any) {
-      alert(`Error saving media item: ${err.message}`);
+      toast.error("❌ Upload failed! Check the URL and try again.");
     } finally {
       setIsSaving(false);
     }
@@ -406,6 +448,7 @@ export const AdminGallery: React.FC = () => {
             mediaType={formData.media_type}
             value={formData.media_url}
             onChange={(val) => setFormData({ ...formData, media_url: val })}
+            onValidationError={setHasUrlError}
           />
 
           {/* Action buttons */}
@@ -420,12 +463,16 @@ export const AdminGallery: React.FC = () => {
             <button
               type="submit"
               disabled={isSaving}
-              className="flex-1 py-2.5 bg-orange-burnt hover:bg-orange-burnt/95 text-white font-display text-sm font-semibold rounded-lg shadow-md transition-all flex items-center justify-center space-x-1.5"
+              className={`flex-1 py-2.5 text-white font-display text-sm font-semibold rounded-lg shadow-md transition-all flex items-center justify-center space-x-1.5 ${
+                isSaving 
+                  ? 'bg-orange-burnt animate-pulse cursor-not-allowed shadow-[#C84B0E]/30'
+                  : 'bg-orange-burnt hover:bg-orange-burnt/95 hover:scale-[1.01] active:scale-[0.99]'
+              }`}
             >
               {isSaving ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Saving Media...</span>
+                  <span>Adding...</span>
                 </>
               ) : (
                 <span>Publish Media</span>

@@ -79,6 +79,8 @@ const AppContent: React.FC = () => {
   );
 };
 
+import { ToastProvider } from './components/admin/Toast';
+
 export const App: React.FC = () => {
   // Global Lenis smooth scroll engine initialization
   useEffect(() => {
@@ -103,16 +105,18 @@ export const App: React.FC = () => {
   }, []);
 
   return (
-    <Router>
-      {/* Reset window viewport coordinate on routing */}
-      <ScrollToTop />
-      
-      {/* Fixed Scroll progress indicator */}
-      <ScrollProgressBar />
+    <ToastProvider>
+      <Router>
+        {/* Reset window viewport coordinate on routing */}
+        <ScrollToTop />
+        
+        {/* Fixed Scroll progress indicator */}
+        <ScrollProgressBar />
 
-      {/* Dynamic Content isolated layout */}
-      <AppContent />
-    </Router>
+        {/* Dynamic Content isolated layout */}
+        <AppContent />
+      </Router>
+    </ToastProvider>
   );
 };
 

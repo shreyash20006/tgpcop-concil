@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { motion } from 'framer-motion';
 import { ShieldCheck, Mail, Lock, Loader2, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useToast } from '../../components/admin/Toast';
 
 export const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -11,6 +12,7 @@ export const AdminLogin: React.FC = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
+  const toast = useToast();
 
   useEffect(() => {
     // If user is already authenticated, send them to dashboard immediately
@@ -37,7 +39,9 @@ export const AdminLogin: React.FC = () => {
       if (error) throw error;
       navigate('/admin/dashboard', { replace: true });
     } catch (err: any) {
-      setErrorMessage(err.message || 'Invalid email or password. Please try again.');
+      const errMsg = err.message || 'Invalid email or password. Please try again.';
+      setErrorMessage(errMsg);
+      toast.error(`❌ Login failed! ${errMsg}`);
     } finally {
       setIsLoggingIn(false);
     }

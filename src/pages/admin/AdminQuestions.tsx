@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { DataTable } from '../../components/admin/DataTable';
 import { QuestionRow } from '../../components/admin/QuestionRow';
 import { councilMembers } from '../../data/council';
+import { useToast } from '../../components/admin/Toast';
 import { 
   Mail, 
   AlertCircle, 
@@ -28,6 +29,7 @@ const QuestionCardMobile: React.FC<{ question: any; onRefresh: () => void }> = (
   const [isReplying, setIsReplying] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const toast = useToast();
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -50,9 +52,10 @@ const QuestionCardMobile: React.FC<{ question: any; onRefresh: () => void }> = (
         .eq('id', question.id);
 
       if (error) throw error;
+      toast.success("✅ Question marked as seen!");
       onRefresh();
     } catch (err: any) {
-      alert(`Error updating status: ${err.message}`);
+      toast.error(`❌ Action failed! ${err.message}`);
     } finally {
       setIsUpdatingStatus(false);
     }
@@ -73,10 +76,11 @@ const QuestionCardMobile: React.FC<{ question: any; onRefresh: () => void }> = (
         .eq('id', question.id);
 
       if (error) throw error;
+      toast.success("✅ Reply submitted successfully!");
       onRefresh();
       setIsExpanded(false);
     } catch (err: any) {
-      alert(`Error submitting reply: ${err.message}`);
+      toast.error(`❌ Failed to submit reply. ${err.message}`);
     } finally {
       setIsReplying(false);
     }
@@ -93,9 +97,10 @@ const QuestionCardMobile: React.FC<{ question: any; onRefresh: () => void }> = (
         .eq('id', question.id);
 
       if (error) throw error;
+      toast.success("✅ Question deleted permanently!");
       onRefresh();
     } catch (err: any) {
-      alert(`Error deleting question: ${err.message}`);
+      toast.error(`❌ Failed to delete question. ${err.message}`);
     } finally {
       setIsDeleting(false);
     }

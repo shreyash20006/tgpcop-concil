@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Loader2, Calendar } from 'lucide-react';
 import { Modal } from './Modal';
+import { useToast } from './Toast';
 
 interface EventModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ export const EventModal: React.FC<EventModalProps> = ({
     is_active: true,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     if (eventToEdit) {
@@ -75,6 +77,7 @@ export const EventModal: React.FC<EventModalProps> = ({
           .eq('id', eventToEdit.id);
 
         if (error) throw error;
+        toast.success("✅ Event details updated successfully!");
       } else {
         // INSERT record
         const { error } = await supabase
@@ -82,12 +85,13 @@ export const EventModal: React.FC<EventModalProps> = ({
           .insert([dataPayload]);
 
         if (error) throw error;
+        toast.success("✅ Event created successfully!");
       }
 
       onRefresh();
       onClose();
     } catch (err: any) {
-      alert(`Error saving event: ${err.message}`);
+      toast.error(`❌ Action failed! ${err.message}`);
     } finally {
       setIsSaving(false);
     }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { DataTable } from '../../components/admin/DataTable';
 import { NoticeModal } from '../../components/admin/NoticeModal';
+import { useToast } from '../../components/admin/Toast';
 import { 
   Megaphone, 
   Plus, 
@@ -127,6 +128,7 @@ export const AdminNotices: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
+  const toast = useToast();
 
   // Modal Control
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -179,9 +181,10 @@ export const AdminNotices: React.FC = () => {
     try {
       const { error } = await supabase.from('notices').delete().eq('id', id);
       if (error) throw error;
+      toast.success("✅ Notice deleted successfully!");
       fetchNotices();
     } catch (err: any) {
-      alert(`Error deleting notice: ${err.message}`);
+      toast.error(`❌ Failed to delete notice. ${err.message}`);
     }
   };
 

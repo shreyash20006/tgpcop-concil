@@ -106,8 +106,12 @@ export const Footer: React.FC = () => {
 
         {/* Footer Base Strip */}
         <div className="border-t border-white/10 pt-8 mt-8 flex flex-col md:flex-row items-center justify-between text-xs text-white/50 space-y-4 md:space-y-0">
-          <p>
-            © {currentYear} TGPCOP Student Council. All Rights Reserved.
+          <p className="flex flex-wrap items-center gap-2">
+            <span>© {currentYear} TGPCOP Student Council. All Rights Reserved.</span>
+            <span className="text-white/25 hidden sm:inline">|</span>
+            <Link to="/admin" className="hover:text-orange-burnt transition-colors font-semibold tracking-wide">
+              🔐 Admin Portal
+            </Link>
           </p>
           <p className="flex items-center space-x-1">
             <span>Made with</span>

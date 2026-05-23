@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Loader2, Megaphone } from 'lucide-react';
 import { Modal } from './Modal';
+import { useToast } from './Toast';
 
 interface NoticeModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export const NoticeModal: React.FC<NoticeModalProps> = ({
     is_pinned: false,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     if (noticeToEdit) {
@@ -71,6 +73,7 @@ export const NoticeModal: React.FC<NoticeModalProps> = ({
           .eq('id', noticeToEdit.id);
 
         if (error) throw error;
+        toast.success("✅ Notice updated successfully!");
       } else {
         // INSERT record
         const { error } = await supabase
@@ -78,12 +81,13 @@ export const NoticeModal: React.FC<NoticeModalProps> = ({
           .insert([dataPayload]);
 
         if (error) throw error;
+        toast.success("✅ Notice added successfully!");
       }
 
       onRefresh();
       onClose();
     } catch (err: any) {
-      alert(`Error saving notice: ${err.message}`);
+      toast.error(`❌ Action failed! ${err.message}`);
     } finally {
       setIsSaving(false);
     }

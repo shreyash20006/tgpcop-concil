@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { DataTable } from '../../components/admin/DataTable';
 import { EventModal } from '../../components/admin/EventModal';
+import { useToast } from '../../components/admin/Toast';
 import { 
   Plus, 
   Trash2, 
@@ -121,6 +122,7 @@ export const AdminEvents: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeTab, setTypeTab] = useState<'All' | 'event' | 'competition'>('All');
   const [isLoading, setIsLoading] = useState(true);
+  const toast = useToast();
 
   // Modal Control
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -172,9 +174,10 @@ export const AdminEvents: React.FC = () => {
     try {
       const { error } = await supabase.from('events').delete().eq('id', id);
       if (error) throw error;
+      toast.success("✅ Event deleted successfully!");
       fetchEvents();
     } catch (err: any) {
-      alert(`Error deleting event: ${err.message}`);
+      toast.error(`❌ Failed to delete event. ${err.message}`);
     }
   };
 

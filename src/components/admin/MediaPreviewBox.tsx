@@ -14,6 +14,7 @@ interface MediaPreviewBoxProps {
   value: string;
   onChange: (value: string) => void;
   required?: boolean;
+  onValidationError?: (hasError: boolean) => void;
 }
 
 export const MediaPreviewBox: React.FC<MediaPreviewBoxProps> = ({
@@ -21,27 +22,66 @@ export const MediaPreviewBox: React.FC<MediaPreviewBoxProps> = ({
   value,
   onChange,
   required = false,
+  onValidationError,
 }) => {
   const [loadError, setLoadError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setLoadError(false);
-    if (!value.trim()) {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      setLoadError(false);
+      onValidationError?.(false);
       setIsLoading(false);
       return;
     }
+
+    // 1. Protocol Validation: Must start with https://
+    if (!trimmed.toLowerCase().startsWith('https://')) {
+      setLoadError(true);
+      onValidationError?.(true);
+      setIsLoading(false);
+      return;
+    }
+
+    // 2. Format Validation
+    if (mediaType === 'video') {
+      const isVideo = trimmed.toLowerCase().includes('.mp4') || 
+                      trimmed.toLowerCase().includes('.mov') || 
+                      trimmed.toLowerCase().includes('.avi');
+      if (!isVideo) {
+        setLoadError(true);
+        onValidationError?.(true);
+        setIsLoading(false);
+        return;
+      }
+    } else if (mediaType === 'audio') {
+      const isAudio = trimmed.toLowerCase().includes('.mp3') || 
+                      trimmed.toLowerCase().includes('.wav') || 
+                      trimmed.toLowerCase().includes('.m4a');
+      if (!isAudio) {
+        setLoadError(true);
+        onValidationError?.(true);
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    setLoadError(false);
+    onValidationError?.(false);
     setIsLoading(true);
-  }, [value, mediaType]);
+  }, [value, mediaType, onValidationError]);
 
   const handleLoadSuccess = () => {
     setIsLoading(false);
     setLoadError(false);
+    onValidationError?.(false);
   };
 
   const handleLoadError = () => {
     setIsLoading(false);
     setLoadError(true);
+    onValidationError?.(true);
   };
 
   const activeMediaUrl = getCloudinaryMediaUrl(value, mediaType);
@@ -72,29 +112,40 @@ export const MediaPreviewBox: React.FC<MediaPreviewBoxProps> = ({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={`Paste direct ${mediaType} URL address here...`}
-          className="w-full px-3 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt focus:ring-1 focus:ring-orange-burnt outline-none text-sm bg-white transition-colors"
+          className={`w-full px-3 py-2.5 rounded-lg border focus:ring-1 outline-none text-sm bg-white transition-colors ${
+            loadError && value.trim()
+              ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500 bg-amber-50/10'
+              : 'border-navy-dark/15 focus:border-orange-burnt focus:ring-orange-burnt'
+          }`}
         />
-        <p className="text-[10px] text-navy-dark/45 mt-1 font-sans">
-          Upload media to Cloudinary, copy the direct address link (e.g. .jpg, .mp4, .mp3, etc.), and paste here.
-        </p>
+        {loadError && value.trim() ? (
+          <p className="text-xs text-[#F59E0B] font-sans mt-2 flex items-start space-x-1 font-semibold leading-relaxed animate-in fade-in slide-in-from-top-1 duration-200">
+            <span>⚠️ Could not load media. Make sure URL is correct Cloudinary link.</span>
+          </p>
+        ) : (
+          <p className="text-[10px] text-navy-dark/45 mt-1 font-sans">
+            Upload media to Cloudinary, copy the direct address link (e.g. .jpg, .mp4, .mp3, etc.), and paste here.
+          </p>
+        )}
       </div>
 
       {/* 2. Visual Preview Sandbox Container */}
       <div className="border border-dashed border-navy-dark/15 bg-navy-dark/[0.015] rounded-xl min-h-56 flex flex-col items-center justify-center overflow-hidden relative p-4">
         
-        {/* Loading overlay spinner */}
+        {/* Loading skeleton wrapper */}
         {isLoading && value.trim() && (
-          <div className="absolute inset-0 z-10 bg-white/85 flex flex-col items-center justify-center text-navy-dark/60">
-            <Loader2 className="w-8 h-8 text-orange-burnt animate-spin mb-2" />
-            <span className="text-[10px] font-bold uppercase tracking-widest font-display">
-              Resolving Media Stream...
-            </span>
+          <div className="absolute inset-0 z-10 bg-white flex flex-col items-center justify-center p-6 space-y-4 w-full h-full animate-in fade-in duration-200">
+            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+              <Loader2 className="w-6 h-6 animate-spin text-orange-burnt" />
+            </div>
+            <div className="h-4 bg-gray-100 rounded-full animate-pulse w-3/4"></div>
+            <div className="h-3 bg-gray-100 rounded-full animate-pulse w-1/2"></div>
           </div>
         )}
 
         {/* Dynamic Rendering Preview based on selected media type */}
         {value.trim() && !loadError ? (
-          <div className="w-full flex flex-col items-center justify-center space-y-4">
+          <div className="w-full flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-300">
             
             {/* Image Previewer */}
             {mediaType === 'image' && (
@@ -137,14 +188,16 @@ export const MediaPreviewBox: React.FC<MediaPreviewBoxProps> = ({
 
           </div>
         ) : value.trim() && loadError ? (
-          /* Error feedback panel */
-          <div className="flex flex-col items-center justify-center text-red-500 text-center space-y-2 p-4">
-            <AlertTriangle className="w-10 h-10 animate-bounce" />
-            <h4 className="font-display font-bold text-xs uppercase tracking-wider">
-              Failed to load {mediaType}
+          /* Broken Icon Preview */
+          <div className="flex flex-col items-center justify-center text-[#F59E0B] text-center space-y-2 p-6 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 rounded-full bg-[#F59E0B]/10 border border-[#F59E0B]/20 flex items-center justify-center text-[#F59E0B] mb-2">
+              <AlertTriangle className="w-8 h-8" />
+            </div>
+            <h4 className="font-display font-extrabold text-xs uppercase tracking-wider text-navy-dark">
+              ⚠️ Broken Media Link
             </h4>
-            <p className="text-[10px] text-red-500/70 max-w-xs leading-relaxed font-sans">
-              Could not resolve direct media link. Make sure the pasted URL is valid and publicly accessible.
+            <p className="text-[10px] text-navy-dark/45 max-w-xs leading-relaxed font-sans">
+              Could not load direct stream. Please check your URL address or make sure it's a correct Cloudinary link.
             </p>
           </div>
         ) : (

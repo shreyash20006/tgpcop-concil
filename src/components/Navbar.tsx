@@ -68,10 +68,14 @@ export const Navbar: React.FC = () => {
     <>
       <header
         id="navbar"
+        style={{
+          background: isScrolled ? 'var(--bg-nav)' : 'transparent',
+          borderBottomColor: isScrolled ? 'var(--border-subtle)' : 'transparent',
+        }}
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
           isScrolled
-            ? 'bg-[#060B1C]/80 backdrop-blur-xl border-b border-white/5 py-2.5 shadow-2xl'
-            : 'bg-transparent py-4 text-white'
+            ? 'backdrop-blur-xl border-b py-2.5 shadow-2xl'
+            : 'py-4'
         }`}
       >
         {/* Dynamic Announcement Bar - upgraded with sleek glow */}
@@ -96,7 +100,10 @@ export const Navbar: React.FC = () => {
               <GraduationCap className="w-5 h-5 text-orange-burnt absolute" />
             </div>
             <div>
-              <span className="font-display font-extrabold text-lg sm:text-xl tracking-tight block leading-none text-white group-hover:text-orange-burnt transition-colors">
+              <span
+                className="font-display font-extrabold text-lg sm:text-xl tracking-tight block leading-none group-hover:text-orange-burnt transition-colors"
+                style={{ color: isScrolled ? 'var(--text-primary)' : '#ffffff' }}
+              >
                 TGPCOP
               </span>
               <span className="text-[9px] sm:text-[10px] opacity-80 block tracking-widest uppercase font-semibold text-orange-burnt mt-0.5">
@@ -113,11 +120,13 @@ export const Navbar: React.FC = () => {
                 <NavLink
                   key={link.path}
                   to={link.path}
+                  style={!isScrolled ? { color: 'rgba(255,255,255,0.85)' } : {}}
                   className={`relative font-display font-semibold text-xs sm:text-sm tracking-wide transition-all duration-300 hover:text-orange-burnt px-2 py-2 ${
                     isActive
                       ? 'text-orange-burnt'
-                      : 'text-white/80 hover:text-white'
+                      : 'hover:text-orange-burnt'
                   }`}
+                  data-active={isActive ? 'true' : 'false'}
                 >
                   {link.name}
                   {isActive && (
@@ -262,7 +271,8 @@ export const Navbar: React.FC = () => {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed right-0 top-0 bottom-0 w-[290px] bg-[#050B18]/95 backdrop-blur-2xl text-white p-6 z-50 shadow-2xl flex flex-col justify-between md:hidden overflow-y-auto border-l border-white/5"
+              style={{ background: 'var(--bg-drawer)', borderLeftColor: 'var(--border-subtle)' }}
+              className="fixed right-0 top-0 bottom-0 w-[290px] backdrop-blur-2xl p-6 z-50 shadow-2xl flex flex-col justify-between md:hidden overflow-y-auto border-l"
             >
               <div>
                 <div className="flex items-center justify-between mb-8">

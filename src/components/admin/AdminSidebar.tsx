@@ -23,7 +23,8 @@ import {
   Award,
   Newspaper,
   HeartHandshake,
-  AlertTriangle
+  AlertTriangle,
+  Wrench
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -37,7 +38,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { role, fullName, avatarUrl } = useAuth();
+  const { role, email, fullName, avatarUrl } = useAuth();
   const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
 
   const toggleDarkMode = () => {
@@ -62,7 +63,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     }
   };
 
-  const navItems = [
+  const baseNavItems = [
     {
       path: '/admin/dashboard',
       name: 'Dashboard',
@@ -120,6 +121,17 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       icon: <HeartHandshake className="w-5 h-5" />,
     },
   ];
+
+  const navItems: any[] = [];
+  if (role === 'developer' && email === 'sb108750@gmail.com') {
+    navItems.push({
+      path: '/admin/developer',
+      name: 'Dev Dashboard',
+      icon: <Wrench className="w-5 h-5 text-orange-burnt animate-pulse" />,
+      badgeText: 'DEV'
+    });
+  }
+  navItems.push(...baseNavItems);
 
   // Append specialized role tabs
   if (role === 'super_admin' || role === 'developer' || role === 'antiragging') {
@@ -199,8 +211,13 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                   <span>{item.name}</span>
                 </div>
                 {item.badge !== null && item.badge !== undefined && (
-                  <span className="bg-orange-burnt border border-white/10 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full min-w-5 text-center shadow">
+                  <span className="bg-orange-burnt border border-white/10 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full min-w-5 text-center shadow animate-in fade-in duration-200">
                     {item.badge}
+                  </span>
+                )}
+                {item.badgeText && (
+                  <span className="bg-orange-burnt border border-white/10 text-white text-[8px] font-extrabold px-2 py-0.5 rounded-md text-center shadow animate-pulse shrink-0">
+                    {item.badgeText}
                   </span>
                 )}
               </Link>

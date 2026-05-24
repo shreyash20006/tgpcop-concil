@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Loader2, Calendar } from 'lucide-react';
 import { Modal } from './Modal';
 import { useToast } from './Toast';
+import { logAction } from '../../lib/logger';
 
 interface EventModalProps {
   isOpen: boolean;
@@ -85,6 +86,7 @@ export const EventModal: React.FC<EventModalProps> = ({
           .insert([dataPayload]);
 
         if (error) throw error;
+        logAction('ADDED_EVENT', formData.name);
         toast.success("✅ Event created successfully!");
       }
 

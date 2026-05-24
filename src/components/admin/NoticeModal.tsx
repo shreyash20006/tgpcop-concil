@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Loader2, Megaphone } from 'lucide-react';
 import { Modal } from './Modal';
 import { useToast } from './Toast';
+import { logAction } from '../../lib/logger';
 
 interface NoticeModalProps {
   isOpen: boolean;
@@ -103,6 +104,7 @@ export const NoticeModal: React.FC<NoticeModalProps> = ({
           .insert([dataPayload]);
 
         if (error) throw error;
+        logAction('ADDED_NOTICE', formData.title);
         toast.success("✅ Notice added successfully!");
       }
 

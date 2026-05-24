@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ShieldCheck, Loader2, ArrowLeft, GraduationCap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../../components/admin/Toast';
+import { logAction } from '../../lib/logger';
 
 export const AdminLogin: React.FC = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -16,6 +17,7 @@ export const AdminLogin: React.FC = () => {
     // If user is already authenticated, send them to dashboard immediately
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
+        logAction('LOGIN', 'Administrator signed in via Google OAuth');
         navigate('/admin/dashboard', { replace: true });
       }
     });

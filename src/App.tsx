@@ -44,6 +44,8 @@ import { AdminAchievements } from './pages/admin/AdminAchievements';
 import { AdminNewsletter } from './pages/admin/AdminNewsletter';
 import { AdminComplaints } from './pages/admin/AdminComplaints';
 import { AdminMentors } from './pages/admin/AdminMentors';
+import { AdminDeveloper } from './pages/admin/AdminDeveloper';
+import { AdminManageAdmins } from './pages/admin/AdminManageAdmins';
 
 // A helper component to scroll to top automatically on route changes
 const ScrollToTop: React.FC = () => {
@@ -113,6 +115,10 @@ const AppContent: React.FC = () => {
             <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="/admin/logs" element={<AdminLogs />} />
             <Route path="/admin/bugs" element={<AdminBugs />} />
+
+            {/* Developer Gated Routes */}
+            <Route path="/admin/developer" element={<AdminDeveloper />} />
+            <Route path="/admin/manage-admins" element={<AdminManageAdmins />} />
           </Route>
         </Routes>
       </main>

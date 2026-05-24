@@ -6,6 +6,7 @@ import { QuestionRow } from '../../components/admin/QuestionRow';
 import { councilMembers } from '../../data/council';
 import { useToast } from '../../components/admin/Toast';
 import { sendQuestionReplyEmail } from '../../lib/brevo';
+import { logAction } from '../../lib/logger';
 import { 
   Mail, 
   AlertCircle, 
@@ -97,6 +98,7 @@ const QuestionCardMobile: React.FC<{ question: any; onRefresh: () => void }> = (
         }
       }
 
+      logAction('REPLIED_QUESTION', `Reply sent to ${question.student_name} (${question.directed_to})`);
       toast.success("✅ Reply submitted successfully!");
       onRefresh();
       setIsExpanded(false);

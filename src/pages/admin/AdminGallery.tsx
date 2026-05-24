@@ -4,6 +4,7 @@ import { Modal } from '../../components/admin/Modal';
 import { MediaPreviewBox } from '../../components/admin/MediaPreviewBox';
 import { getCloudinaryThumbnail } from '../../lib/cloudinary';
 import { useToast } from '../../components/admin/Toast';
+import { logAction } from '../../lib/logger';
 import { 
   Image as ImageIcon, 
   Plus, 
@@ -175,6 +176,7 @@ export const AdminGallery: React.FC = () => {
           .insert([dataPayload]);
 
         if (error) throw error;
+        logAction('UPLOADED_MEDIA', formData.title);
         toast.success("✅ Media added successfully!");
       }
 

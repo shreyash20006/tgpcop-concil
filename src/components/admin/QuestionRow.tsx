@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Check, MessageSquare, Trash2, Loader2, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from './Toast';
 import { sendQuestionReplyEmail } from '../../lib/brevo';
+import { logAction } from '../../lib/logger';
 
 interface QuestionRowProps {
   question: any;
@@ -82,6 +83,7 @@ export const QuestionRow: React.FC<QuestionRowProps> = ({ question, onRefresh })
         }
       }
 
+      logAction('REPLIED_QUESTION', `Reply sent to ${question.student_name} (${question.directed_to})`);
       toast.success("✅ Reply submitted successfully!");
       onRefresh();
       setIsExpanded(false);

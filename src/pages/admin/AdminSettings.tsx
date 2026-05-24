@@ -32,15 +32,26 @@ export const AdminSettings: React.FC = () => {
   const [originalAnnouncementText, setOriginalAnnouncementText] = useState('');
   const [originalAnnouncementEnabled, setOriginalAnnouncementEnabled] = useState(false);
 
+  const [myProfileName, setMyProfileName] = useState('');
+  const [myProfilePhone, setMyProfilePhone] = useState('');
+  const [myProfileYear, setMyProfileYear] = useState('');
+  const [myProfileAvatar, setMyProfileAvatar] = useState('');
+  const [originalProfileName, setOriginalProfileName] = useState('');
+  const [originalProfilePhone, setOriginalProfilePhone] = useState('');
+  const [originalProfileYear, setOriginalProfileYear] = useState('');
+  const [originalProfileAvatar, setOriginalProfileAvatar] = useState('');
+
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState<'logo' | 'banner' | 'favicon' | 'announcement' | null>(null);
+  const [isSaving, setIsSaving] = useState<'logo' | 'banner' | 'favicon' | 'announcement' | 'profile' | null>(null);
   const [logoError, setLogoError] = useState('');
   const [bannerError, setBannerError] = useState('');
   const [faviconError, setFaviconError] = useState('');
+  const [profileError, setProfileError] = useState('');
 
   const logoImgRef = useRef<HTMLImageElement>(null);
   const bannerImgRef = useRef<HTMLImageElement>(null);
   const faviconImgRef = useRef<HTMLImageElement>(null);
+  const profileImgRef = useRef<HTMLImageElement>(null);
 
   const fetchSettings = async () => {
     setIsLoading(true);
@@ -60,6 +71,25 @@ export const AdminSettings: React.FC = () => {
       setOriginalFavicon(map['favicon_url'] || '');
       setOriginalAnnouncementText(map['announcement_text'] || '');
       setOriginalAnnouncementEnabled(map['announcement_enabled'] === 'true');
+
+      // Fetch personal profile details defensively
+      const { data: profData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('email', myEmail)
+        .maybeSingle();
+
+      if (profData) {
+        setMyProfileName(profData.name || '');
+        setMyProfilePhone(profData.phone || '');
+        setMyProfileYear(profData.year || '');
+        setMyProfileAvatar(profData.avatar_url || '');
+
+        setOriginalProfileName(profData.name || '');
+        setOriginalProfilePhone(profData.phone || '');
+        setOriginalProfileYear(profData.year || '');
+        setOriginalProfileAvatar(profData.avatar_url || '');
+      }
     } catch (err: any) {
       toast.error('❌ Failed to load settings: ' + err.message);
     } finally {
@@ -151,6 +181,41 @@ export const AdminSettings: React.FC = () => {
     }
   };
 
+  const saveProfile = async () => {
+    if (myProfileAvatar && !validateUrl(myProfileAvatar)) {
+      setProfileError('URL must start with https://');
+      return;
+    }
+    setProfileError('');
+    setIsSaving('profile');
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          name: myProfileName,
+          phone: myProfilePhone,
+          year: myProfileYear,
+          avatar_url: myProfileAvatar,
+        })
+        .eq('email', myEmail);
+
+      if (error) throw error;
+
+      await logActivity(myEmail, 'profile_update', 'Updated personal profile details');
+
+      setOriginalProfileName(myProfileName);
+      setOriginalProfilePhone(myProfilePhone);
+      setOriginalProfileYear(myProfileYear);
+      setOriginalProfileAvatar(myProfileAvatar);
+
+      toast.success('✅ Personal profile updated successfully!');
+    } catch (err: any) {
+      toast.error(`❌ Failed to save profile: ${err.message}`);
+    } finally {
+      setIsSaving(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-32 text-navy-dark/40">
@@ -173,6 +238,123 @@ export const AdminSettings: React.FC = () => {
           <p className="text-[10px] text-navy-dark/45 font-sans leading-none mt-0.5">
             Change the college logo and homepage banner image displayed on the public website.
           </p>
+        </div>
+      </div>
+
+      {/* ── My Personal Council Profile ───────────────────────────────────── */}
+      <div className="bg-white border border-navy-dark/10 rounded-2xl shadow-xs p-6 space-y-5">
+        <div className="flex items-center space-x-2 pb-3 border-b border-navy-dark/5">
+          <Sliders className="w-4 h-4 text-orange-burnt" />
+          <h4 className="font-display font-bold text-sm text-navy-dark">👤 My Council Card Profile</h4>
+        </div>
+
+        {/* Profile Card Preview & Details */}
+        <div className="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-xl bg-navy-dark/[0.02] border border-navy-dark/5">
+          {/* Avatar Preview */}
+          <div className="w-20 h-20 rounded-full bg-orange-burnt/10 border border-orange-burnt/20 flex items-center justify-center text-orange-burnt font-display font-extrabold text-2xl shadow-inner shrink-0 overflow-hidden relative">
+            {myProfileAvatar ? (
+              <img
+                ref={profileImgRef}
+                src={myProfileAvatar}
+                alt="Avatar Preview"
+                className="w-full h-full object-cover"
+                onError={() => setProfileError('Image could not be loaded. Check the URL.')}
+                onLoad={() => setProfileError('')}
+              />
+            ) : (
+              <span>{myProfileName ? myProfileName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '??'}</span>
+            )}
+          </div>
+
+          {/* Details list */}
+          <div className="space-y-1 text-xs text-navy-dark/70 font-sans leading-relaxed text-center sm:text-left flex-grow">
+            <h5 className="font-display font-extrabold text-sm text-navy-dark">{myProfileName || 'Unnamed Member'}</h5>
+            <p className="font-semibold text-orange-burnt/85 uppercase tracking-wider text-[10px]">
+              Role: {myEmail === 'shrey@tgpcopconcil.com' ? 'President' : 'Council Administrator'} ({myEmail})
+            </p>
+            {myProfileYear && <p>🎓 {myProfileYear}</p>}
+            {myProfilePhone && <p>📞 {myProfilePhone}</p>}
+          </div>
+        </div>
+
+        {/* Form Inputs Grid (2 columns on sm+) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Name Input */}
+          <div className="space-y-1.5">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60">Display Name</label>
+            <input
+              type="text"
+              value={myProfileName}
+              onChange={e => setMyProfileName(e.target.value)}
+              placeholder="Enter your full name"
+              className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-xs sm:text-sm font-sans text-navy-dark transition-colors"
+            />
+          </div>
+
+          {/* Phone Input */}
+          <div className="space-y-1.5">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60">Phone Number</label>
+            <input
+              type="tel"
+              value={myProfilePhone}
+              onChange={e => setMyProfilePhone(e.target.value)}
+              placeholder="e.g. +91 98765 43210"
+              className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-xs sm:text-sm font-sans text-navy-dark transition-colors"
+            />
+          </div>
+
+          {/* Year/Class Input */}
+          <div className="space-y-1.5">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60">Course & Year</label>
+            <input
+              type="text"
+              value={myProfileYear}
+              onChange={e => setMyProfileYear(e.target.value)}
+              placeholder="e.g. B.Pharm III Year"
+              className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-xs sm:text-sm font-sans text-navy-dark transition-colors"
+            />
+          </div>
+
+          {/* Profile Picture Input */}
+          <div className="space-y-1.5">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60">Profile Photo URL (https://)</label>
+            <input
+              type="url"
+              value={myProfileAvatar}
+              onChange={e => { setMyProfileAvatar(e.target.value); setProfileError(''); }}
+              placeholder="https://res.cloudinary.com/.../your-photo.jpg"
+              className={`w-full px-4 py-2.5 rounded-lg border ${profileError ? 'border-red-400 bg-red-50' : 'border-navy-dark/15 focus:border-orange-burnt'} outline-none text-xs sm:text-sm font-sans text-navy-dark transition-colors`}
+            />
+          </div>
+        </div>
+
+        {profileError && (
+          <p className="text-xs text-red-500 font-medium mt-1">{profileError}</p>
+        )}
+
+        {/* Buttons */}
+        <div className="flex items-center space-x-3 pt-2">
+          <button
+            onClick={saveProfile}
+            disabled={isSaving === 'profile' || (myProfileName === originalProfileName && myProfilePhone === originalProfilePhone && myProfileYear === originalProfileYear && myProfileAvatar === originalProfileAvatar)}
+            className="flex items-center space-x-1.5 px-5 py-2.5 bg-orange-burnt hover:bg-orange-burnt/90 text-white rounded-lg font-display text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-orange-burnt/15"
+          >
+            {isSaving === 'profile' ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>Saving...</span></> : <><Check className="w-3.5 h-3.5" /><span>Save Profile</span></>}
+          </button>
+          <button
+            onClick={() => {
+              setMyProfileName(originalProfileName);
+              setMyProfilePhone(originalProfilePhone);
+              setMyProfileYear(originalProfileYear);
+              setMyProfileAvatar(originalProfileAvatar);
+              setProfileError('');
+            }}
+            disabled={myProfileName === originalProfileName && myProfilePhone === originalProfilePhone && myProfileYear === originalProfileYear && myProfileAvatar === originalProfileAvatar}
+            className="flex items-center space-x-1.5 px-4 py-2.5 border border-navy-dark/15 rounded-lg text-navy-dark/60 font-display text-xs font-bold hover:bg-navy-dark/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Reset</span>
+          </button>
         </div>
       </div>
 

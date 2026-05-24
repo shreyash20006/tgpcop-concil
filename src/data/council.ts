@@ -4,6 +4,8 @@ export interface CouncilMember {
   year: string;
   email: string;
   avatarSeed: string; // Used to generate initials monogram in CouncilCard
+  avatarUrl?: string; // Live profile picture
+  phone?: string; // Live phone number
 }
 
 export const councilMembers: CouncilMember[] = [

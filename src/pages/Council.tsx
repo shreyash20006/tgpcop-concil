@@ -1,10 +1,76 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CouncilCard } from '../components/CouncilCard';
-import { councilMembers } from '../data/council';
-import { ShieldCheck } from 'lucide-react';
+import { councilMembers, type CouncilMember } from '../data/council';
+import { ShieldCheck, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export const Council: React.FC = () => {
+  const [members, setMembers] = useState<CouncilMember[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const { data: dbProfiles, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('is_suspended', false);
+
+        if (error) throw error;
+
+        // Map live database profiles by email
+        const dbProfilesMap = new Map<string, any>();
+        (dbProfiles || []).forEach(p => {
+          if (p.email) dbProfilesMap.set(p.email.toLowerCase(), p);
+        });
+
+        // Merge live data on top of static council roster
+        const merged = councilMembers.map(staticMember => {
+          const dbProf = dbProfilesMap.get(staticMember.email.toLowerCase());
+          if (dbProf) {
+            return {
+              ...staticMember,
+              name: dbProf.name || staticMember.name,
+              year: dbProf.year || staticMember.year,
+              avatarUrl: dbProf.avatar_url || undefined,
+              phone: dbProf.phone || undefined,
+              email: dbProf.email || staticMember.email,
+            };
+          }
+          return staticMember;
+        });
+
+        // Dynamically append any new database council profiles not present in the static fallback
+        const staticEmails = new Set(councilMembers.map(m => m.email.toLowerCase()));
+        (dbProfiles || []).forEach(p => {
+          const emailLower = p.email?.toLowerCase();
+          if (emailLower && !staticEmails.has(emailLower) && p.name) {
+            const displayRole = p.role ? p.role.replace('_', ' ').toUpperCase() : 'COUNCIL MEMBER';
+            merged.push({
+              role: displayRole,
+              name: p.name,
+              year: p.year || 'Council Member',
+              email: p.email,
+              avatarSeed: p.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2),
+              avatarUrl: p.avatar_url || undefined,
+              phone: p.phone || undefined,
+            });
+          }
+        });
+
+        setMembers(merged);
+      } catch (err) {
+        console.error('Error fetching dynamic council profiles:', err);
+        setMembers(councilMembers);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMembers();
+  }, []);
+
   // Container Variants for staggering children cards
   const gridContainerVariants = {
     hidden: {},
@@ -68,16 +134,23 @@ export const Council: React.FC = () => {
         </div>
 
         {/* 13 Members Grid layout */}
-        <motion.div
-          variants={gridContainerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          {councilMembers.map((member) => (
-            <CouncilCard key={member.name} member={member} />
-          ))}
-        </motion.div>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-24 text-navy-dark/40">
+            <Loader2 className="w-8 h-8 animate-spin text-orange-burnt mb-3" />
+            <span className="font-display text-xs sm:text-sm">Retrieving council members live data...</span>
+          </div>
+        ) : (
+          <motion.div
+            variants={gridContainerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            {members.map((member) => (
+              <CouncilCard key={`${member.email}-${member.name}`} member={member} />
+            ))}
+          </motion.div>
+        )}
       </div>
     </div>
   );

@@ -31,8 +31,17 @@ export const CouncilCard: React.FC<CouncilCardProps> = ({ member }) => {
     >
       <div className="flex items-start justify-between mb-4">
         {/* Avatar Ring */}
-        <div className="w-14 h-14 rounded-full bg-orange-burnt/10 border border-orange-burnt/20 flex items-center justify-center text-orange-burnt font-display font-bold text-lg shadow-inner shrink-0">
-          {member.avatarSeed ? (
+        <div className="w-14 h-14 rounded-full bg-orange-burnt/10 border border-orange-burnt/20 flex items-center justify-center text-orange-burnt font-display font-bold text-lg shadow-inner shrink-0 overflow-hidden relative">
+          {member.avatarUrl ? (
+            <img
+              src={member.avatarUrl}
+              alt={member.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          ) : member.avatarSeed ? (
             <span>{member.avatarSeed}</span>
           ) : (
             <User className="w-6 h-6" />
@@ -46,7 +55,7 @@ export const CouncilCard: React.FC<CouncilCardProps> = ({ member }) => {
       </div>
 
       {/* Roster Information */}
-      <div className="mb-6">
+      <div className="mb-4">
         <p className="text-orange-burnt font-display font-bold text-xs uppercase tracking-widest mb-1.5">
           {member.role}
         </p>
@@ -54,6 +63,24 @@ export const CouncilCard: React.FC<CouncilCardProps> = ({ member }) => {
           {member.name}
         </h3>
       </div>
+
+      {/* Contact Details */}
+      {(member.email || member.phone) && (
+        <div className="mt-2 mb-4 space-y-1 text-[11px] text-navy-dark/65 font-sans border-t border-navy-dark/5 pt-2">
+          {member.email && (
+            <div className="flex items-center space-x-1.5">
+              <span>📧</span>
+              <span className="truncate">{member.email}</span>
+            </div>
+          )}
+          {member.phone && (
+            <div className="flex items-center space-x-1.5">
+              <span>📞</span>
+              <span>{member.phone}</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* CTA Button */}
       <Link

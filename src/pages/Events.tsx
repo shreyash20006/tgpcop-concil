@@ -37,16 +37,21 @@ export const Events: React.FC = () => {
   const competitions = events.filter((e) => e.type === 'competition');
 
   return (
-    <div className="pt-28 pb-24 min-h-screen bg-gray-light">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen bg-[#050B18] pt-32 pb-24 overflow-hidden">
+      {/* Background glowing orbs & grids */}
+      <div className="absolute top-[15%] right-[5%] w-[450px] h-[450px] rounded-full ambient-orb-orange z-0 pointer-events-none" />
+      <div className="absolute top-[50%] left-[5%] w-[400px] h-[400px] rounded-full ambient-orb-gold z-0 pointer-events-none" />
+      <div className="absolute inset-0 grid-bg-overlay opacity-15 z-0 pointer-events-none" />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Page Title Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12 flex flex-col items-center space-y-4">
+        <div className="text-center max-w-3xl mx-auto mb-16 flex flex-col items-center space-y-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: 'spring' }}
-            className="w-12 h-12 rounded-full bg-orange-burnt/10 flex items-center justify-center text-orange-burnt"
+            className="w-12 h-12 rounded-xl bg-orange-burnt/10 flex items-center justify-center text-orange-burnt border border-orange-burnt/20 shadow-lg"
           >
             {activeTab === 'events' ? (
               <CalendarRange className="w-6 h-6" />
@@ -68,17 +73,16 @@ export const Events: React.FC = () => {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="font-display font-extrabold text-3xl sm:text-5xl text-navy-dark leading-tight uppercase"
+              className="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight uppercase"
             >
-              {activeTab === 'events' ? 'EVENTS TIMELINE' : 'ACTIVE COMPETITIONS'}
+              {activeTab === 'events' ? 'Events Timeline' : 'Active Competitions'}
             </motion.h1>
             
-            {/* Animated Underline */}
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: '80px' }}
               transition={{ delay: 0.4, duration: 0.6, ease: 'easeOut' }}
-              className="h-1 bg-orange-burnt mx-auto mt-4 rounded-full"
+              className="h-1 bg-gradient-to-r from-orange-burnt to-gold-accent mx-auto mt-4 rounded-full"
             />
           </div>
 
@@ -86,62 +90,83 @@ export const Events: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-navy-dark/70 text-sm sm:text-base font-sans"
+            className="text-white/60 text-sm sm:text-base font-sans"
           >
             Explore our rich history of technical symposiums, cultural nights, and community campaigns, or participate in live scientific competitions!
           </motion.p>
         </div>
 
-        {/* Toggle Selector Tabs */}
-        <div className="flex items-center justify-center mb-12">
-          <div className="bg-navy-dark/5 p-1.5 rounded-xl flex space-x-1 border border-navy-dark/5 backdrop-blur-md">
+        {/* Toggle Selector Tabs with smooth layout slider */}
+        <div className="flex items-center justify-center mb-16">
+          <div className="bg-white/5 p-1.5 rounded-2xl flex space-x-1.5 border border-white/5 backdrop-blur-xl relative">
             <button
               onClick={() => setActiveTab('events')}
-              className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-display text-xs sm:text-sm font-bold tracking-wide transition-all duration-300 ${
-                activeTab === 'events'
-                  ? 'bg-navy-dark text-white shadow-md'
-                  : 'text-navy-dark/75 hover:bg-navy-dark/5 hover:text-navy-dark'
+              className={`flex items-center space-x-2 px-6 py-3.5 rounded-xl font-display text-xs sm:text-sm font-bold tracking-wide transition-all duration-300 relative z-10 ${
+                activeTab === 'events' ? 'text-white' : 'text-white/60 hover:text-white'
               }`}
             >
               <CalendarDays className="w-4 h-4 text-orange-burnt" />
               <span>Upcoming Events</span>
+              {activeTab === 'events' && (
+                <motion.div
+                  layoutId="activeTabSelectorBg"
+                  className="absolute inset-0 bg-[#0F1E42] rounded-xl border border-white/5 shadow-lg -z-10"
+                  transition={{ type: 'spring', stiffness: 350, damping: 26 }}
+                />
+              )}
             </button>
             <button
               onClick={() => setActiveTab('competitions')}
-              className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-display text-xs sm:text-sm font-bold tracking-wide transition-all duration-300 ${
-                activeTab === 'competitions'
-                  ? 'bg-navy-dark text-white shadow-md'
-                  : 'text-navy-dark/75 hover:bg-navy-dark/5 hover:text-navy-dark'
+              className={`flex items-center space-x-2 px-6 py-3.5 rounded-xl font-display text-xs sm:text-sm font-bold tracking-wide transition-all duration-300 relative z-10 ${
+                activeTab === 'competitions' ? 'text-white' : 'text-white/60 hover:text-white'
               }`}
             >
               <Trophy className="w-4 h-4 text-orange-burnt" />
               <span>Competitions</span>
+              {activeTab === 'competitions' && (
+                <motion.div
+                  layoutId="activeTabSelectorBg"
+                  className="absolute inset-0 bg-[#0F1E42] rounded-xl border border-white/5 shadow-lg -z-10"
+                  transition={{ type: 'spring', stiffness: 350, damping: 26 }}
+                />
+              )}
             </button>
           </div>
         </div>
 
         {/* Dynamic Display Panel */}
         {isLoading ? (
-          /* SHIMMERING SKELETON COVERS */
           activeTab === 'events' ? (
-            <div className="h-96 flex flex-col items-center justify-center text-navy-dark/40">
-              <Loader2 className="w-8 h-8 text-orange-burnt animate-spin mb-3" />
-              <p className="font-display text-xs tracking-widest uppercase">Fetching timeline milestones...</p>
+            <div className="space-y-8 max-w-4xl mx-auto">
+              {[1, 2].map((idx) => (
+                <div key={idx} className="glass-panel rounded-2xl p-6 flex flex-col md:flex-row gap-6 border border-white/5 h-auto overflow-hidden relative">
+                  <div className="absolute inset-0 shimmer pointer-events-none" />
+                  <div className="w-full md:w-48 h-32 bg-white/5 rounded-xl shrink-0" />
+                  <div className="flex-grow space-y-3 pt-2">
+                    <div className="w-24 h-4 bg-white/5 rounded" />
+                    <div className="w-48 h-6 bg-white/5 rounded" />
+                    <div className="w-full h-12 bg-white/5 rounded-xl mt-3" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {[1, 2, 3].map((idx) => (
                 <div
                   key={idx}
-                  className="bg-white rounded-xl overflow-hidden shadow-sm border border-navy-dark/5 p-6 space-y-4 animate-pulse"
+                  className="glass-panel rounded-2xl overflow-hidden border border-white/5 p-6 h-96 flex flex-col justify-between relative"
                 >
-                  <div className="flex justify-between items-center">
-                    <div className="w-10 h-10 rounded-full bg-navy-dark/10" />
-                    <div className="w-20 h-5 bg-navy-dark/10 rounded-full" />
+                  <div className="absolute inset-0 shimmer pointer-events-none" />
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10" />
+                    <div className="w-20 h-5 bg-white/5 rounded-full" />
                   </div>
-                  <div className="h-6 bg-navy-dark/10 w-2/3 rounded" />
-                  <div className="h-16 bg-navy-dark/5 w-full rounded" />
-                  <div className="h-20 bg-navy-dark/10 w-full rounded-lg" />
+                  <div className="space-y-3 flex-grow pt-4">
+                    <div className="h-6 bg-white/5 w-2/3 rounded" />
+                    <div className="h-16 bg-white/5 w-full rounded-xl" />
+                  </div>
+                  <div className="h-10 bg-white/5 w-full rounded-xl mt-6" />
                 </div>
               ))}
             </div>
@@ -151,41 +176,40 @@ export const Events: React.FC = () => {
             {activeTab === 'events' ? (
               <motion.div
                 key="events-tab"
-                initial={{ opacity: 0, y: 25 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -25 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.25 }}
               >
                 <EventTimeline events={timelineEvents} />
                 
                 {timelineEvents.length === 0 && (
-                  <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-navy-dark/5 max-w-lg mx-auto flex flex-col items-center p-6">
-                    <RefreshCw className="w-12 h-12 text-navy-dark/20 mb-3 animate-spin" style={{ animationDuration: '6s' }} />
-                    <h3 className="font-display font-bold text-navy-dark/70 mb-1">No Timeline Events</h3>
-                    <p className="text-navy-dark/50 text-sm font-sans">Timeline events are currently empty in our records.</p>
+                  <div className="text-center py-20 glass-panel rounded-2xl border border-white/5 max-w-lg mx-auto flex flex-col items-center p-6">
+                    <RefreshCw className="w-12 h-12 text-white/10 mb-4 animate-spin" style={{ animationDuration: '6s' }} />
+                    <h3 className="font-display font-bold text-white/70 mb-1">No Upcoming Events</h3>
+                    <p className="text-white/50 text-sm font-sans">Campus events are currently empty in our database.</p>
                   </div>
                 )}
               </motion.div>
             ) : (
               <motion.div
                 key="competitions-tab"
-                initial={{ opacity: 0, y: 25 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -25 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.25 }}
               >
-                {/* Competitions Card Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto py-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto py-4">
                   {competitions.map((comp) => (
                     <CompetitionCard key={comp.id} competition={comp} />
                   ))}
                 </div>
 
                 {competitions.length === 0 && (
-                  <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-navy-dark/5 max-w-lg mx-auto flex flex-col items-center p-6">
-                    <RefreshCw className="w-12 h-12 text-navy-dark/20 mb-3 animate-spin" style={{ animationDuration: '6s' }} />
-                    <h3 className="font-display font-bold text-navy-dark/70 mb-1">No Active Competitions</h3>
-                    <p className="text-navy-dark/50 text-sm font-sans">No contests or quizzes are running at this moment. Check back soon!</p>
+                  <div className="text-center py-20 glass-panel rounded-2xl border border-white/5 max-w-lg mx-auto flex flex-col items-center p-6">
+                    <RefreshCw className="w-12 h-12 text-white/10 mb-4 animate-spin" style={{ animationDuration: '6s' }} />
+                    <h3 className="font-display font-bold text-white/70 mb-1">No Active Competitions</h3>
+                    <p className="text-white/50 text-sm font-sans">No contests or drug challenges are running at this moment.</p>
                   </div>
                 )}
               </motion.div>
@@ -197,23 +221,5 @@ export const Events: React.FC = () => {
     </div>
   );
 };
-
-// Quick helper to show spinner in skeleton loader
-const Loader2: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg
-    {...props}
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-  </svg>
-);
 
 export default Events;

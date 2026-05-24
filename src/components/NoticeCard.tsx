@@ -25,10 +25,10 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
 
   const getCategoryStyles = (category: string) => {
     switch (category) {
-      case 'Academic': return 'bg-blue-50 text-blue-600 border-blue-200';
-      case 'Event':    return 'bg-emerald-50 text-emerald-600 border-emerald-200';
-      case 'Alert':    return 'bg-red-50 text-red-600 border-red-200';
-      default:         return 'bg-amber-50 text-amber-600 border-amber-200';
+      case 'Academic': return 'bg-blue-500/10 text-blue-400 border-blue-500/25';
+      case 'Event':    return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25';
+      case 'Alert':    return 'bg-red-500/10 text-red-400 border-red-500/25';
+      default:         return 'bg-amber-500/10 text-amber-400 border-amber-500/25';
     }
   };
 
@@ -49,51 +49,51 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
     <>
       <motion.div
         layout
-        initial={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
+        exit={{ opacity: 0, scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        whileHover={{ y: -5, boxShadow: '0 15px 30px -10px rgba(0, 0, 0, 0.1)' }}
-        className="bg-white rounded-xl shadow-sm border border-navy-dark/5 p-6 relative flex flex-col justify-between"
+        whileHover={{ y: -5 }}
+        className="glass-panel glow-card rounded-2xl border border-white/5 p-6 relative flex flex-col justify-between bg-[#0F1E42]/10"
       >
         <div>
           {/* Header Badge & Pin */}
           <div className="flex items-center justify-between mb-4">
             {notice.is_pinned ? (
-              <div className="flex items-center space-x-1.5 text-orange-burnt">
-                <Pin className="w-5 h-5 fill-current transform -rotate-45" />
-                <span className="text-[10px] uppercase font-bold tracking-widest text-navy-dark/40">Pinned</span>
+              <div className="flex items-center space-x-1.5 text-orange-burnt animate-pulse">
+                <Pin className="w-4 h-4 fill-current transform -rotate-45" />
+                <span className="text-[10px] uppercase font-bold tracking-widest text-orange-burnt">Pinned</span>
               </div>
             ) : <div />}
-            <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${getCategoryStyles(notice.category)}`}>
+            <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border ${getCategoryStyles(notice.category)}`}>
               {notice.category}
             </span>
           </div>
 
           {/* Title */}
-          <h3 className="font-display font-bold text-lg sm:text-xl text-navy-dark mb-2 leading-snug">
+          <h3 className="font-display font-bold text-lg text-white mb-2 leading-snug">
             {notice.title}
           </h3>
 
           {/* Date */}
-          <div className="flex items-center space-x-1.5 text-navy-dark/50 text-xs mb-4">
-            <Calendar className="w-3.5 h-3.5" />
+          <div className="flex items-center space-x-1.5 text-white/45 text-xs mb-4 font-sans">
+            <Calendar className="w-3.5 h-3.5 text-orange-burnt shrink-0" />
             <span>{formattedDate}</span>
           </div>
 
           {/* Description */}
-          <p className="text-navy-dark/85 text-sm sm:text-base leading-relaxed mb-6 font-sans">
+          <p className="text-white/70 text-sm leading-relaxed mb-6 font-sans">
             {notice.description}
           </p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="space-y-2 pt-2 border-t border-navy-dark/5 w-full">
+        {/* Action Buttons with high fidelity glass styles */}
+        <div className="space-y-2 pt-4 border-t border-white/5 w-full">
           {pdfUrl && (
             <div className="grid grid-cols-3 gap-2 w-full">
               <button
                 onClick={openPreview}
-                className="flex items-center justify-center space-x-1.5 py-2 px-2 rounded-lg font-display text-xs font-bold bg-navy-dark hover:bg-orange-burnt text-white transition-colors shadow-sm"
+                className="flex items-center justify-center space-x-1.5 py-2.5 px-2 rounded-xl font-display text-[10px] sm:text-xs font-bold bg-[#0F1E42] hover:bg-orange-burnt text-white transition-all shadow-md border border-white/5 hover:border-transparent active:scale-98"
               >
                 <Eye className="w-3.5 h-3.5" />
                 <span>Preview</span>
@@ -102,7 +102,7 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
                 href={pdfUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center space-x-1.5 py-2 px-2 rounded-lg font-display text-xs font-bold border border-navy-dark/15 hover:border-orange-burnt text-navy-dark hover:text-orange-burnt transition-colors bg-white shadow-sm"
+                className="flex items-center justify-center space-x-1.5 py-2.5 px-2 rounded-xl font-display text-[10px] sm:text-xs font-bold bg-white/5 hover:bg-white/10 text-white transition-all shadow-md border border-white/5 active:scale-98"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
                 <span>Open</span>
@@ -112,10 +112,10 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
                 download
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center space-x-1.5 py-2 px-2 rounded-lg font-display text-xs font-bold bg-orange-burnt hover:bg-orange-burnt/90 text-white transition-colors shadow-sm"
+                className="flex items-center justify-center space-x-1.5 py-2.5 px-2 rounded-xl font-display text-[10px] sm:text-xs font-bold bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white transition-all shadow-md active:scale-98"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Download</span>
+                <span>Get</span>
               </a>
             </div>
           )}
@@ -125,7 +125,7 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
               href={externalLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center space-x-2 w-full py-2.5 px-4 rounded-lg font-display text-sm font-semibold bg-navy-dark hover:bg-orange-burnt text-white shadow-md transition-colors"
+              className="flex items-center justify-center space-x-2 w-full py-3 px-4 rounded-xl font-display text-xs sm:text-sm font-bold bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white shadow-lg active:scale-98 transition-all"
             >
               <span>{notice.linkText || 'Open External Resource'}</span>
               <ExternalLink className="w-4 h-4" />
@@ -134,10 +134,10 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
         </div>
       </motion.div>
 
-      {/* ── PDF Preview Modal ─────────────────────────────────────────────── */}
+      {/* ── PDF Preview Modal (Upgraded with Glassmorphism Dark Layout) ── */}
       <AnimatePresence>
         {isPreviewOpen && pdfUrl && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
             {/* Backdrop click closes */}
             <div onClick={() => setIsPreviewOpen(false)} className="absolute inset-0 cursor-default" />
 
@@ -146,10 +146,10 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              className="relative bg-white w-full max-w-4xl h-[88vh] rounded-2xl overflow-hidden shadow-2xl flex flex-col z-10"
+              className="relative bg-[#080F25] w-full max-w-4xl h-[88vh] rounded-2xl overflow-hidden shadow-2xl flex flex-col z-10 border border-white/10"
             >
-              {/* Modal Header */}
-              <div className="bg-navy-dark text-white px-5 py-3.5 flex items-center justify-between shrink-0">
+              {/* Modal Header in sleek dark-slate */}
+              <div className="bg-[#050B18] text-white px-5 py-4 flex items-center justify-between shrink-0 border-b border-white/5">
                 <div className="flex items-center space-x-2 min-w-0">
                   <FileText className="w-4 h-4 text-orange-burnt shrink-0" />
                   <h4 className="font-display font-extrabold text-sm truncate">{notice.title}</h4>
@@ -159,7 +159,7 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
                     href={pdfUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-colors"
+                    className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-bold transition-all border border-white/5 active:scale-95"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     <span>Open</span>
@@ -169,14 +169,14 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
                     download
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-orange-burnt hover:bg-orange-burnt/90 text-white text-xs font-bold transition-colors"
+                    className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white text-xs font-bold transition-all active:scale-95 shadow-md shadow-orange-burnt/10"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Download</span>
                   </a>
                   <button
                     onClick={() => setIsPreviewOpen(false)}
-                    className="p-1.5 rounded-lg hover:bg-white/10 text-white transition-colors"
+                    className="p-2 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -184,19 +184,18 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
               </div>
 
               {/* PDF Viewer Body */}
-              <div className="flex-grow relative bg-gray-100 overflow-hidden">
-
+              <div className="flex-grow relative bg-[#050B18] overflow-hidden">
                 {/* Loading spinner */}
                 {isPdfLoading && !embedFailed && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-10">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#050B18] z-10">
                     <Loader2 className="w-10 h-10 text-orange-burnt animate-spin mb-3" />
-                    <span className="text-xs font-semibold tracking-wider font-display uppercase text-navy-dark/60">
-                      Loading PDF...
+                    <span className="text-xs font-bold tracking-wider font-display uppercase text-white/50">
+                      Loading Document PDF...
                     </span>
                   </div>
                 )}
 
-                {/* Native browser PDF embed — works with Cloudinary & direct PDF URLs */}
+                {/* Native browser PDF embed */}
                 {!embedFailed ? (
                   <embed
                     key={pdfUrl}
@@ -208,22 +207,22 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
                   />
                 ) : (
                   /* Fallback UI when browser blocks inline embed */
-                  <div className="flex flex-col items-center justify-center h-full text-center px-8 bg-white">
-                    <div className="w-16 h-16 rounded-2xl bg-orange-burnt/10 flex items-center justify-center mb-4">
-                      <AlertTriangle className="w-8 h-8 text-orange-burnt" />
+                  <div className="flex flex-col items-center justify-center h-full text-center px-8 bg-[#050B18]">
+                    <div className="w-16 h-16 rounded-2xl bg-orange-burnt/15 flex items-center justify-center mb-4 border border-orange-burnt/25">
+                      <AlertTriangle className="w-8 h-8 text-orange-burnt animate-bounce" />
                     </div>
-                    <h4 className="font-display font-extrabold text-navy-dark text-lg mb-2">
-                      Inline Preview Not Available
+                    <h4 className="font-display font-extrabold text-white text-lg mb-2">
+                      Inline Preview Blocked
                     </h4>
-                    <p className="text-navy-dark/55 text-sm font-sans max-w-sm leading-relaxed mb-6">
-                      Your browser blocked the inline preview. Open or download the document directly using the buttons below.
+                    <p className="text-white/50 text-sm font-sans max-w-sm leading-relaxed mb-6">
+                      Your browser's security blocks loading PDFs in small frames. You can open or download the PDF document directly using the buttons below.
                     </p>
                     <div className="flex items-center space-x-3">
                       <a
                         href={pdfUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center space-x-2 px-5 py-2.5 rounded-lg bg-navy-dark hover:bg-orange-burnt text-white font-display text-sm font-bold shadow-md transition-colors"
+                        className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-display text-sm font-bold shadow-md transition-all active:scale-95 border border-white/5"
                       >
                         <ExternalLink className="w-4 h-4" />
                         <span>Open in New Tab</span>
@@ -233,7 +232,7 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
                         download
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center space-x-2 px-5 py-2.5 rounded-lg bg-orange-burnt hover:bg-orange-burnt/90 text-white font-display text-sm font-bold shadow-md transition-colors"
+                        className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white font-display text-sm font-bold shadow-md transition-all active:scale-95 border border-white/5"
                       >
                         <Download className="w-4 h-4" />
                         <span>Download PDF</span>

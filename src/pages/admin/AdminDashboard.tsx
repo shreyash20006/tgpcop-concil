@@ -70,10 +70,10 @@ export const AdminDashboard: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="space-y-8 animate-in fade-in duration-300 relative z-10">
       
       {isLoading ? (
-        <div className="h-96 flex flex-col items-center justify-center text-navy-dark/45">
+        <div className="h-96 flex flex-col items-center justify-center text-white/50">
           <Loader2 className="w-10 h-10 text-orange-burnt animate-spin mb-4" />
           <p className="font-display text-sm tracking-wider uppercase">Fetching console metrics...</p>
         </div>
@@ -84,25 +84,25 @@ export const AdminDashboard: React.FC = () => {
             <StatsCard
               label="Total Questions"
               value={stats.totalQuestions}
-              icon={<HelpCircle className="w-6 h-6" />}
+              icon={<HelpCircle className="w-5 h-5 text-white" />}
               trendColor="navy"
             />
             <StatsCard
               label="Pending Questions"
               value={stats.pendingQuestions}
-              icon={<AlertCircle className="w-6 h-6" />}
+              icon={<AlertCircle className="w-5 h-5 text-white" />}
               trendColor="orange"
             />
             <StatsCard
               label="Notices Published"
               value={stats.noticesCount}
-              icon={<Megaphone className="w-6 h-6" />}
+              icon={<Megaphone className="w-5 h-5 text-white" />}
               trendColor="amber"
             />
             <StatsCard
               label="Active Events"
               value={stats.activeEventsCount}
-              icon={<Calendar className="w-6 h-6" />}
+              icon={<Calendar className="w-5 h-5 text-white" />}
               trendColor="green"
             />
           </div>
@@ -111,15 +111,15 @@ export const AdminDashboard: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
             {/* Recent Questions Table panel (lg:span-8) */}
-            <div className="lg:col-span-8 bg-white border border-navy-dark/10 rounded-2xl p-6 shadow-sm space-y-4">
-              <div className="flex items-center justify-between border-b border-navy-dark/5 pb-4">
-                <h3 className="font-display font-extrabold text-base text-navy-dark flex items-center space-x-2">
-                  <Clock className="w-5 h-5 text-orange-burnt" />
+            <div className="lg:col-span-8 glass-panel glow-card rounded-2xl p-6 shadow-2xl border border-white/5 space-y-5 bg-[#0F1E42]/10">
+              <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                <h3 className="font-display font-extrabold text-base text-white flex items-center space-x-2">
+                  <Clock className="w-5 h-5 text-orange-burnt animate-pulse" />
                   <span>Recent Student Inquiries</span>
                 </h3>
                 <Link
                   to="/admin/questions"
-                  className="inline-flex items-center space-x-1 text-xs font-display font-extrabold text-orange-burnt hover:text-navy-dark transition-colors group"
+                  className="inline-flex items-center space-x-1 text-xs font-display font-extrabold text-orange-burnt hover:text-white transition-colors group"
                 >
                   <span>Manage All</span>
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -129,35 +129,35 @@ export const AdminDashboard: React.FC = () => {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse min-w-[500px]">
                   <thead>
-                    <tr className="border-b border-navy-dark/10 text-[10px] font-bold uppercase tracking-wider text-navy-dark/40 bg-gray-50/50">
-                      <th className="px-4 py-2">Student</th>
-                      <th className="px-4 py-2">To</th>
-                      <th className="px-4 py-2">Question Summary</th>
-                      <th className="px-4 py-2 text-right">Status</th>
+                    <tr className="border-b border-white/10 text-[10px] font-bold uppercase tracking-wider text-white/40 bg-white/5">
+                      <th className="px-4 py-3">Student</th>
+                      <th className="px-4 py-3">To</th>
+                      <th className="px-4 py-3">Question Summary</th>
+                      <th className="px-4 py-3 text-right">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-navy-dark/5">
+                  <tbody className="divide-y divide-white/5">
                     {recentQuestions.map((q, idx) => (
-                      <tr key={idx} className="hover:bg-navy-dark/[0.01] transition-colors">
-                        <td className="px-4 py-3 whitespace-nowrap">
+                      <tr key={idx} className="hover:bg-white/5 transition-colors">
+                        <td className="px-4 py-3.5 whitespace-nowrap">
                           <div className="flex flex-col">
-                            <span className="font-display font-bold text-xs text-navy-dark">{q.student_name}</span>
-                            <span className="text-[9px] text-navy-dark/50 font-sans">{q.student_year}</span>
+                            <span className="font-display font-bold text-xs text-white">{q.student_name}</span>
+                            <span className="text-[9px] text-white/45 font-sans mt-0.5">{q.student_year}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs font-semibold text-orange-burnt">
+                        <td className="px-4 py-3.5 whitespace-nowrap text-xs font-bold text-orange-burnt">
                           {q.directed_to}
                         </td>
-                        <td className="px-4 py-3 text-xs text-navy-dark/70 max-w-xs truncate">
+                        <td className="px-4 py-3.5 text-xs text-white/70 max-w-xs truncate font-sans">
                           "{q.question_text}"
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-right">
-                          <span className={`inline-block text-[8px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded border ${
+                        <td className="px-4 py-3.5 whitespace-nowrap text-right">
+                          <span className={`inline-block text-[8px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded border ${
                             q.status === 'answered' 
-                              ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' 
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25' 
                               : q.status === 'seen'
-                              ? 'bg-blue-500/10 text-blue-600 border-blue-500/20'
-                              : 'bg-orange-burnt/10 text-orange-burnt border-orange-burnt/20'
+                              ? 'bg-blue-500/10 text-blue-400 border-blue-500/25'
+                              : 'bg-orange-burnt/10 text-orange-burnt border-orange-burnt/25'
                           }`}>
                             {q.status}
                           </span>
@@ -167,9 +167,9 @@ export const AdminDashboard: React.FC = () => {
 
                     {recentQuestions.length === 0 && (
                       <tr>
-                        <td colSpan={4} className="text-center py-8">
-                          <HelpCircle className="w-8 h-8 text-navy-dark/15 mx-auto mb-2" />
-                          <p className="text-xs text-navy-dark/40 font-display">No questions submitted yet.</p>
+                        <td colSpan={4} className="text-center py-12">
+                          <HelpCircle className="w-8 h-8 text-white/10 mx-auto mb-2" />
+                          <p className="text-xs text-white/40 font-display">No questions submitted yet.</p>
                         </td>
                       </tr>
                     )}
@@ -179,25 +179,25 @@ export const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Quick Actions Shortcuts panel (lg:span-4) */}
-            <div className="lg:col-span-4 bg-navy-dark text-white rounded-2xl p-6 shadow-sm relative overflow-hidden space-y-4">
-              <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.005)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.005)_1px,transparent_1px)] bg-[size:20px_20px] opacity-15 pointer-events-none" />
+            <div className="lg:col-span-4 glass-panel glow-card rounded-2xl p-6 shadow-2xl relative overflow-hidden border border-white/5 space-y-5 bg-[#0F1E42]/10">
+              <div className="absolute inset-0 grid-bg-overlay opacity-10 pointer-events-none" />
               
-              <div className="border-b border-white/10 pb-3 z-10 relative">
+              <div className="border-b border-white/5 pb-3 z-10 relative">
                 <h3 className="font-display font-extrabold text-base text-orange-burnt">
                   Quick Tasks Panel
                 </h3>
-                <p className="text-[10px] text-white/50 font-sans mt-0.5">
+                <p className="text-[10px] text-white/45 font-sans mt-0.5">
                   Publish updates and portfolio photos live to the college portal.
                 </p>
               </div>
 
-              <div className="space-y-3 z-10 relative">
+              <div className="space-y-3.5 z-10 relative">
                 <Link
                   to="/admin/notices"
-                  className="w-full flex items-center justify-between p-3.5 rounded-xl bg-white/5 hover:bg-orange-burnt text-xs font-bold font-display uppercase tracking-wider transition-all duration-300 group shadow-sm border border-white/5"
+                  className="w-full flex items-center justify-between p-3.5 rounded-xl bg-white/5 hover:bg-gradient-to-r hover:from-orange-burnt hover:to-[#E06D2B] text-xs font-bold font-display uppercase tracking-wider transition-all duration-300 group shadow-sm border border-white/5"
                 >
                   <div className="flex items-center space-x-2.5">
-                    <Plus className="w-4 h-4 text-orange-burnt group-hover:text-white transition-colors" />
+                    <Plus className="w-4 h-4 text-orange-burnt group-hover:text-white transition-colors shrink-0" />
                     <span>📢 Add Announcement</span>
                   </div>
                   <ArrowRight className="w-4 h-4 text-white/30 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
@@ -205,10 +205,10 @@ export const AdminDashboard: React.FC = () => {
 
                 <Link
                   to="/admin/events"
-                  className="w-full flex items-center justify-between p-3.5 rounded-xl bg-white/5 hover:bg-orange-burnt text-xs font-bold font-display uppercase tracking-wider transition-all duration-300 group shadow-sm border border-white/5"
+                  className="w-full flex items-center justify-between p-3.5 rounded-xl bg-white/5 hover:bg-gradient-to-r hover:from-orange-burnt hover:to-[#E06D2B] text-xs font-bold font-display uppercase tracking-wider transition-all duration-300 group shadow-sm border border-white/5"
                 >
                   <div className="flex items-center space-x-2.5">
-                    <Plus className="w-4 h-4 text-orange-burnt group-hover:text-white transition-colors" />
+                    <Plus className="w-4 h-4 text-orange-burnt group-hover:text-white transition-colors shrink-0" />
                     <span>🎉 Add Live Event</span>
                   </div>
                   <ArrowRight className="w-4 h-4 text-white/30 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
@@ -216,10 +216,10 @@ export const AdminDashboard: React.FC = () => {
 
                 <Link
                   to="/admin/gallery"
-                  className="w-full flex items-center justify-between p-3.5 rounded-xl bg-white/5 hover:bg-orange-burnt text-xs font-bold font-display uppercase tracking-wider transition-all duration-300 group shadow-sm border border-white/5"
+                  className="w-full flex items-center justify-between p-3.5 rounded-xl bg-white/5 hover:bg-gradient-to-r hover:from-orange-burnt hover:to-[#E06D2B] text-xs font-bold font-display uppercase tracking-wider transition-all duration-300 group shadow-sm border border-white/5"
                 >
                   <div className="flex items-center space-x-2.5">
-                    <Plus className="w-4 h-4 text-orange-burnt group-hover:text-white transition-colors" />
+                    <Plus className="w-4 h-4 text-orange-burnt group-hover:text-white transition-colors shrink-0" />
                     <span>📸 Upload Gallery Image</span>
                   </div>
                   <ArrowRight className="w-4 h-4 text-white/30 group-hover:text-white group-hover:translate-x-0.5 transition-all" />

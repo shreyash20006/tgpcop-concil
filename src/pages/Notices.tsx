@@ -31,22 +31,26 @@ export const Notices: React.FC = () => {
     fetchNotices();
   }, []);
 
-  // Filter notices based on selection
   const filteredNotices = notices.filter(
     (n) => activeFilter === 'All' || n.category === activeFilter
   );
 
   return (
-    <div className="pt-28 pb-24 min-h-screen bg-gray-light">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen bg-[#050B18] pt-32 pb-24 overflow-hidden">
+      {/* Background colorful orbs and noise */}
+      <div className="absolute top-[20%] left-[5%] w-[450px] h-[450px] rounded-full ambient-orb-orange z-0 pointer-events-none" />
+      <div className="absolute top-[60%] right-[5%] w-[400px] h-[400px] rounded-full ambient-orb-gold z-0 pointer-events-none" />
+      <div className="absolute inset-0 grid-bg-overlay opacity-15 z-0 pointer-events-none" />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Page Title Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12 flex flex-col items-center space-y-4">
+        <div className="text-center max-w-3xl mx-auto mb-16 flex flex-col items-center space-y-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: 'spring' }}
-            className="w-12 h-12 rounded-full bg-orange-burnt/10 flex items-center justify-center text-orange-burnt"
+            className="w-12 h-12 rounded-xl bg-orange-burnt/10 flex items-center justify-center text-orange-burnt border border-orange-burnt/20 shadow-lg"
           >
             <Megaphone className="w-6 h-6" />
           </motion.div>
@@ -64,17 +68,16 @@ export const Notices: React.FC = () => {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="font-display font-extrabold text-3xl sm:text-5xl text-navy-dark leading-tight"
+              className="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight uppercase"
             >
-              OFFICIAL ANNOUNCEMENTS
+              Official Announcements
             </motion.h1>
             
-            {/* Animated Underline */}
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: '80px' }}
               transition={{ delay: 0.4, duration: 0.6, ease: 'easeOut' }}
-              className="h-1 bg-orange-burnt mx-auto mt-4 rounded-full"
+              className="h-1 bg-gradient-to-r from-orange-burnt to-gold-accent mx-auto mt-4 rounded-full"
             />
           </div>
 
@@ -82,22 +85,22 @@ export const Notices: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-navy-dark/70 text-sm sm:text-base font-sans"
+            className="text-white/60 text-sm sm:text-base font-sans"
           >
             Stay updated with examinations schedules, blood donation campaigns, anti-ragging warnings, and study resources published by the council.
           </motion.p>
         </div>
 
         {/* Filter Categories Bar */}
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10">
+        <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 mb-16">
           {(['All', 'Academic', 'Event', 'Alert', 'General'] as const).map((filter) => (
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`px-5 py-2 sm:py-2.5 rounded-full font-display text-xs sm:text-sm font-semibold transition-all duration-300 ${
+              className={`px-5 py-2.5 sm:py-3 rounded-xl font-display text-xs sm:text-sm font-semibold tracking-wide transition-all duration-300 relative border ${
                 activeFilter === filter
-                  ? 'bg-orange-burnt text-white shadow-lg shadow-orange-burnt/25 scale-105'
-                  : 'bg-white hover:bg-navy-dark hover:text-white text-navy-dark/70 border border-navy-dark/5 shadow-sm'
+                  ? 'bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white border-transparent shadow-lg shadow-orange-burnt/15 scale-102'
+                  : 'bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border-white/5'
               }`}
             >
               {filter === 'Event' ? 'Events' : filter === 'Alert' ? 'Alerts' : filter}
@@ -107,30 +110,29 @@ export const Notices: React.FC = () => {
 
         {/* Dynamic Fetching States */}
         {isLoading ? (
-          /* SHIMMERING SKELETON CARDS */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3].map((skeletonIdx) => (
               <div
                 key={skeletonIdx}
-                className="bg-white rounded-xl border border-navy-dark/5 p-6 space-y-4 shadow-sm animate-pulse"
+                className="glass-panel rounded-2xl p-6 space-y-4 border border-white/5 h-64 overflow-hidden relative"
               >
-                <div className="flex justify-between items-center">
-                  <div className="h-4 bg-navy-dark/10 w-24 rounded-full" />
-                  <div className="h-4 bg-navy-dark/10 w-16 rounded-full" />
+                <div className="absolute inset-0 shimmer pointer-events-none" />
+                <div className="flex justify-between items-center mb-4">
+                  <div className="h-5 bg-white/5 w-20 rounded-full border border-white/5" />
+                  <div className="h-5 bg-white/5 w-16 rounded-full border border-white/5" />
                 </div>
-                <div className="h-6 bg-navy-dark/10 w-3/4 rounded" />
+                <div className="h-6 bg-white/5 w-3/4 rounded" />
                 <div className="space-y-2 pt-2">
-                  <div className="h-3.5 bg-navy-dark/10 w-full rounded" />
-                  <div className="h-3.5 bg-navy-dark/10 w-5/6 rounded" />
-                  <div className="h-3.5 bg-navy-dark/10 w-4/5 rounded" />
+                  <div className="h-3.5 bg-white/5 w-full rounded" />
+                  <div className="h-3.5 bg-white/5 w-5/6 rounded" />
                 </div>
-                <div className="h-10 bg-navy-dark/5 w-full rounded-lg pt-4" />
+                <div className="h-10 bg-white/5 w-full rounded-xl mt-6" />
               </div>
             ))}
           </div>
         ) : (
           <>
-            {/* Pinboard Grid Track */}
+            {/* Grid layout with layout animation */}
             <motion.div
               layout
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
@@ -142,16 +144,16 @@ export const Notices: React.FC = () => {
               </AnimatePresence>
             </motion.div>
 
-            {/* Empty State visual */}
+            {/* Empty State */}
             {filteredNotices.length === 0 && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-center py-20 bg-white rounded-xl shadow-sm border border-navy-dark/5 max-w-lg mx-auto flex flex-col items-center p-6"
+                className="text-center py-20 glass-panel rounded-2xl border border-white/5 max-w-lg mx-auto flex flex-col items-center p-6 shadow-2xl"
               >
-                <RefreshCw className="w-12 h-12 text-navy-dark/20 mb-3 animate-spin" style={{ animationDuration: '6s' }} />
-                <h3 className="font-display font-bold text-navy-dark/70 mb-1">Notice Board is Empty</h3>
-                <p className="text-navy-dark/50 text-sm font-sans">No notice board items are currently active in this category.</p>
+                <RefreshCw className="w-12 h-12 text-white/10 mb-4 animate-spin" style={{ animationDuration: '6s' }} />
+                <h3 className="font-display font-bold text-white/70 mb-1">Notice Board is Empty</h3>
+                <p className="text-white/50 text-sm font-sans">No notice board items are currently active in this category.</p>
               </motion.div>
             )}
           </>

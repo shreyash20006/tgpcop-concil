@@ -102,19 +102,25 @@ export const EventRegister: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="pt-28 pb-24 min-h-screen bg-gray-light flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-orange-burnt animate-spin" />
+      <div className="relative min-h-screen bg-[#050B18] pt-32 pb-24 overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0 grid-bg-overlay opacity-10 pointer-events-none" />
+        <div className="glass-panel rounded-2xl p-8 border border-white/5 w-full max-w-lg h-96 relative flex flex-col justify-center items-center">
+          <div className="absolute inset-0 shimmer pointer-events-none" />
+          <Loader2 className="w-10 h-10 text-orange-burnt animate-spin mb-4" />
+          <span className="text-white/50 text-xs font-bold uppercase tracking-widest font-display">Loading Event Data...</span>
+        </div>
       </div>
     );
   }
 
   if (!event) {
     return (
-      <div className="pt-28 pb-24 min-h-screen bg-gray-light flex flex-col items-center justify-center text-center px-4">
-        <AlertTriangle className="w-12 h-12 text-orange-burnt mb-4" />
-        <h2 className="font-display font-extrabold text-2xl text-navy-dark mb-2">Event Not Found</h2>
-        <p className="text-navy-dark/60 text-sm mb-6">This event doesn't exist or has been removed.</p>
-        <Link to="/events" className="text-orange-burnt font-display font-bold text-sm hover:underline flex items-center space-x-1">
+      <div className="relative min-h-screen bg-[#050B18] pt-32 pb-24 overflow-hidden flex flex-col items-center justify-center text-center px-4">
+        <div className="absolute inset-0 grid-bg-overlay opacity-10 pointer-events-none" />
+        <AlertTriangle className="w-12 h-12 text-orange-burnt mb-4 animate-bounce" />
+        <h2 className="font-display font-extrabold text-2xl text-white mb-2">Event Not Found</h2>
+        <p className="text-white/60 text-sm mb-6 max-w-sm">This event doesn't exist or has been removed from campus records.</p>
+        <Link to="/events" className="text-orange-burnt font-display font-extrabold text-sm hover:text-white transition-colors flex items-center space-x-1.5">
           <ArrowLeft className="w-4 h-4" /><span>Back to Events</span>
         </Link>
       </div>
@@ -122,124 +128,152 @@ export const EventRegister: React.FC = () => {
   }
 
   return (
-    <div className="pt-28 pb-24 min-h-screen bg-gray-light">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6">
+    <div className="relative min-h-screen bg-[#050B18] pt-32 pb-24 overflow-hidden">
+      {/* Background custom elements */}
+      <div className="absolute top-[20%] left-[10%] w-[400px] h-[400px] rounded-full ambient-orb-orange z-0 pointer-events-none" />
+      <div className="absolute bottom-[20%] right-[10%] w-[350px] h-[350px] rounded-full ambient-orb-gold z-0 pointer-events-none" />
+      <div className="absolute inset-0 grid-bg-overlay opacity-15 z-0 pointer-events-none" />
+
+      <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6">
         {/* Back */}
-        <Link to="/events" className="inline-flex items-center space-x-1.5 text-navy-dark/50 hover:text-orange-burnt font-display text-sm font-bold mb-6 transition-colors">
+        <Link to="/events" className="inline-flex items-center space-x-1.5 text-white/50 hover:text-orange-burnt font-display text-xs sm:text-sm font-extrabold mb-8 transition-all hover:-translate-x-0.5">
           <ArrowLeft className="w-4 h-4" /><span>Back to Events</span>
         </Link>
 
-        {/* Event Info */}
+        {/* Event Details Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl border border-navy-dark/10 p-6 sm:p-8 shadow-sm mb-6"
+          className="glass-panel glow-card rounded-2xl border border-white/5 p-6 sm:p-8 shadow-2xl mb-6 bg-[#0F1E42]/10"
         >
-          <div className="flex items-start justify-between flex-wrap gap-3 mb-4">
-            <div>
-              <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-navy-dark leading-tight mb-2">{event.name}</h1>
-              <div className="flex items-center space-x-3 text-navy-dark/50 text-sm">
-                <div className="flex items-center space-x-1"><CalendarDays className="w-4 h-4" /><span>{new Date(event.event_date || event.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span></div>
+          <div className="flex items-start justify-between flex-wrap gap-4 mb-4">
+            <div className="space-y-1">
+              <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-white leading-tight">{event.name}</h1>
+              <div className="flex items-center space-x-2 text-white/50 text-xs font-sans">
+                <CalendarDays className="w-4 h-4 text-orange-burnt" />
+                <span>{new Date(event.event_date || event.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
               </div>
             </div>
-            <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${seatsLeft > 5 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : seatsLeft > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+            <span className={`px-3 py-1.5 rounded-xl text-xs font-bold border ${seatsLeft > 5 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25' : seatsLeft > 0 ? 'bg-amber-500/10 text-amber-400 border-amber-500/25' : 'bg-red-500/10 text-red-400 border-red-500/25'}`}>
               {seatsLeft > 0 ? `🟢 ${seatsLeft} seats left` : '🔴 Full'}
             </span>
           </div>
-          <p className="text-navy-dark/70 text-sm leading-relaxed mb-5 font-sans">{event.description}</p>
+          <p className="text-white/70 text-sm leading-relaxed mb-6 font-sans">{event.description}</p>
 
-          {/* Capacity Bar */}
+          {/* Capacity Progress Bar */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-navy-dark/40">
-              <span>Registrations</span>
+            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-white/40">
+              <span>Current Registrations</span>
               <span>{event.registered_count || 0} / {event.capacity || 100}</span>
             </div>
-            <div className="w-full h-2.5 bg-navy-dark/5 rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${capacityPercent}%` }}
                 transition={{ duration: 1, ease: 'easeOut' }}
-                className={`h-full rounded-full ${capacityPercent >= 90 ? 'bg-red-500' : capacityPercent >= 70 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                className={`h-full rounded-full ${capacityPercent >= 90 ? 'bg-red-500' : capacityPercent >= 70 ? 'bg-amber-500' : 'bg-gradient-to-r from-emerald-500 to-teal-400'}`}
               />
             </div>
           </div>
         </motion.div>
 
-        {/* Registration Form or Success */}
+        {/* Form State Panels */}
         {status === 'success' ? (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl border border-emerald-200 p-8 text-center shadow-sm"
+            className="glass-panel rounded-2xl border border-emerald-500/25 bg-emerald-500/5 p-8 text-center shadow-2xl relative overflow-hidden"
           >
-            <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-bl-full pointer-events-none" />
+            <div className="w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center mx-auto mb-4 text-emerald-400">
+              <CheckCircle2 className="w-8 h-8 animate-pulse" />
             </div>
-            <h3 className="font-display font-extrabold text-xl text-navy-dark mb-2">You're Registered! 🎉</h3>
-            <p className="text-navy-dark/60 text-sm font-sans mb-1">Welcome to <strong>{event.name}</strong>.</p>
-            <p className="text-navy-dark/40 text-xs font-sans">A confirmation has been sent to <strong>{email}</strong>.</p>
+            <h3 className="font-display font-extrabold text-xl text-white mb-2">You're Registered! 🎉</h3>
+            <p className="text-white/70 text-sm font-sans mb-1.5">Your seat at <strong>{event.name}</strong> is reserved successfully.</p>
+            <p className="text-white/40 text-xs font-sans">A confirmation has been sent to <strong>{email}</strong>.</p>
           </motion.div>
         ) : (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-2xl border border-navy-dark/10 p-6 sm:p-8 shadow-sm"
+            className="glass-panel glow-card rounded-2xl border border-white/5 p-6 sm:p-8 shadow-2xl bg-[#0F1E42]/10"
           >
-            <div className="flex items-center space-x-2 mb-6 pb-4 border-b border-navy-dark/5">
-              <UserPlus className="w-5 h-5 text-orange-burnt" />
-              <h2 className="font-display font-extrabold text-lg text-navy-dark">Register for this Event</h2>
+            <div className="flex items-center space-x-2 mb-6 pb-4 border-b border-white/5">
+              <UserPlus className="w-5 h-5 text-orange-burnt animate-pulse" />
+              <h2 className="font-display font-extrabold text-lg text-white">Registration Portal</h2>
             </div>
 
-            {/* Status Messages */}
+            {/* Alert Logs */}
             {status === 'duplicate' && (
-              <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm font-medium flex items-center space-x-2">
-                <AlertTriangle className="w-4 h-4 shrink-0" /><span>You've already registered with this email!</span>
+              <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/25 rounded-xl text-amber-400 text-xs sm:text-sm font-semibold flex items-center space-x-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" /><span>You have already registered with this email address!</span>
               </div>
             )}
             {status === 'full' && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm font-medium flex items-center space-x-2">
-                <AlertTriangle className="w-4 h-4 shrink-0" /><span>Sorry, this event is full!</span>
+              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/25 rounded-xl text-red-400 text-xs sm:text-sm font-semibold flex items-center space-x-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" /><span>Sorry, registration capacity has been reached!</span>
               </div>
             )}
             {status === 'error' && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm font-medium flex items-center space-x-2">
-                <AlertTriangle className="w-4 h-4 shrink-0" /><span>Something went wrong. Please try again.</span>
+              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/25 rounded-xl text-red-400 text-xs sm:text-sm font-semibold flex items-center space-x-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" /><span>An unexpected error occurred. Please try again later.</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60 mb-1.5">Full Name *</label>
-                <div className="relative">
-                  <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-navy-dark/30" />
-                  <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Enter your full name"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors" />
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-white/50 mb-2">Full Name *</label>
+                <div className="relative group">
+                  <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 group-focus-within:text-orange-burnt transition-colors" />
+                  <input 
+                    type="text" 
+                    required 
+                    value={fullName} 
+                    onChange={e => setFullName(e.target.value)} 
+                    placeholder="Enter your full name"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 bg-white/5 focus:border-orange-burnt outline-none text-xs sm:text-sm font-sans text-white transition-all duration-300 focus:shadow-lg focus:shadow-orange-burnt/5" 
+                  />
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60 mb-1.5">Email Address *</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-navy-dark/30" />
-                  <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="your.email@example.com"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors" />
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-white/50 mb-2">Email Address *</label>
+                <div className="relative group">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 group-focus-within:text-orange-burnt transition-colors" />
+                  <input 
+                    type="email" 
+                    required 
+                    value={email} 
+                    onChange={e => setEmail(e.target.value)} 
+                    placeholder="your.email@example.com"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 bg-white/5 focus:border-orange-burnt outline-none text-xs sm:text-sm font-sans text-white transition-all duration-300 focus:shadow-lg focus:shadow-orange-burnt/5" 
+                  />
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60 mb-1.5">WhatsApp Number</label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-navy-dark/30" />
-                  <input type="tel" value={whatsapp} onChange={e => setWhatsapp(e.target.value)} placeholder="+91 98765 43210"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors" />
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-white/50 mb-2">WhatsApp Number</label>
+                <div className="relative group">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 group-focus-within:text-orange-burnt transition-colors" />
+                  <input 
+                    type="tel" 
+                    value={whatsapp} 
+                    onChange={e => setWhatsapp(e.target.value)} 
+                    placeholder="+91 98765 43210"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 bg-white/5 focus:border-orange-burnt outline-none text-xs sm:text-sm font-sans text-white transition-all duration-300 focus:shadow-lg focus:shadow-orange-burnt/5" 
+                  />
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60 mb-1.5">Year *</label>
-                <div className="relative">
-                  <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-navy-dark/30" />
-                  <select required value={year} onChange={e => setYear(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark bg-white transition-colors appearance-none">
-                    <option value="">Select Year</option>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-white/50 mb-2">Academic Year *</label>
+                <div className="relative group">
+                  <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 group-focus-within:text-orange-burnt transition-colors" />
+                  <select 
+                    required 
+                    value={year} 
+                    onChange={e => setYear(e.target.value)}
+                    className="w-full pl-10 pr-10 py-3 rounded-xl border border-white/10 bg-[#080F25] focus:border-orange-burnt outline-none text-xs sm:text-sm font-sans text-white transition-all duration-300 appearance-none focus:shadow-lg focus:shadow-orange-burnt/5"
+                  >
+                    <option value="">Select Academic Year</option>
                     <option value="D.Pharm I">D.Pharm I Year</option>
                     <option value="D.Pharm II">D.Pharm II Year</option>
                     <option value="B.Pharm I">B.Pharm I Year</option>
@@ -248,11 +282,25 @@ export const EventRegister: React.FC = () => {
                     <option value="B.Pharm IV">B.Pharm IV Year</option>
                     <option value="M.Pharm">M.Pharm</option>
                   </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/30">▼</div>
                 </div>
               </div>
-              <button type="submit" disabled={isSubmitting || seatsLeft <= 0}
-                className="w-full py-3 rounded-lg bg-orange-burnt hover:bg-orange-burnt/90 text-white font-display text-sm font-bold shadow-md shadow-orange-burnt/15 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
-                {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /><span>Registering...</span></> : <><UserPlus className="w-4 h-4" /><span>Register Now</span></>}
+              <button 
+                type="submit" 
+                disabled={isSubmitting || seatsLeft <= 0}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white font-display text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 active:scale-98 transition-all hover:shadow-orange-burnt/20 border border-white/5"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Reserving Seat...</span>
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4" />
+                    <span>Confirm Registration</span>
+                  </>
+                )}
               </button>
             </form>
           </motion.div>

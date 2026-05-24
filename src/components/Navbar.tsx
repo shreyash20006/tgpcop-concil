@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, GraduationCap, ChevronDown } from 'lucide-react';
+import { Menu, X, GraduationCap, ChevronDown, Lock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export const Navbar: React.FC = () => {
@@ -66,28 +66,27 @@ export const Navbar: React.FC = () => {
     <>
       <header
         id="navbar"
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
           isScrolled
-            ? 'bg-white shadow-lg py-3 text-navy-dark'
-            : 'bg-navy-dark/90 backdrop-blur-md py-4 text-white'
+            ? 'bg-[#060B1C]/80 backdrop-blur-xl border-b border-white/5 py-2.5 shadow-2xl'
+            : 'bg-transparent py-4 text-white'
         }`}
       >
-        {/* Dynamic Announcement Bar */}
+        {/* Dynamic Announcement Bar - upgraded with sleek glow */}
         {announcementEnabled && announcementText && (
-          <div className="w-full bg-gradient-to-r from-orange-burnt to-gold-accent py-2 px-4 text-white text-center text-[10px] sm:text-xs font-display font-bold tracking-wide flex items-center justify-center space-x-2 shadow-inner border-b border-white/5">
+          <div className="w-full bg-gradient-to-r from-orange-burnt to-[#E06D2B] py-2 px-4 text-white text-center text-[10px] sm:text-xs font-display font-bold tracking-wide flex items-center justify-center space-x-2 shadow-inner border-b border-white/5 relative overflow-hidden">
             <span className="bg-white/20 border border-white/30 px-2 py-0.5 rounded text-[8px] sm:text-[9px] uppercase tracking-wider animate-pulse shrink-0">LATEST</span>
             <span className="truncate">{announcementText}</span>
           </div>
         )}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Logo & College Name */}
-          <Link to="/" className="flex items-center space-x-3 group">
-            <div className="relative overflow-hidden w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 border border-orange-burnt/10 shadow-sm">
-              {/* Load the official TGPCOP logo, fallback to GraduationCap */}
+          <Link to="/" className="flex items-center space-x-3 group relative z-50">
+            <div className="relative overflow-hidden w-10 h-10 rounded-xl bg-white/10 hover:bg-white/15 flex items-center justify-center shrink-0 border border-white/10 shadow-lg transition-colors">
               <img
                 src="https://res.cloudinary.com/dsqxboxoc/image/upload/v1779522116/WhatsApp_Image_2026-05-23_at_1.10.29_PM_susb5a.jpg"
                 alt="TGPCOP Logo"
-                className="w-full h-full object-cover error-fallback-hide absolute inset-0 transition-transform duration-300 group-hover:scale-108"
+                className="w-full h-full object-cover error-fallback-hide absolute inset-0 transition-transform duration-500 group-hover:scale-110"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
@@ -95,10 +94,10 @@ export const Navbar: React.FC = () => {
               <GraduationCap className="w-5 h-5 text-orange-burnt absolute" />
             </div>
             <div>
-              <span className="font-display font-bold text-lg sm:text-xl tracking-tight block leading-none">
+              <span className="font-display font-extrabold text-lg sm:text-xl tracking-tight block leading-none text-white group-hover:text-orange-burnt transition-colors">
                 TGPCOP
               </span>
-              <span className="text-[10px] sm:text-xs opacity-80 block tracking-wider uppercase font-semibold">
+              <span className="text-[9px] sm:text-[10px] opacity-80 block tracking-widest uppercase font-semibold text-orange-burnt mt-0.5">
                 Student Council
               </span>
             </div>
@@ -112,22 +111,18 @@ export const Navbar: React.FC = () => {
                 <NavLink
                   key={link.path}
                   to={link.path}
-                  className={({ isActive }) =>
-                    `relative font-display font-medium text-sm transition-colors duration-200 hover:text-orange-burnt px-1 py-2 ${
-                      isActive
-                        ? 'text-orange-burnt'
-                        : isScrolled
-                        ? 'text-navy-dark/80'
-                        : 'text-white/80'
-                    }`
-                  }
+                  className={`relative font-display font-semibold text-xs sm:text-sm tracking-wide transition-all duration-300 hover:text-orange-burnt px-2 py-2 ${
+                    isActive
+                      ? 'text-orange-burnt'
+                      : 'text-white/80 hover:text-white'
+                  }`}
                 >
                   {link.name}
                   {isActive && (
                     <motion.div
                       layoutId="activeNavUnderline"
-                      className="absolute bottom-0 left-0 w-full h-[2px] bg-orange-burnt"
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-orange-burnt to-gold-accent"
+                      transition={{ type: 'spring', stiffness: 350, damping: 25 }}
                     />
                   )}
                 </NavLink>
@@ -141,18 +136,16 @@ export const Navbar: React.FC = () => {
               onMouseLeave={() => setIsMoreDropdownOpen(false)}
             >
               <button
-                className={`flex items-center space-x-1 font-display font-medium text-sm transition-colors duration-200 hover:text-orange-burnt px-1 py-2 outline-none ${
+                className={`flex items-center space-x-1 font-display font-semibold text-xs sm:text-sm tracking-wide transition-all duration-300 hover:text-orange-burnt px-2 py-2 outline-none ${
                   isMoreActive
-                    ? 'text-orange-burnt font-semibold'
-                    : isScrolled
-                    ? 'text-navy-dark/80'
-                    : 'text-white/80'
+                    ? 'text-orange-burnt font-extrabold'
+                    : 'text-white/80 hover:text-white'
                 }`}
               >
                 <span>More</span>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                    isMoreDropdownOpen ? 'rotate-180' : ''
+                  className={`w-3.5 h-3.5 transition-transform duration-300 ${
+                    isMoreDropdownOpen ? 'rotate-180 text-orange-burnt' : ''
                   }`}
                 />
               </button>
@@ -160,32 +153,32 @@ export const Navbar: React.FC = () => {
               <AnimatePresence>
                 {isMoreDropdownOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl py-2 border border-gray-100 z-50 overflow-hidden text-navy-dark"
+                    initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 12, scale: 0.95 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    className="absolute right-0 mt-2 w-64 bg-[#080F25]/95 backdrop-blur-2xl rounded-2xl shadow-2xl py-2.5 border border-white/10 z-50 overflow-hidden text-white"
                   >
                     {moreLinks.map((subLink) => (
                       <Link
                         key={subLink.path}
                         to={subLink.path}
                         onClick={() => setIsMoreDropdownOpen(false)}
-                        className={`block px-4 py-2.5 hover:bg-orange-burnt/5 transition-colors ${
-                          subLink.highlight ? 'bg-red-50/40 hover:bg-red-50/60' : ''
+                        className={`block px-4 py-3 hover:bg-white/5 transition-all duration-200 ${
+                          subLink.highlight ? 'bg-red-500/5 hover:bg-red-500/10 border-l-2 border-red-500' : ''
                         }`}
                       >
                         <div className="flex items-start space-x-3">
-                          <span className="text-lg mt-0.5">{subLink.icon}</span>
+                          <span className="text-base mt-0.5">{subLink.icon}</span>
                           <div>
                             <span
                               className={`block text-xs font-semibold ${
-                                subLink.highlight ? 'text-red-500 font-bold' : 'text-navy-dark hover:text-orange-burnt'
+                                subLink.highlight ? 'text-red-400 font-extrabold' : 'text-white hover:text-orange-burnt'
                               }`}
                             >
                               {subLink.name}
                             </span>
-                            <span className="block text-[10px] text-gray-500 leading-tight mt-0.5">
+                            <span className="block text-[10px] text-white/50 leading-tight mt-0.5">
                               {subLink.desc}
                             </span>
                           </div>
@@ -197,16 +190,12 @@ export const Navbar: React.FC = () => {
               </AnimatePresence>
             </div>
 
-            {/* Portal Action button */}
+            {/* Portal Action button upgraded with gold active ring */}
             <Link
               to="/admin"
-              className={`ml-2 px-4 py-1.5 rounded-full border text-[11px] font-display font-bold uppercase tracking-widest transition-all duration-300 hover:scale-105 active:scale-95 flex items-center space-x-1 shrink-0 ${
-                isScrolled
-                  ? 'border-orange-burnt text-orange-burnt hover:bg-orange-burnt hover:text-white shadow-xs shadow-orange-burnt/10'
-                  : 'border-white/35 text-white hover:bg-white hover:text-navy-dark shadow-xs'
-              }`}
+              className="ml-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-[10px] font-display font-bold uppercase tracking-widest text-white transition-all duration-300 hover:scale-105 active:scale-95 flex items-center space-x-1.5 shrink-0 shadow-lg shadow-orange-burnt/15 border border-white/10 hover:shadow-orange-burnt/25"
             >
-              <span>🔑</span>
+              <Lock className="w-3 h-3 text-white" />
               <span>Portal</span>
             </Link>
           </nav>
@@ -214,7 +203,7 @@ export const Navbar: React.FC = () => {
           {/* Hamburger Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-md hover:bg-orange-burnt/10 transition-colors"
+            className="md:hidden p-2 rounded-xl hover:bg-white/5 transition-colors relative z-50 text-white"
             aria-label="Toggle Menu"
           >
             {isMobileMenuOpen ? (
@@ -236,31 +225,31 @@ export const Navbar: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm"
+              className="fixed inset-0 bg-black/80 z-40 md:hidden backdrop-blur-sm"
             />
 
-            {/* Slide-in Drawer */}
+            {/* Slide-in Drawer with Glassmorphism */}
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed right-0 top-0 bottom-0 w-[280px] bg-navy-dark text-white p-6 z-50 shadow-2xl flex flex-col justify-between md:hidden overflow-y-auto"
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="fixed right-0 top-0 bottom-0 w-[290px] bg-[#050B18]/95 backdrop-blur-2xl text-white p-6 z-50 shadow-2xl flex flex-col justify-between md:hidden overflow-y-auto border-l border-white/5"
             >
               <div>
-                <div className="flex items-center justify-between mb-6">
-                  <span className="font-display font-bold text-lg text-orange-burnt">
+                <div className="flex items-center justify-between mb-8">
+                  <span className="font-display font-extrabold text-lg text-orange-burnt uppercase tracking-wider">
                     TGPCOP Council
                   </span>
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 rounded-md hover:bg-white/10 transition-colors"
+                    className="p-2 rounded-xl hover:bg-white/5 transition-colors"
                   >
-                    <X className="w-6 h-6" />
+                    <X className="w-6 h-6 text-white" />
                   </button>
                 </div>
 
-                <nav className="flex flex-col space-y-3">
+                <nav className="flex flex-col space-y-4">
                   {navLinks.map((link) => {
                     const isActive = location.pathname === link.path;
                     return (
@@ -268,30 +257,28 @@ export const Navbar: React.FC = () => {
                         key={link.path}
                         to={link.path}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`font-display font-medium text-base py-2 border-b border-white/15 flex items-center justify-between ${
-                          isActive ? 'text-orange-burnt font-bold' : 'text-white/80'
+                        className={`font-display font-semibold text-sm py-2 flex items-center justify-between border-b border-white/5 transition-colors ${
+                          isActive ? 'text-orange-burnt font-extrabold' : 'text-white/80 hover:text-white'
                         }`}
                       >
                         {link.name}
                         {isActive && (
-                          <span className="w-2 h-2 rounded-full bg-orange-burnt" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-orange-burnt shadow-md shadow-orange-burnt/50" />
                         )}
                       </Link>
                     );
                   })}
 
                   {/* Expandable Mobile "More" Items */}
-                  <div className="border-b border-white/15">
+                  <div>
                     <button
                       onClick={() => setIsMobileMoreOpen(!isMobileMoreOpen)}
-                      className={`w-full font-display font-medium text-base py-2 flex items-center justify-between outline-none ${
-                        isMoreActive ? 'text-orange-burnt font-bold' : 'text-white/80'
-                      }`}
+                      className={`w-full font-display font-semibold text-sm py-2 flex items-center justify-between outline-none text-white/80`}
                     >
                       <span>More Features</span>
                       <ChevronDown
-                        className={`w-4 h-4 transition-transform duration-200 ${
-                          isMobileMoreOpen ? 'rotate-180' : ''
+                        className={`w-4 h-4 transition-transform duration-300 ${
+                          isMobileMoreOpen ? 'rotate-180 text-orange-burnt' : ''
                         }`}
                       />
                     </button>
@@ -302,8 +289,8 @@ export const Navbar: React.FC = () => {
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="pl-4 pb-2 space-y-2 overflow-hidden flex flex-col text-sm"
+                          transition={{ duration: 0.25 }}
+                          className="pl-4 pb-2 mt-2 space-y-3 overflow-hidden flex flex-col border-l border-white/5 text-xs"
                         >
                           {moreLinks.map((subLink) => {
                             const isSubActive = location.pathname === subLink.path;
@@ -312,8 +299,8 @@ export const Navbar: React.FC = () => {
                                 key={subLink.path}
                                 to={subLink.path}
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className={`py-1.5 flex items-center space-x-2 transition-colors ${
-                                  isSubActive ? 'text-orange-burnt font-bold' : 'text-white/70 hover:text-white'
+                                className={`py-1 flex items-center space-x-2 transition-colors ${
+                                  isSubActive ? 'text-orange-burnt font-extrabold' : 'text-white/60 hover:text-white'
                                 }`}
                               >
                                 <span>{subLink.icon}</span>
@@ -328,15 +315,15 @@ export const Navbar: React.FC = () => {
                 </nav>
               </div>
 
-              <div className="mt-8">
+              <div className="mt-8 pt-6 border-t border-white/5">
                 <Link
                   to="/admin"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full text-center py-3 bg-orange-burnt hover:bg-orange-burnt/95 text-white font-display text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-orange-burnt/15 transition-all block mb-4 active:scale-98"
+                  className="w-full text-center py-3 bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white font-display text-xs font-bold uppercase tracking-widest rounded-xl shadow-lg shadow-orange-burnt/15 transition-all block mb-4 active:scale-98 border border-white/5"
                 >
                   🔑 Admin Portal
                 </Link>
-                <div className="text-center text-xs text-white/50 border-t border-white/10 pt-4">
+                <div className="text-center text-[10px] text-white/45 tracking-wider">
                   TGPCOP Student Council © 2026
                 </div>
               </div>

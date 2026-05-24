@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CouncilCard } from '../components/CouncilCard';
 import { councilMembers, type CouncilMember } from '../data/council';
-import { ShieldCheck, Loader2 } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export const Council: React.FC = () => {
@@ -71,27 +71,31 @@ export const Council: React.FC = () => {
     fetchMembers();
   }, []);
 
-  // Container Variants for staggering children cards
   const gridContainerVariants = {
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: 0.08,
+        staggerChildren: 0.06,
       },
     },
   };
 
   return (
-    <div className="pt-28 pb-24 min-h-screen bg-gray-light">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen bg-[#050B18] pt-32 pb-24 overflow-hidden">
+      {/* Background orbs and grid noise */}
+      <div className="absolute top-[20%] left-[5%] w-[450px] h-[450px] rounded-full ambient-orb-orange z-0 pointer-events-none" />
+      <div className="absolute top-[60%] right-[5%] w-[400px] h-[400px] rounded-full ambient-orb-gold z-0 pointer-events-none" />
+      <div className="absolute inset-0 grid-bg-overlay opacity-15 z-0 pointer-events-none" />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 flex flex-col items-center space-y-4">
+        <div className="text-center max-w-3xl mx-auto mb-20 flex flex-col items-center space-y-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: 'spring' }}
-            className="w-12 h-12 rounded-full bg-orange-burnt/10 flex items-center justify-center text-orange-burnt"
+            className="w-12 h-12 rounded-xl bg-orange-burnt/10 flex items-center justify-center text-orange-burnt border border-orange-burnt/20 shadow-lg"
           >
             <ShieldCheck className="w-6 h-6" />
           </motion.div>
@@ -101,7 +105,7 @@ export const Council: React.FC = () => {
             animate={{ opacity: 1 }}
             className="text-orange-burnt text-xs font-bold uppercase tracking-widest block"
           >
-            Elected Leadership 2026
+            Elected Student Leadership
           </motion.span>
 
           <div className="relative inline-block">
@@ -109,17 +113,16 @@ export const Council: React.FC = () => {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="font-display font-extrabold text-3xl sm:text-5xl text-navy-dark leading-tight"
+              className="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight uppercase"
             >
-              OUR NEWLY SELECTED MEMBERS
+              Our Council Members
             </motion.h1>
             
-            {/* Animated Underline */}
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: '80px' }}
               transition={{ delay: 0.4, duration: 0.6, ease: 'easeOut' }}
-              className="h-1 bg-orange-burnt mx-auto mt-4 rounded-full"
+              className="h-1 bg-gradient-to-r from-orange-burnt to-gold-accent mx-auto mt-4 rounded-full"
             />
           </div>
 
@@ -127,17 +130,32 @@ export const Council: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-navy-dark/70 text-sm sm:text-base font-sans max-w-xl"
+            className="text-white/60 text-sm sm:text-base font-sans"
           >
             Representing semesters, cultural programs, physical sports, community NSS campaigns, and student welfare across TGPCOP.
           </motion.p>
         </div>
 
-        {/* 13 Members Grid layout */}
+        {/* Shimmer Skeleton Loaders */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-24 text-navy-dark/40">
-            <Loader2 className="w-8 h-8 animate-spin text-orange-burnt mb-3" />
-            <span className="font-display text-xs sm:text-sm">Retrieving council members live data...</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[...Array(6)].map((_, i) => (
+              <div 
+                key={i} 
+                className="glass-panel rounded-2xl p-6 flex flex-col justify-between border border-white/5 h-64 overflow-hidden relative"
+              >
+                <div className="absolute inset-0 shimmer pointer-events-none" />
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10" />
+                  <div className="w-20 h-5 bg-white/5 rounded-full" />
+                </div>
+                <div className="space-y-3">
+                  <div className="w-24 h-4 bg-white/5 rounded" />
+                  <div className="w-40 h-6 bg-white/5 rounded" />
+                </div>
+                <div className="w-full h-10 bg-white/5 rounded-xl mt-6" />
+              </div>
+            ))}
           </div>
         ) : (
           <motion.div

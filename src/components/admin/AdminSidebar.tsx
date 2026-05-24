@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from './ProtectedRoute';
+import { getRoleDisplayName, getPositionTitle } from '../../hooks/useRole';
 import { 
   LayoutDashboard, 
   Mail, 
@@ -36,7 +37,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { role } = useAuth();
+  const { role, fullName, avatarUrl } = useAuth();
   const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
 
   const toggleDarkMode = () => {
@@ -208,45 +209,68 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         </nav>
       </div>
 
-      {/* Footer Navigation & Theme/Logout Operations */}
-      <div className="p-4 border-t border-white/10 space-y-1">
-        {/* Dark Mode Toggle */}
-        <button
-          onClick={toggleDarkMode}
-          className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-display text-xs font-bold text-white/60 hover:bg-white/5 hover:text-white transition-all outline-none"
-        >
-          {isDark ? (
-            <>
-              <Sun className="w-4 h-4 text-amber-500 animate-pulse" />
-              <span>☀️ Light Mode</span>
-            </>
+      {/* Footer User Profile & Theme/Logout Operations */}
+      <div className="p-4 border-t border-white/10 space-y-4">
+        {/* User Card Profile details */}
+        <div className="flex items-center space-x-3 p-2 rounded-xl bg-white/[0.02] border border-white/5">
+          {avatarUrl ? (
+            <img 
+              src={avatarUrl} 
+              alt={fullName || 'User avatar'} 
+              className="w-10 h-10 rounded-full object-cover border border-orange-burnt/30 shadow shrink-0"
+            />
           ) : (
-            <>
-              <Moon className="w-4 h-4 text-indigo-400" />
-              <span>🌙 Dark Mode</span>
-            </>
+            <div className="w-10 h-10 rounded-full bg-orange-burnt/10 border border-orange-burnt/20 flex items-center justify-center text-orange-burnt font-display font-extrabold text-sm shadow-inner shrink-0">
+              {fullName ? fullName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : 'AD'}
+            </div>
           )}
-        </button>
+          <div className="flex-1 min-w-0">
+            <span className="block text-xs font-display font-extrabold text-white truncate leading-tight">
+              {fullName || 'Admin User'}
+            </span>
+            <span className="block text-[9px] font-sans font-bold text-white/50 truncate leading-relaxed mt-0.5">
+              {role ? `${getPositionTitle(role)} • ${getRoleDisplayName(role)}` : 'Council Member'}
+            </span>
+          </div>
+        </div>
 
-        {/* View Website External Link */}
-        <a
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-display text-xs font-bold text-white/60 hover:bg-white/5 hover:text-white transition-all outline-none"
-        >
-          <Globe className="w-4 h-4 text-orange-burnt" />
-          <span>🌐 View Website</span>
-        </a>
+        <div className="space-y-1">
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={toggleDarkMode}
+            className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-display text-xs font-bold text-white/60 hover:bg-white/5 hover:text-white transition-all outline-none"
+          >
+            {isDark ? (
+              <>
+                <Sun className="w-4 h-4 text-amber-500 animate-pulse" />
+                <span>☀️ Light Mode</span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-4 h-4 text-indigo-400" />
+                <span>🌙 Dark Mode</span>
+              </>
+            )}
+          </button>
 
-        {/* Sign Out Button */}
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-display text-xs font-bold text-red-400 hover:bg-red-950/20 hover:text-red-300 transition-all outline-none"
-        >
-          <LogOut className="w-4 h-4 shrink-0" />
-          <span>🚪 Logout</span>
-        </button>
+          {/* View Website External Link */}
+          <a
+            href="/"
+            className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-display text-xs font-bold text-white/60 hover:bg-white/5 hover:text-white transition-all outline-none"
+          >
+            <Globe className="w-4 h-4 text-orange-burnt" />
+            <span>🌐 View Website</span>
+          </a>
+
+          {/* Sign Out Button */}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-display text-xs font-bold text-red-400 hover:bg-red-950/20 hover:text-red-300 transition-all outline-none"
+          >
+            <LogOut className="w-4 h-4 shrink-0" />
+            <span>🚪 Sign Out</span>
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,13 +1,15 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Loader2, ShieldAlert, LogOut } from 'lucide-react';
+import { Loader2, ShieldAlert, LogOut, ArrowLeft } from 'lucide-react';
 import type { Role } from '../../hooks/useRole';
 
 interface AuthContextType {
   role: Role | null;
   email: string | null;
   userId: string | null;
+  fullName: string | null;
+  avatarUrl: string | null;
   isSuspended: boolean;
   isLoading: boolean;
 }
@@ -16,6 +18,8 @@ const AuthContext = createContext<AuthContextType>({
   role: null,
   email: null,
   userId: null,
+  fullName: null,
+  avatarUrl: null,
   isSuspended: false,
   isLoading: true,
 });
@@ -48,40 +52,28 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       try {
         const user = userSession.user;
 
-        // Auto-provision Super Admin profile if it is the designated email
-        if (user.email === 'shrey@tgpcopconcil.com') {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-
-          if (!profile) {
-            const { error: seedError } = await supabase.from('profiles').insert({
-              id: user.id,
-              email: user.email,
-              role: 'super_admin',
-              is_suspended: false,
-            });
-            if (seedError) console.error('Error auto-seeding Super Admin profile:', seedError);
-          }
-        }
-
-        // Fetch current profile role and suspension status
-        const { data: profile, error } = await supabase
-          .from('profiles')
+        // Fetch current profile role from admin_roles table by email
+        const { data: roleData, error } = await supabase
+          .from('admin_roles')
           .select('*')
-          .eq('id', user.id)
+          .eq('email', user.email)
           .single();
 
-        if (error) throw error;
-
-        if (active) {
-          setRole(profile?.role || null);
-          setIsSuspended(profile?.is_suspended || false);
+        if (error) {
+          // If not found in admin_roles, they have no authorized role
+          if (active) {
+            setRole(null);
+            setIsSuspended(false);
+          }
+        } else if (active) {
+          setRole(roleData?.role || null);
+          setIsSuspended(false); // RLS/suspension can be handled if needed, otherwise default to false
         }
       } catch (err) {
         console.error('Error resolving admin profile:', err);
+        if (active) {
+          setRole(null);
+        }
       } finally {
         if (active) {
           setIsLoading(false);
@@ -115,6 +107,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     await supabase.auth.signOut();
   };
 
+  const handleAccessDeniedExit = async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/'; // redirect to public website
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-navy-dark flex flex-col items-center justify-center text-white">
@@ -131,7 +128,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return <Navigate to="/admin" replace />;
   }
 
-  // Handle suspended administrator accounts
+  // Handle suspended administrator accounts (if isSuspended state is ever true)
   if (isSuspended) {
     return (
       <div className="min-h-screen bg-navy-dark flex items-center justify-center p-4">
@@ -156,25 +153,28 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Handle case where user is authenticated but has no profile role assigned
+  // Handle case where user is authenticated but has no active role in admin_roles table (Access Denied page)
   if (!role) {
     return (
       <div className="min-h-screen bg-navy-dark flex items-center justify-center p-4">
-        <div className="max-w-md w-full glass-panel-dark p-8 border border-orange-burnt/20 text-center rounded-2xl shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-orange-burnt/5 rounded-bl-full pointer-events-none" />
-          <div className="w-16 h-16 rounded-2xl bg-orange-burnt/10 border border-orange-burnt/30 flex items-center justify-center text-orange-burnt mx-auto mb-6">
-            <ShieldAlert className="w-8 h-8" />
+        <div className="max-w-md w-full glass-panel-dark p-8 border border-red-500/30 text-center rounded-2xl shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-red-500/5 rounded-bl-full pointer-events-none" />
+          <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-500 mx-auto mb-6">
+            <ShieldAlert className="w-8 h-8 animate-pulse" />
           </div>
-          <h2 className="font-display font-extrabold text-2xl text-white mb-2">Access Restricted</h2>
+          <h2 className="font-display font-extrabold text-2xl text-white mb-2">🚫 Access Denied</h2>
           <p className="text-white/60 text-sm leading-relaxed mb-6 font-sans">
-            Your account (`{session.user.email}`) does not have any active administrator role permissions assigned yet. An administrator must approve your role before you can access the console.
+            Your Google account (`{session.user.email}`) is not authorized for this admin panel. Only authorized college emails can access this console.
+          </p>
+          <p className="text-white/40 text-xs mb-6 font-sans">
+            Contact: <span className="font-mono text-orange-burnt">president@tgpcop.edu</span> for access privileges.
           </p>
           <button
-            onClick={handleLogout}
-            className="flex items-center justify-center space-x-2 px-5 py-2.5 bg-orange-burnt hover:bg-orange-burnt/95 text-white font-display font-bold rounded-lg text-sm transition-colors mx-auto w-full shadow-md shadow-orange-burnt/10"
+            onClick={handleAccessDeniedExit}
+            className="flex items-center justify-center space-x-2 px-5 py-2.5 bg-orange-burnt hover:bg-orange-burnt/95 text-white font-display font-bold rounded-lg text-sm transition-colors mx-auto w-full shadow-md shadow-orange-burnt/10 active:scale-98"
           >
-            <LogOut className="w-4 h-4" />
-            <span>Sign Out From Console</span>
+            <ArrowLeft className="w-4 h-4" />
+            <span>Go to Website</span>
           </button>
         </div>
       </div>
@@ -187,6 +187,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         role,
         email: session.user.email,
         userId: session.user.id,
+        fullName: session.user.user_metadata?.full_name || 'Admin User',
+        avatarUrl: session.user.user_metadata?.avatar_url || null,
         isSuspended,
         isLoading: false,
       }}

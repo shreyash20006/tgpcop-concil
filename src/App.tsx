@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Lenis from 'lenis';
 import { supabase } from './lib/supabase';
+import { AuthProvider } from './lib/AuthProvider';
 
 // Import components
 import { Navbar } from './components/Navbar';
@@ -182,20 +183,22 @@ export const App: React.FC = () => {
     };
   }, []);
 
-  return (
-    <ToastProvider>
-      <Router>
-        {/* Reset window viewport coordinate on routing */}
-        <ScrollToTop />
-        
-        {/* Fixed Scroll progress indicator */}
-        <ScrollProgressBar />
+    return (
+      <AuthProvider>
+        <ToastProvider>
+          <Router>
+            {/* Reset window viewport coordinate on routing */}
+            <ScrollToTop />
+            
+            {/* Fixed Scroll progress indicator */}
+            <ScrollProgressBar />
 
-        {/* Dynamic Content isolated layout */}
-        <AppContent />
-      </Router>
-    </ToastProvider>
-  );
+            {/* Dynamic Content isolated layout */}
+            <AppContent />
+          </Router>
+        </ToastProvider>
+      </AuthProvider>
+    );
 };
 
 export default App;

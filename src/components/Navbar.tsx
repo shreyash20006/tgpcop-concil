@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, GraduationCap, ChevronDown, Lock, Sun, Moon } from 'lucide-react';
+import { Menu, X, GraduationCap, ChevronDown, Lock, Sun, Moon, Search, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useThemeContext } from '../lib/ThemeProvider';
+import { useStudentAuth } from '../lib/StudentAuthProvider';
+import { CommandPalette } from './CommandPalette';
+import { NotificationBell } from './NotificationBell';
 
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -12,8 +15,23 @@ export const Navbar: React.FC = () => {
   const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
   const [announcementText, setAnnouncementText] = useState<string>('');
   const [announcementEnabled, setAnnouncementEnabled] = useState<boolean>(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  
   const location = useLocation();
   const { theme, toggleTheme } = useThemeContext();
+  const { studentProfile, signInWithGoogle } = useStudentAuth();
+
+  // Listen for Ctrl+K globally
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     const fetchAnnouncement = async () => {
@@ -57,6 +75,9 @@ export const Navbar: React.FC = () => {
   const moreLinks = [
     { name: 'Achievements', path: '/achievements', icon: '🏆', desc: 'Student hall of fame' },
     { name: 'Vote Now', path: '/vote', icon: '🗳️', desc: 'Participate in active polls' },
+    { name: 'Leaderboard', path: '/leaderboard', icon: '🏆', desc: 'Top achievers' },
+    { name: 'Message Board', path: '/board', icon: '💬', desc: 'Community board' },
+    { name: 'My Calendar', path: '/calendar', icon: '📅', desc: 'Your saved events' },
     { name: 'Mentors', path: '/mentors', icon: '🤝', desc: 'Connect with senior guides' },
     { name: 'Newsletter', path: '/newsletter', icon: '📰', desc: 'Monthly publications' },
     { name: 'Report Issue', path: '/complaint', icon: '🆘', desc: 'File anonymous complaint', highlight: true },
@@ -201,6 +222,19 @@ export const Navbar: React.FC = () => {
               </AnimatePresence>
             </div>
 
+            {/* Desktop Search Button */}
+            <button
+              id="search-btn-desktop"
+              onClick={() => setIsSearchOpen(true)}
+              aria-label="Open search palette"
+              className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors text-white shrink-0 cursor-pointer"
+            >
+              <Search className="w-5 h-5 text-white" />
+            </button>
+
+            {/* Desktop Notification Bell */}
+            <NotificationBell />
+
             {/* Theme Toggle Button */}
             <button
               id="theme-toggle-desktop"
@@ -227,6 +261,37 @@ export const Navbar: React.FC = () => {
               </motion.div>
             </button>
 
+            {/* Student Login / Profile Avatar */}
+            {studentProfile ? (
+              <Link
+                to="/profile"
+                className="flex items-center space-x-2 p-1 pl-2 pr-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-white shrink-0 ml-2"
+              >
+                {studentProfile.avatar_url ? (
+                  <img
+                    src={studentProfile.avatar_url}
+                    alt={studentProfile.full_name}
+                    className="w-6 h-6 rounded-full object-cover border border-orange-burnt"
+                  />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-orange-burnt flex items-center justify-center text-[10px] font-bold">
+                    {studentProfile.full_name.charAt(0)}
+                  </div>
+                )}
+                <span className="text-[10px] font-display font-bold uppercase tracking-wider truncate max-w-[80px]">
+                  {studentProfile.full_name.split(' ')[0]}
+                </span>
+              </Link>
+            ) : (
+              <button
+                onClick={signInWithGoogle}
+                className="ml-2 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-[10px] font-display font-bold uppercase tracking-widest text-white transition-all duration-300 hover:scale-105 active:scale-95 flex items-center space-x-1 shrink-0 cursor-pointer"
+              >
+                <User className="w-3 h-3 text-orange-burnt" />
+                <span>Sign In</span>
+              </button>
+            )}
+
             {/* Portal Action button upgraded with gold active ring */}
             <Link
               to="/admin"
@@ -237,18 +302,28 @@ export const Navbar: React.FC = () => {
             </Link>
           </nav>
 
-          {/* Hamburger Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl hover:bg-white/5 transition-colors relative z-50 text-white"
-            aria-label="Toggle Menu"
-          >
-            {isMobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </button>
+          {/* Mobile Right Icons & Hamburger */}
+          <div className="flex md:hidden items-center space-x-1 relative z-50">
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              aria-label="Open search palette"
+              className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors text-white cursor-pointer"
+            >
+              <Search className="w-5 h-5 text-white" />
+            </button>
+            <NotificationBell />
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 rounded-xl hover:bg-white/5 transition-colors text-white cursor-pointer"
+              aria-label="Toggle Menu"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -272,7 +347,7 @@ export const Navbar: React.FC = () => {
               exit={{ x: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               style={{ background: 'var(--bg-drawer)', borderLeftColor: 'var(--border-subtle)' }}
-              className="fixed right-0 top-0 bottom-0 w-[290px] backdrop-blur-2xl p-6 z-50 shadow-2xl flex flex-col justify-between md:hidden overflow-y-auto border-l"
+              className="fixed right-0 top-0 bottom-0 w-[290px] backdrop-blur-2xl p-6 z-50 shadow-2xl flex flex-col justify-between md:hidden overflow-y-auto border-l animate-fade-in"
             >
               <div>
                 <div className="flex items-center justify-between mb-8">
@@ -354,6 +429,42 @@ export const Navbar: React.FC = () => {
               </div>
 
               <div className="mt-8 pt-6 border-t border-white/5">
+                {/* Mobile Student Profile / Sign In */}
+                {studentProfile ? (
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full flex items-center justify-between py-3 px-4 mb-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-white"
+                  >
+                    <div className="flex items-center space-x-3">
+                      {studentProfile.avatar_url ? (
+                        <img
+                          src={studentProfile.avatar_url}
+                          alt={studentProfile.full_name}
+                          className="w-8 h-8 rounded-full object-cover border border-orange-burnt"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-orange-burnt flex items-center justify-center text-xs font-bold">
+                          {studentProfile.full_name.charAt(0)}
+                        </div>
+                      )}
+                      <div className="text-left">
+                        <span className="block font-display font-bold text-xs">{studentProfile.full_name}</span>
+                        <span className="block text-[9px] text-white/50">{studentProfile.email}</span>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-bold text-orange-burnt tracking-wide">VIEW</span>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => { signInWithGoogle(); setIsMobileMenuOpen(false); }}
+                    className="w-full flex items-center justify-center space-x-2 py-3 px-4 mb-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-display text-xs font-bold uppercase tracking-wider cursor-pointer"
+                  >
+                    <User className="w-4 h-4 text-orange-burnt" />
+                    <span>Student Login</span>
+                  </button>
+                )}
+
                 {/* Mobile Theme Toggle */}
                 <button
                   id="theme-toggle-mobile"
@@ -388,6 +499,9 @@ export const Navbar: React.FC = () => {
           </>
         )}
       </AnimatePresence>
+
+      {/* Global Command Palette Search */}
+      <CommandPalette isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </>
   );
 };

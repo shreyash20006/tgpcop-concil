@@ -26,6 +26,8 @@ export const AdminLayout: React.FC = () => {
         return 'Polls & Voting Management';
       case '/admin/feedback':
         return 'Event Feedback Analytics';
+      case '/admin/messages':
+        return 'Messages Board Moderation';
       case '/admin/achievements':
         return 'Hall of Fame achievements';
       case '/admin/newsletter':

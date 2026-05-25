@@ -4,6 +4,7 @@ import Lenis from 'lenis';
 import { supabase } from './lib/supabase';
 import { AuthProvider } from './lib/AuthProvider';
 import { ThemeProvider } from './lib/ThemeProvider';
+import { StudentAuthProvider } from './lib/StudentAuthProvider';
 
 // Import components
 import { Navbar } from './components/Navbar';
@@ -26,6 +27,10 @@ import { Achievements } from './pages/Achievements';
 import { Newsletter } from './pages/Newsletter';
 import { Complaint } from './pages/Complaint';
 import { Mentors } from './pages/Mentors';
+import { StudentProfile } from './pages/StudentProfile';
+import { MyCalendar } from './pages/MyCalendar';
+import { Leaderboard } from './pages/Leaderboard';
+import { MessageBoard } from './pages/MessageBoard';
 
 // Import admin pages
 import { AdminLogin } from './pages/admin/AdminLogin';
@@ -42,6 +47,7 @@ import { AdminBugs } from './pages/admin/AdminBugs';
 import { AdminRegistrations } from './pages/admin/AdminRegistrations';
 import { AdminPolls } from './pages/admin/AdminPolls';
 import { AdminFeedback } from './pages/admin/AdminFeedback';
+import { AdminMessages } from './pages/admin/AdminMessages';
 import { AdminAchievements } from './pages/admin/AdminAchievements';
 import { AdminNewsletter } from './pages/admin/AdminNewsletter';
 import { AdminComplaints } from './pages/admin/AdminComplaints';
@@ -88,6 +94,10 @@ const AppContent: React.FC = () => {
           <Route path="/newsletter" element={<Newsletter />} />
           <Route path="/complaint" element={<Complaint />} />
           <Route path="/mentors" element={<Mentors />} />
+          <Route path="/profile" element={<StudentProfile />} />
+          <Route path="/calendar" element={<MyCalendar />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/board" element={<MessageBoard />} />
 
           {/* Secure Admin Routes */}
           <Route path="/admin" element={<AdminLogin />} />
@@ -107,6 +117,7 @@ const AppContent: React.FC = () => {
             <Route path="/admin/registrations" element={<AdminRegistrations />} />
             <Route path="/admin/polls" element={<AdminPolls />} />
             <Route path="/admin/feedback" element={<AdminFeedback />} />
+            <Route path="/admin/messages" element={<AdminMessages />} />
             <Route path="/admin/achievements" element={<AdminAchievements />} />
             <Route path="/admin/newsletter" element={<AdminNewsletter />} />
             <Route path="/admin/mentors" element={<AdminMentors />} />
@@ -187,18 +198,20 @@ export const App: React.FC = () => {
     return (
       <ThemeProvider>
         <AuthProvider>
-          <ToastProvider>
-            <Router>
-              {/* Reset window viewport coordinate on routing */}
-              <ScrollToTop />
-              
-              {/* Fixed Scroll progress indicator */}
-              <ScrollProgressBar />
+          <StudentAuthProvider>
+            <ToastProvider>
+              <Router>
+                {/* Reset window viewport coordinate on routing */}
+                <ScrollToTop />
+                
+                {/* Fixed Scroll progress indicator */}
+                <ScrollProgressBar />
 
-              {/* Dynamic Content isolated layout */}
-              <AppContent />
-            </Router>
-          </ToastProvider>
+                {/* Dynamic Content isolated layout */}
+                <AppContent />
+              </Router>
+            </ToastProvider>
+          </StudentAuthProvider>
         </AuthProvider>
       </ThemeProvider>
     );

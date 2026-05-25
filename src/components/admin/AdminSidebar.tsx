@@ -20,6 +20,7 @@ import {
   Moon,
   CheckSquare,
   MessageSquare,
+  MessageCircle,
   Award,
   Newspaper,
   HeartHandshake,
@@ -104,6 +105,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       path: '/admin/feedback',
       name: 'Feedback',
       icon: <MessageSquare className="w-5 h-5" />,
+    },
+    {
+      path: '/admin/messages',
+      name: 'Messages Board',
+      icon: <MessageCircle className="w-5 h-5 text-orange-burnt animate-pulse" />,
     },
     {
       path: '/admin/achievements',

@@ -1,64 +1,29 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { GalleryGrid } from '../components/GalleryGrid';
 import { Images } from 'lucide-react';
+import { PageHeader } from '../components/PageHeader';
+import { ScienceBackground } from '../components/ScienceBackground';
 
 export const Gallery: React.FC = () => {
   return (
-    <div className="pt-28 pb-24 min-h-screen bg-gray-light">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Page Title Header */}
-        <div className="text-center max-w-3xl mx-auto mb-6 flex flex-col items-center space-y-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: 'spring' }}
-            className="w-12 h-12 rounded-full bg-orange-burnt/10 flex items-center justify-center text-orange-burnt"
-          >
-            <Images className="w-6 h-6" />
-          </motion.div>
-          
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-orange-burnt text-xs font-bold uppercase tracking-widest block"
-          >
-            Visual Portfolio
-          </motion.span>
+    <div className="relative min-h-screen bg-[#050B18] overflow-hidden pb-24">
+      {/* Background Molecular Animations & Tech Elements */}
+      <ScienceBackground />
+      <div className="absolute top-[20%] left-[5%] w-[450px] h-[450px] rounded-full ambient-orb-orange z-0 pointer-events-none" />
+      <div className="absolute top-[60%] right-[5%] w-[400px] h-[400px] rounded-full ambient-orb-gold z-0 pointer-events-none" />
+      <div className="absolute inset-0 grid-bg-overlay opacity-15 z-0 pointer-events-none" />
 
-          <div className="relative inline-block">
-            <motion.h1
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="font-display font-extrabold text-3xl sm:text-5xl text-navy-dark leading-tight"
-            >
-              CAMPUS GALLERY & MEDIA
-            </motion.h1>
-            
-            {/* Animated Underline */}
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: '80px' }}
-              transition={{ delay: 0.4, duration: 0.6, ease: 'easeOut' }}
-              className="h-1 bg-orange-burnt mx-auto mt-4 rounded-full"
-            />
-          </div>
+      {/* Custom Reusable Science Page Header */}
+      <PageHeader
+        icon={<Images className="w-6 h-6 animate-pulse" />}
+        title="Campus Gallery"
+        subtitle="Catch a glimpse of dynamic academic exhibitions, intensive technical symposiums, and sports weeks at TGPCOP Nagpur"
+        breadcrumb="Gallery"
+      />
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-navy-dark/70 text-sm sm:text-base font-sans"
-          >
-            Catch a glimpse of dynamic academic exhibitions, intense technical symposiums, cultural presentations, and student sports days at TGPCOP.
-          </motion.p>
-        </div>
-
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
         {/* Masonry gallery Grid panel */}
         <GalleryGrid />
-
       </div>
     </div>
   );

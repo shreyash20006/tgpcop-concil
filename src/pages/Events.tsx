@@ -4,6 +4,8 @@ import { EventTimeline } from '../components/EventTimeline';
 import { CompetitionCard } from '../components/CompetitionCard';
 import { supabase } from '../lib/supabase';
 import { CalendarRange, Trophy, CalendarDays, RefreshCw } from 'lucide-react';
+import { PageHeader } from '../components/PageHeader';
+import { ScienceBackground } from '../components/ScienceBackground';
 
 export const Events: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'events' | 'competitions'>('events');
@@ -37,64 +39,22 @@ export const Events: React.FC = () => {
   const competitions = events.filter((e) => e.type === 'competition');
 
   return (
-    <div className="relative min-h-screen bg-[#050B18] pt-32 pb-24 overflow-hidden">
-      {/* Background glowing orbs & grids */}
+    <div className="relative min-h-screen bg-[#050B18] overflow-hidden pb-24">
+      {/* Background Molecular Animations & Tech Elements */}
+      <ScienceBackground />
       <div className="absolute top-[15%] right-[5%] w-[450px] h-[450px] rounded-full ambient-orb-orange z-0 pointer-events-none" />
       <div className="absolute top-[50%] left-[5%] w-[400px] h-[400px] rounded-full ambient-orb-gold z-0 pointer-events-none" />
       <div className="absolute inset-0 grid-bg-overlay opacity-15 z-0 pointer-events-none" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Page Title Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 flex flex-col items-center space-y-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: 'spring' }}
-            className="w-12 h-12 rounded-xl bg-orange-burnt/10 flex items-center justify-center text-orange-burnt border border-orange-burnt/20 shadow-lg"
-          >
-            {activeTab === 'events' ? (
-              <CalendarRange className="w-6 h-6" />
-            ) : (
-              <Trophy className="w-6 h-6" />
-            )}
-          </motion.div>
-          
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-orange-burnt text-xs font-bold uppercase tracking-widest block"
-          >
-            Campus Happenings & Contests
-          </motion.span>
+      {/* Custom Reusable Science Page Header */}
+      <PageHeader
+        icon={activeTab === 'events' ? <CalendarRange className="w-6 h-6 animate-pulse" /> : <Trophy className="w-6 h-6 animate-pulse" />}
+        title={activeTab === 'events' ? "Events Timeline" : "Active Competitions"}
+        subtitle="Discover scientific drug delivery challenges, technical symposiums, research forums, and campus cultural week contests."
+        breadcrumb="Events"
+      />
 
-          <div className="relative inline-block">
-            <motion.h1
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight uppercase"
-            >
-              {activeTab === 'events' ? 'Events Timeline' : 'Active Competitions'}
-            </motion.h1>
-            
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: '80px' }}
-              transition={{ delay: 0.4, duration: 0.6, ease: 'easeOut' }}
-              className="h-1 bg-gradient-to-r from-orange-burnt to-gold-accent mx-auto mt-4 rounded-full"
-            />
-          </div>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-white/60 text-sm sm:text-base font-sans"
-          >
-            Explore our rich history of technical symposiums, cultural nights, and community campaigns, or participate in live scientific competitions!
-          </motion.p>
-        </div>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
 
         {/* Toggle Selector Tabs with smooth layout slider */}
         <div className="flex items-center justify-center mb-16">

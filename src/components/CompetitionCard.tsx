@@ -62,60 +62,60 @@ export const CompetitionCard: React.FC<CompetitionCardProps> = ({ competition })
   return (
     <motion.div
       variants={cardVariants}
-      whileHover={{ y: -6, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.08)' }}
-      className="bg-white rounded-xl shadow-md border border-navy-dark/5 overflow-hidden flex flex-col justify-between"
+      whileHover={{ y: -6, boxShadow: '0 20px 40px -15px rgba(214, 90, 30, 0.25)' }}
+      className="bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-2xl overflow-hidden flex flex-col justify-between shadow-[0_8px_32px_rgba(5,11,24,0.4)]"
     >
       {/* Upper Color Strip */}
-      <div className="bg-gradient-to-r from-orange-burnt to-gold-accent h-2 w-full" />
+      <div className="bg-gradient-to-r from-orange-burnt via-gold-accent to-orange-burnt h-1.5 w-full shadow-[0_0_8px_rgba(214,90,30,0.3)]" />
 
       <div className="p-6 flex flex-col h-full justify-between">
         <div>
           {/* Header Trophy Badging */}
           <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 rounded-full bg-orange-burnt/10 flex items-center justify-center text-orange-burnt shrink-0">
-              <Trophy className="w-5 h-5 fill-current" />
+            <div className="w-10 h-10 rounded-xl bg-orange-burnt/10 border border-orange-burnt/20 flex items-center justify-center text-orange-burnt shrink-0">
+              <Trophy className="w-5 h-5 fill-current animate-pulse" />
             </div>
             <div className="flex flex-col items-end space-y-1">
               {timeLeft.isExpired ? (
-                <span className="bg-red-50 text-red-600 border border-red-150 text-[10px] sm:text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+                <span className="bg-red-500/10 text-red-400 border border-red-500/25 text-[10px] sm:text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
                   Ended
                 </span>
               ) : (
-                <span className="bg-orange-burnt/10 text-orange-burnt border border-orange-burnt/25 text-[10px] sm:text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider flex items-center">
+                <span className="bg-orange-burnt/10 text-orange-burnt border border-orange-burnt/35 text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider flex items-center">
                   <Hourglass className="w-3.5 h-3.5 mr-1 animate-spin" style={{ animationDuration: '4s' }} />
                   Active
                 </span>
               )}
-              <span className={`text-[10px] font-bold ${isFull ? 'text-red-500' : 'text-emerald-600'}`}>
-                {isFull ? '🔴 Full' : `🟢 ${seatsLeft} seats left`}
+              <span className={`text-[10px] font-bold ${isFull ? 'text-red-400' : 'text-emerald-400'}`}>
+                {isFull ? '🔴 House Full' : `🟢 ${seatsLeft} seats left`}
               </span>
             </div>
           </div>
 
           {/* Title */}
-          <h3 className="font-display font-bold text-xl text-navy-dark mb-3 leading-snug">
+          <h3 className="font-display font-bold text-xl text-white mb-3 leading-snug">
             {competition.name}
           </h3>
 
           {/* Description */}
-          <p className="text-navy-dark/80 text-sm leading-relaxed mb-6 font-sans">
+          <p className="text-white/70 text-sm leading-relaxed mb-6 font-sans">
             {competition.description}
           </p>
 
           {/* Prize Info & Eligibility Grid */}
-          <div className="space-y-3 mb-6 bg-navy-dark/5 p-4 rounded-lg">
-            <div className="flex items-start space-x-2 text-xs">
+          <div className="space-y-3 mb-6 bg-[#0F1E42]/40 border border-orange-burnt/15 p-4 rounded-xl shadow-inner">
+            <div className="flex items-start space-x-2.5 text-xs">
               <Trophy className="w-4 h-4 text-orange-burnt shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-navy-dark block">Rewards:</span>
-                <span className="text-navy-dark/80">{competition.prizeInfo || 'Exciting Prizes & Certificates'}</span>
+                <span className="font-bold text-white block">Rewards:</span>
+                <span className="text-white/70">{competition.prizeInfo || 'Exciting Prizes & Certificates'}</span>
               </div>
             </div>
-            <div className="flex items-start space-x-2 text-xs">
+            <div className="flex items-start space-x-2.5 text-xs">
               <Users className="w-4 h-4 text-orange-burnt shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-navy-dark block">Eligibility:</span>
-                <span className="text-navy-dark/80">{competition.participationInfo || 'All B.Pharm & D.Pharm Students'}</span>
+                <span className="font-bold text-white block">Eligibility:</span>
+                <span className="text-white/70">{competition.participationInfo || 'All B.Pharm & D.Pharm Students'}</span>
               </div>
             </div>
           </div>
@@ -131,11 +131,11 @@ export const CompetitionCard: React.FC<CompetitionCardProps> = ({ competition })
                 { label: 'Min', value: timeLeft.minutes },
                 { label: 'Sec', value: timeLeft.seconds },
               ].map((cell, idx) => (
-                <div key={idx} className="bg-navy-dark text-white rounded p-2">
-                  <span className="block font-display font-bold text-base sm:text-lg leading-none mb-1">
+                <div key={idx} className="bg-[#0F1E42]/80 border border-orange-burnt/20 text-white rounded-lg p-2 shadow-sm">
+                  <span className="block font-display font-bold text-base sm:text-lg leading-none mb-1 text-gold-accent">
                     {String(cell.value).padStart(2, '0')}
                   </span>
-                  <span className="block text-[8px] uppercase tracking-wider opacity-75">
+                  <span className="block text-[8px] uppercase tracking-wider text-white/50">
                     {cell.label}
                   </span>
                 </div>
@@ -147,14 +147,14 @@ export const CompetitionCard: React.FC<CompetitionCardProps> = ({ competition })
           {timeLeft.isExpired || isFull ? (
             <button
               disabled
-              className="w-full py-3 bg-navy-dark/10 text-navy-dark/40 font-display font-semibold rounded-lg text-sm cursor-not-allowed uppercase"
+              className="w-full py-3 bg-white/5 text-white/30 font-display font-bold rounded-xl text-xs sm:text-sm cursor-not-allowed uppercase border border-white/5"
             >
               {isFull && !timeLeft.isExpired ? 'Registrations Full' : 'Registrations Closed'}
             </button>
           ) : (
             <Link
               to={`/register/${competition.id}`}
-              className="group flex items-center justify-center space-x-2 w-full py-3 bg-orange-burnt hover:bg-orange-burnt/90 text-white font-display font-bold rounded-lg text-sm shadow-md hover:shadow-orange-burnt/20 hover:-translate-y-[1px] transition-all duration-300"
+              className="group flex items-center justify-center space-x-2 w-full py-3 bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white font-display font-bold rounded-xl text-xs sm:text-sm shadow-md hover:shadow-orange-burnt/25 hover:-translate-y-[1px] transition-all duration-300 border border-white/5 active:scale-98"
             >
               <span>REGISTER NOW</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

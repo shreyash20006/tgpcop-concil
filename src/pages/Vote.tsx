@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
-import { Vote as VoteIcon, Loader2, CheckCircle2, AlertTriangle, Mail, Clock } from 'lucide-react';
+import { Vote as VoteIcon, CheckCircle2, AlertTriangle, Mail, Clock } from 'lucide-react';
+import { PageHeader } from '../components/PageHeader';
+import { ScienceBackground } from '../components/ScienceBackground';
+import { DNALoader } from '../components/DNALoader';
 
 export const Vote: React.FC = () => {
   const [polls, setPolls] = useState<any[]>([]);
@@ -22,29 +25,36 @@ export const Vote: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="pt-28 pb-24 min-h-screen bg-gray-light flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-orange-burnt animate-spin" />
+      <div className="relative min-h-screen bg-[#050B18] flex flex-col items-center justify-center">
+        <ScienceBackground />
+        <DNALoader />
+        <span className="text-xs font-bold font-display uppercase tracking-widest text-white/50 mt-4 animate-pulse">Loading Live Polls...</span>
       </div>
     );
   }
 
   return (
-    <div className="pt-28 pb-24 min-h-screen bg-gray-light">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
-          <div className="w-14 h-14 rounded-2xl bg-orange-burnt/10 flex items-center justify-center mx-auto mb-4">
-            <VoteIcon className="w-7 h-7 text-orange-burnt" />
-          </div>
-          <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-navy-dark mb-3">Active Polls</h1>
-          <p className="text-navy-dark/60 text-sm sm:text-base font-sans max-w-lg mx-auto">Cast your vote and make your voice heard. Results are shown live after voting.</p>
-        </motion.div>
+    <div className="relative min-h-screen bg-[#050B18] overflow-hidden pb-24">
+      {/* Background Molecular Animations & Tech Elements */}
+      <ScienceBackground />
+      <div className="absolute top-[20%] left-[5%] w-[450px] h-[450px] rounded-full ambient-orb-orange z-0 pointer-events-none" />
+      <div className="absolute top-[60%] right-[5%] w-[400px] h-[400px] rounded-full ambient-orb-gold z-0 pointer-events-none" />
+      <div className="absolute inset-0 grid-bg-overlay opacity-15 z-0 pointer-events-none" />
 
+      {/* Custom Reusable Science Page Header */}
+      <PageHeader
+        icon={<VoteIcon className="w-6 h-6 animate-pulse" />}
+        title="Live Voting Portal"
+        subtitle="Cast your vote dynamically on campus initiatives, council changes, and student preferences. Voice of 500+ pharmacy students."
+        breadcrumb="Vote"
+      />
+
+      <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 mt-12">
         {polls.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl border border-navy-dark/10 shadow-sm">
-            <VoteIcon className="w-12 h-12 text-navy-dark/15 mx-auto mb-3" />
-            <h3 className="font-display font-bold text-navy-dark/60 mb-1">No Active Polls</h3>
-            <p className="text-navy-dark/40 text-sm font-sans">Check back later for new voting opportunities.</p>
+          <div className="text-center py-20 bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-2xl flex flex-col items-center p-6 shadow-2xl">
+            <VoteIcon className="w-12 h-12 text-white/10 mx-auto mb-3" />
+            <h3 className="font-display font-bold text-white/70 mb-1">No Active Polls</h3>
+            <p className="text-white/50 text-sm font-sans">There are no live surveys or student council polls running currently.</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -94,7 +104,7 @@ const PollCard: React.FC<{ poll: any }> = ({ poll }) => {
         .from('votes')
         .select('id')
         .eq('poll_id', poll.id)
-        .eq('email', voterEmail)
+        .eq('email', voterEmail.trim().toLowerCase())
         .maybeSingle();
       if (existing) {
         setError('You have already voted in this poll!');
@@ -105,7 +115,7 @@ const PollCard: React.FC<{ poll: any }> = ({ poll }) => {
       }
 
       const { error: insertError } = await supabase.from('votes').insert({
-        poll_id: poll.id, email: voterEmail, selected_option: selected,
+        poll_id: poll.id, email: voterEmail.trim().toLowerCase(), selected_option: selected,
       });
       if (insertError) throw insertError;
 
@@ -121,79 +131,110 @@ const PollCard: React.FC<{ poll: any }> = ({ poll }) => {
   const isExpired = poll.end_date && new Date(poll.end_date) < new Date();
 
   return (
-    <div className="bg-white rounded-2xl border border-navy-dark/10 shadow-sm overflow-hidden">
+    <div className="bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-2xl shadow-[0_8px_32px_rgba(5,11,24,0.4)] overflow-hidden transition-all duration-300">
       <div className="p-6 sm:p-8">
-        <div className="flex items-start justify-between flex-wrap gap-2 mb-1">
-          <h3 className="font-display font-extrabold text-lg text-navy-dark flex items-center space-x-2">
-            <VoteIcon className="w-5 h-5 text-orange-burnt" />
+        <div className="flex items-start justify-between flex-wrap gap-3.5 mb-3">
+          <h3 className="font-display font-extrabold text-lg text-white flex items-center space-x-2">
+            <VoteIcon className="w-5 h-5 text-orange-burnt animate-pulse" />
             <span>{poll.title}</span>
           </h3>
           {poll.end_date && (
-            <span className={`inline-flex items-center space-x-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${isExpired ? 'bg-red-50 text-red-600 border-red-200' : 'bg-blue-50 text-blue-600 border-blue-200'}`}>
-              <Clock className="w-3 h-3" />
+            <span className={`inline-flex items-center space-x-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${isExpired ? 'bg-red-500/10 text-red-400 border-red-500/25' : 'bg-orange-burnt/10 text-orange-burnt border border-orange-burnt/25'}`}>
+              <Clock className="w-3.5 h-3.5" />
               <span>{isExpired ? 'Ended' : `Ends: ${new Date(poll.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}</span>
             </span>
           )}
         </div>
-        {poll.description && <p className="text-navy-dark/60 text-sm font-sans mb-5">{poll.description}</p>}
+        {poll.description && <p className="text-white/60 text-sm font-sans mb-5 leading-relaxed">{poll.description}</p>}
 
         <AnimatePresence mode="wait">
           {!hasVoted ? (
             <motion.form key="form" onSubmit={handleVote} exit={{ opacity: 0 }} className="space-y-4">
               {error && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm font-medium flex items-center space-x-2">
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400 text-sm font-medium flex items-center space-x-2">
                   <AlertTriangle className="w-4 h-4 shrink-0" /><span>{error}</span>
                 </div>
               )}
               <div className="space-y-2">
                 {options.map(opt => (
-                  <label key={opt}
-                    className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all ${selected === opt ? 'border-orange-burnt bg-orange-burnt/5' : 'border-navy-dark/10 hover:border-navy-dark/20'}`}>
-                    <input type="radio" name={`poll-${poll.id}`} value={opt} checked={selected === opt}
-                      onChange={() => setSelected(opt)} className="accent-orange-burnt w-4 h-4" />
-                    <span className="text-sm font-sans text-navy-dark font-medium">{opt}</span>
+                  <label
+                    key={opt}
+                    className={`flex items-center space-x-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                      selected === opt
+                        ? 'border-orange-burnt bg-orange-burnt/10 text-orange-burnt shadow-lg'
+                        : 'border-white/10 hover:border-orange-burnt/30 text-white/80 bg-white/5 hover:bg-white/10'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name={`poll-${poll.id}`}
+                      value={opt}
+                      checked={selected === opt}
+                      onChange={() => setSelected(opt)}
+                      className="accent-orange-burnt w-4 h-4 bg-transparent border-white/20 text-orange-burnt"
+                    />
+                    <span className="text-sm font-display font-bold">{opt}</span>
                   </label>
                 ))}
               </div>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-navy-dark/30" />
-                <input type="email" required value={voterEmail} onChange={e => setVoterEmail(e.target.value)} placeholder="Your email (for duplicate check)"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-orange-burnt outline-none text-sm font-sans text-navy-dark transition-colors" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
+                <input
+                  type="email"
+                  required
+                  value={voterEmail}
+                  onChange={e => setVoterEmail(e.target.value)}
+                  placeholder="Enter your student email"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-orange-burnt/20 bg-[#050B18] outline-none text-xs sm:text-sm font-sans text-white placeholder-white/30 focus:border-orange-burnt transition-colors shadow-inner"
+                />
               </div>
-              <button type="submit" disabled={isSubmitting || !selected || isExpired}
-                className="w-full py-2.5 rounded-lg bg-orange-burnt hover:bg-orange-burnt/90 text-white font-display text-sm font-bold shadow-md transition-all disabled:opacity-50 flex items-center justify-center space-x-2">
-                {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /><span>Casting Vote...</span></> : <><VoteIcon className="w-4 h-4" /><span>Cast Vote →</span></>}
+              <button
+                type="submit"
+                disabled={isSubmitting || !selected || isExpired}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white font-display text-xs font-bold uppercase tracking-wider shadow-md hover:shadow-orange-burnt/25 hover:-translate-y-[1px] transition-all disabled:opacity-50 flex items-center justify-center space-x-2 border border-white/5 active:scale-98"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center space-x-2">
+                    <DNALoader />
+                    <span>Casting Vote...</span>
+                  </div>
+                ) : (
+                  <>
+                    <VoteIcon className="w-4 h-4 text-white" />
+                    <span>Cast Vote</span>
+                  </>
+                )}
               </button>
             </motion.form>
           ) : (
             <motion.div key="results" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-              <div className="flex items-center space-x-2 text-emerald-600 font-display font-bold text-sm mb-2">
-                <CheckCircle2 className="w-5 h-5" />
+              <div className="flex items-center space-x-2 text-emerald-400 font-display font-bold text-sm mb-2">
+                <CheckCircle2 className="w-5 h-5 animate-pulse shrink-0" />
                 <span>{error ? error : 'Vote Cast Successfully!'}</span>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3 pt-2">
                 {options.map(opt => {
                   const count = results[opt] || 0;
                   const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
                   return (
                     <div key={opt} className="space-y-1">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className={`font-sans font-medium ${selected === opt ? 'text-orange-burnt font-bold' : 'text-navy-dark'}`}>{opt}</span>
-                        <span className="text-navy-dark/50 text-xs font-mono">{pct}% ({count})</span>
+                      <div className="flex items-center justify-between text-sm font-semibold">
+                        <span className={`${selected === opt ? 'text-orange-burnt font-bold' : 'text-white/80'}`}>{opt}</span>
+                        <span className="text-orange-burnt text-xs font-mono">{pct}% ({count} votes)</span>
                       </div>
-                      <div className="w-full h-3 bg-navy-dark/5 rounded-full overflow-hidden">
+                      <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden border border-white/5 shadow-inner">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${pct}%` }}
                           transition={{ duration: 0.8, ease: 'easeOut' }}
-                          className={`h-full rounded-full ${selected === opt ? 'bg-orange-burnt' : 'bg-navy-dark/20'}`}
+                          className={`h-full rounded-full bg-gradient-to-r ${selected === opt ? 'from-orange-burnt to-[#E06D2B]' : 'from-white/10 to-white/20'}`}
                         />
                       </div>
                     </div>
                   );
                 })}
               </div>
-              <p className="text-navy-dark/40 text-xs font-mono text-right">Total votes: {totalVotes}</p>
+              <p className="text-white/40 text-xs font-mono text-right pt-2">Total votes cast: {totalVotes}</p>
             </motion.div>
           )}
         </AnimatePresence>

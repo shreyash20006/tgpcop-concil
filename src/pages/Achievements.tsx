@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
-import { Trophy, Loader2, GraduationCap } from 'lucide-react';
+import { Trophy, GraduationCap } from 'lucide-react';
+import { PageHeader } from '../components/PageHeader';
+import { ScienceBackground } from '../components/ScienceBackground';
+import { DNALoader } from '../components/DNALoader';
 
 const CATEGORIES = ['All', 'Academic', 'Sports', 'Cultural', 'Research', 'Competition'];
 
 const CATEGORY_COLORS: Record<string, string> = {
-  academic: 'bg-blue-50 text-blue-600 border-blue-200',
-  sports: 'bg-emerald-50 text-emerald-600 border-emerald-200',
-  cultural: 'bg-purple-50 text-purple-600 border-purple-200',
-  research: 'bg-cyan-50 text-cyan-600 border-cyan-200',
-  competition: 'bg-amber-50 text-amber-600 border-amber-200',
+  academic: 'bg-blue-500/10 text-blue-400 border-blue-500/25',
+  sports: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25',
+  cultural: 'bg-purple-500/10 text-purple-400 border-purple-500/25',
+  research: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/25',
+  competition: 'bg-amber-500/10 text-amber-400 border-amber-500/25',
 };
 
 export const Achievements: React.FC = () => {
@@ -34,34 +37,49 @@ export const Achievements: React.FC = () => {
   }, [items, activeCategory]);
 
   return (
-    <div className="pt-28 pb-24 min-h-screen bg-gray-light">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Hero */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
-          <div className="w-16 h-16 rounded-2xl bg-orange-burnt/10 flex items-center justify-center mx-auto mb-4">
-            <Trophy className="w-8 h-8 text-orange-burnt" />
-          </div>
-          <h1 className="font-display font-extrabold text-3xl sm:text-5xl text-navy-dark mb-3">Hall of Fame</h1>
-          <p className="text-navy-dark/60 text-sm sm:text-base font-sans max-w-lg mx-auto">Celebrating TGPCOP's finest students and their outstanding achievements.</p>
-        </motion.div>
+    <div className="relative min-h-screen bg-[#050B18] overflow-hidden pb-24">
+      {/* Background Molecular Animations & Tech Elements */}
+      <ScienceBackground />
+      <div className="absolute top-[20%] left-[5%] w-[450px] h-[450px] rounded-full ambient-orb-orange z-0 pointer-events-none" />
+      <div className="absolute top-[60%] right-[5%] w-[400px] h-[400px] rounded-full ambient-orb-gold z-0 pointer-events-none" />
+      <div className="absolute inset-0 grid-bg-overlay opacity-15 z-0 pointer-events-none" />
 
+      {/* Custom Reusable Science Page Header */}
+      <PageHeader
+        icon={<Trophy className="w-6 h-6 animate-pulse" />}
+        title="Hall of Fame"
+        subtitle="Celebrating TGPCOP's finest pharmacy students and their outstanding milestones inside & outside Nagpur"
+        breadcrumb="Achievements"
+      />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
         {/* Category Tabs */}
-        <div className="flex items-center justify-center flex-wrap gap-2 mb-10">
+        <div className="flex items-center justify-center flex-wrap gap-2.5 mb-12">
           {CATEGORIES.map(cat => (
-            <button key={cat} onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-full font-display text-xs font-bold tracking-wide transition-all ${activeCategory === cat ? 'bg-navy-dark text-white shadow-md' : 'bg-white text-navy-dark/60 border border-navy-dark/10 hover:border-orange-burnt hover:text-orange-burnt'}`}>
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-5 py-2.5 rounded-xl font-display text-xs font-bold tracking-wider transition-all duration-300 border ${
+                activeCategory === cat
+                  ? 'bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white border-transparent shadow-lg shadow-orange-burnt/15 scale-102'
+                  : 'bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border-white/5'
+              }`}
+            >
               {cat}
             </button>
           ))}
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-20"><Loader2 className="w-10 h-10 text-orange-burnt animate-spin" /></div>
+          <div className="flex flex-col items-center justify-center py-20">
+            <DNALoader />
+            <span className="text-xs font-bold font-display uppercase tracking-widest text-white/50 mt-4 animate-pulse">Loading Hall of Fame...</span>
+          </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl border border-navy-dark/10">
-            <Trophy className="w-12 h-12 text-navy-dark/15 mx-auto mb-3" />
-            <h3 className="font-display font-bold text-navy-dark/60">No achievements found</h3>
-            <p className="text-navy-dark/40 text-sm font-sans">Check back later for new entries.</p>
+          <div className="text-center py-20 bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-2xl max-w-lg mx-auto flex flex-col items-center p-6 shadow-2xl">
+            <Trophy className="w-12 h-12 text-white/10 mx-auto mb-3" />
+            <h3 className="font-display font-bold text-white/70 mb-1">No Achievements Recorded</h3>
+            <p className="text-white/50 text-sm font-sans">No entries match the "{activeCategory}" category currently.</p>
           </div>
         ) : (
           <motion.div
@@ -70,32 +88,34 @@ export const Achievements: React.FC = () => {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           >
             {filtered.map(item => (
-              <motion.div key={item.id}
+              <motion.div
+                key={item.id}
                 variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
-                whileHover={{ y: -6, boxShadow: '0 15px 30px -10px rgba(0,0,0,0.1)' }}
-                className="bg-white rounded-xl border border-navy-dark/5 shadow-sm overflow-hidden flex flex-col"
+                whileHover={{ y: -6, boxShadow: '0 20px 40px -15px rgba(214, 90, 30, 0.2)' }}
+                className="bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-2xl shadow-[0_8px_32px_rgba(5,11,24,0.4)] overflow-hidden flex flex-col hover:border-orange-burnt/40 transition-all duration-300"
               >
                 {item.image_url ? (
-                  <div className="h-44 bg-navy-dark/5 overflow-hidden">
-                    <img src={item.image_url} alt={item.student_name} className="w-full h-full object-cover" />
+                  <div className="h-48 overflow-hidden relative border-b border-orange-burnt/10">
+                    <img src={item.image_url} alt={item.student_name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
                   </div>
                 ) : (
-                  <div className="h-32 bg-gradient-to-br from-navy-dark/5 to-orange-burnt/5 flex items-center justify-center">
-                    <Trophy className="w-12 h-12 text-orange-burnt/30" />
+                  <div className="h-36 bg-gradient-to-br from-white/5 to-orange-burnt/10 flex items-center justify-center border-b border-orange-burnt/10">
+                    <Trophy className="w-12 h-12 text-orange-burnt/40" />
                   </div>
                 )}
                 <div className="p-5 flex-grow flex flex-col">
                   <div className="flex items-center justify-between mb-3">
-                    <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[item.category?.toLowerCase()] || 'bg-gray-50 text-gray-500 border-gray-200'}`}>
+                    <span className={`text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${CATEGORY_COLORS[item.category?.toLowerCase()] || 'bg-white/5 text-white/60 border-white/10'}`}>
                       {item.category}
                     </span>
                   </div>
-                  <h3 className="font-display font-bold text-base text-navy-dark mb-1">{item.student_name}</h3>
-                  <div className="flex items-center space-x-1 text-navy-dark/50 text-xs mb-2">
-                    <GraduationCap className="w-3.5 h-3.5" /><span>{item.year}</span>
+                  <h3 className="font-display font-bold text-base text-white mb-1">{item.student_name}</h3>
+                  <div className="flex items-center space-x-1.5 text-white/50 text-xs mb-2">
+                    <GraduationCap className="w-4 h-4 text-orange-burnt" />
+                    <span>{item.year}</span>
                   </div>
-                  <p className="text-sm font-display font-semibold text-orange-burnt mb-1">{item.title}</p>
-                  {item.description && <p className="text-xs text-navy-dark/55 font-sans leading-relaxed flex-grow">{item.description}</p>}
+                  <p className="text-xs sm:text-sm font-display font-semibold text-orange-burnt mb-2">{item.title}</p>
+                  {item.description && <p className="text-xs text-white/60 font-sans leading-relaxed flex-grow">{item.description}</p>}
                 </div>
               </motion.div>
             ))}

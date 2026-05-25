@@ -4,6 +4,8 @@ import { CouncilCard } from '../components/CouncilCard';
 import { councilMembers, type CouncilMember } from '../data/council';
 import { ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { PageHeader } from '../components/PageHeader';
+import { ScienceBackground } from '../components/ScienceBackground';
 
 export const Council: React.FC = () => {
   const [members, setMembers] = useState<CouncilMember[]>([]);
@@ -68,7 +70,10 @@ export const Council: React.FC = () => {
       }
     };
 
-    fetchMembers();
+    const timer = setTimeout(() => {
+      fetchMembers();
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   const gridContainerVariants = {
@@ -81,60 +86,22 @@ export const Council: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#050B18] pt-32 pb-24 overflow-hidden">
-      {/* Background orbs and grid noise */}
+    <div className="relative min-h-screen bg-[#050B18] overflow-hidden pb-24">
+      {/* Background Molecular Animations & Tech Elements */}
+      <ScienceBackground />
       <div className="absolute top-[20%] left-[5%] w-[450px] h-[450px] rounded-full ambient-orb-orange z-0 pointer-events-none" />
       <div className="absolute top-[60%] right-[5%] w-[400px] h-[400px] rounded-full ambient-orb-gold z-0 pointer-events-none" />
       <div className="absolute inset-0 grid-bg-overlay opacity-15 z-0 pointer-events-none" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-20 flex flex-col items-center space-y-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: 'spring' }}
-            className="w-12 h-12 rounded-xl bg-orange-burnt/10 flex items-center justify-center text-orange-burnt border border-orange-burnt/20 shadow-lg"
-          >
-            <ShieldCheck className="w-6 h-6" />
-          </motion.div>
-          
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-orange-burnt text-xs font-bold uppercase tracking-widest block"
-          >
-            Elected Student Leadership
-          </motion.span>
+      {/* Custom Reusable Science Page Header */}
+      <PageHeader
+        icon={<ShieldCheck className="w-6 h-6 animate-pulse" />}
+        title="Student Council"
+        subtitle="Meet your elected leaders representing academic, cultural, sports, and student welfare across TGPCOP"
+        breadcrumb="Council"
+      />
 
-          <div className="relative inline-block">
-            <motion.h1
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight uppercase"
-            >
-              Our Council Members
-            </motion.h1>
-            
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: '80px' }}
-              transition={{ delay: 0.4, duration: 0.6, ease: 'easeOut' }}
-              className="h-1 bg-gradient-to-r from-orange-burnt to-gold-accent mx-auto mt-4 rounded-full"
-            />
-          </div>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-white/60 text-sm sm:text-base font-sans"
-          >
-            Representing semesters, cultural programs, physical sports, community NSS campaigns, and student welfare across TGPCOP.
-          </motion.p>
-        </div>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
 
         {/* Shimmer Skeleton Loaders */}
         {loading ? (

@@ -1,63 +1,30 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { AskForm } from '../components/AskForm';
 import { HelpCircle } from 'lucide-react';
+import { PageHeader } from '../components/PageHeader';
+import { ScienceBackground } from '../components/ScienceBackground';
 
 export const Ask: React.FC = () => {
   return (
-    <div className="pt-28 pb-20 min-h-screen bg-gray-light">
-      {/* Page Title Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: 'spring' }}
-            className="w-12 h-12 rounded-full bg-orange-burnt/10 flex items-center justify-center text-orange-burnt mx-auto"
-          >
-            <HelpCircle className="w-6 h-6" />
-          </motion.div>
-          
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-orange-burnt text-xs font-bold uppercase tracking-widest block"
-          >
-            Student Grievance & Q&A
-          </motion.span>
+    <div className="relative min-h-screen bg-[#050B18] overflow-hidden pb-20">
+      {/* Background canvas molecules and grid overlay */}
+      <ScienceBackground />
+      <div className="absolute top-[20%] -left-[10%] w-[500px] h-[500px] rounded-full ambient-orb-orange z-0 pointer-events-none" />
+      <div className="absolute top-[50%] -right-[10%] w-[500px] h-[500px] rounded-full ambient-orb-gold z-0 pointer-events-none" />
+      <div className="absolute inset-0 grid-bg-overlay opacity-15 z-0 pointer-events-none" />
 
-          <div className="relative inline-block">
-            <motion.h1
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="font-display font-extrabold text-3xl sm:text-5xl text-navy-dark leading-tight"
-            >
-              ASK THE COUNCIL
-            </motion.h1>
-            
-            {/* Animated Underline */}
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: '80px' }}
-              transition={{ delay: 0.4, duration: 0.6, ease: 'easeOut' }}
-              className="h-1 bg-orange-burnt mx-auto mt-4 rounded-full"
-            />
-          </div>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-navy-dark/70 text-sm sm:text-base font-sans"
-          >
-            Have a question about mid-sems, sports registrations, anti-ragging compliance, or general college life? Send us a message directly.
-          </motion.p>
-        </div>
-      </div>
+      {/* Reusable premium science page header */}
+      <PageHeader 
+        icon={<HelpCircle className="w-6 h-6 animate-pulse" />}
+        title="Ask the Council"
+        subtitle="Have queries regarding examinations, mid-sems, sports registrations, library timings, or anti-ragging? Send it here."
+        breadcrumb="Ask Portal"
+      />
 
       {/* Dynamic Form and FAQs Accordion */}
-      <AskForm />
+      <div className="relative z-10 mt-12">
+        <AskForm />
+      </div>
     </div>
   );
 };

@@ -31,6 +31,7 @@ import { StudentProfile } from './pages/StudentProfile';
 import { MyCalendar } from './pages/MyCalendar';
 import { Leaderboard } from './pages/Leaderboard';
 import { MessageBoard } from './pages/MessageBoard';
+import { Store } from './pages/Store';
 
 // Import admin pages
 import { AdminLogin } from './pages/admin/AdminLogin';
@@ -98,6 +99,7 @@ const AppContent: React.FC = () => {
           <Route path="/calendar" element={<MyCalendar />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/board" element={<MessageBoard />} />
+          <Route path="/store" element={<Store />} />
 
           {/* Secure Admin Routes */}
           <Route path="/admin" element={<AdminLogin />} />

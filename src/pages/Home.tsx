@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { HeroSection } from '../components/HeroSection';
+import { DNAHero } from '../components/DNAHero';
+import { ScienceBackground } from '../components/ScienceBackground';
 import { MarqueeStrip } from '../components/MarqueeStrip';
 import { supabase } from '../lib/supabase';
 import {
@@ -254,6 +255,7 @@ export const Home: React.FC = () => {
 
   return (
     <div className="relative min-h-screen bg-[#050B18] overflow-hidden pb-20">
+      <ScienceBackground />
       {/* Dynamic colorful floating gradient HSL orbs */}
       <div className="absolute top-[15%] -left-[10%] w-[500px] h-[500px] rounded-full ambient-orb-orange z-0 pointer-events-none" />
       <div className="absolute top-[45%] -right-[15%] w-[600px] h-[600px] rounded-full ambient-orb-gold z-0 pointer-events-none" />
@@ -263,7 +265,7 @@ export const Home: React.FC = () => {
       <div className="absolute inset-0 grid-bg-overlay opacity-15 z-0 pointer-events-none" />
 
       {/* 1. Hero Canvas */}
-      <HeroSection />
+      <DNAHero />
 
       {/* 2. Dynamic Notices Infinite Marquee */}
       <MarqueeStrip />
@@ -340,7 +342,7 @@ export const Home: React.FC = () => {
             ].map((stat, idx) => (
               <div
                 key={idx}
-                className="glass-panel glow-card rounded-2xl p-6 shadow-xl flex items-start space-x-4 border border-white/5"
+                className="bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-2xl p-6 shadow-[0_8px_32px_rgba(5,11,24,0.4)] flex items-start space-x-4 transition-all duration-300 hover:border-orange-burnt/40"
               >
                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-burnt to-[#E06D2B] flex items-center justify-center text-white shrink-0 shadow-lg shadow-orange-burnt/15">
                   {stat.icon}
@@ -391,10 +393,10 @@ export const Home: React.FC = () => {
                 variants={fadeUpVariants}
                 whileHover={{
                   y: -8,
-                  borderColor: 'rgba(214, 90, 30, 0.4)',
-                  boxShadow: '0 20px 40px -15px rgba(214, 90, 30, 0.15)',
+                  borderColor: 'rgba(200, 75, 14, 0.45)',
+                  boxShadow: '0 20px 40px -15px rgba(200, 75, 14, 0.25)',
                 }}
-                className="glass-panel glow-card rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 border border-white/5 cursor-pointer relative group"
+                className="bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 cursor-pointer relative group shadow-[0_8px_32px_rgba(5,11,24,0.4)]"
               >
                 <div>
                   <div className="flex items-center justify-between mb-6">
@@ -430,7 +432,7 @@ export const Home: React.FC = () => {
       {/* 5. Active Poll Section (Glassmorphic Voter Panel) */}
       {activePoll && (
         <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="glass-panel glow-card rounded-3xl p-8 md:p-12 shadow-2xl border border-white/5 relative overflow-hidden">
+          <div className="bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-3xl p-8 md:p-12 shadow-[0_8px_32px_rgba(5,11,24,0.4)] relative overflow-hidden">
             <div className="absolute -top-10 -right-10 w-64 h-64 bg-orange-burnt/5 rounded-full blur-[100px] pointer-events-none" />
             
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -462,7 +464,7 @@ export const Home: React.FC = () => {
               {/* Right Interactive Form/Results Column */}
               <div className="lg:col-span-6">
                 {hasVoted ? (
-                  <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-5">
+                  <div className="bg-[#050B18]/60 border border-orange-burnt/20 rounded-2xl p-6 space-y-5">
                     <div className="flex items-center space-x-2 text-emerald-400 font-display font-bold text-xs sm:text-sm">
                       <CheckCircle2 className="w-5 h-5 shrink-0" />
                       <span>Thank you! Your voice has been recorded.</span>
@@ -523,7 +525,7 @@ export const Home: React.FC = () => {
                         required
                         value={votingEmail}
                         onChange={(e) => setVotingEmail(e.target.value)}
-                        className="flex-grow px-4 py-3 rounded-xl border border-white/10 text-xs sm:text-sm bg-white/5 focus:outline-none focus:border-orange-burnt text-white font-sans"
+                        className="flex-grow px-4 py-3 rounded-xl border border-orange-burnt/25 text-xs sm:text-sm bg-[#050B18]/60 focus:outline-none focus:border-orange-burnt text-white font-sans"
                       />
                       <button
                         type="submit"
@@ -566,7 +568,7 @@ export const Home: React.FC = () => {
         </div>
 
         {recentAchievements.length === 0 ? (
-          <div className="text-center py-16 glass-panel rounded-2xl border border-white/5">
+          <div className="text-center py-16 bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-2xl shadow-[0_8px_32px_rgba(5,11,24,0.4)]">
             <Trophy className="w-10 h-10 text-white/10 mx-auto mb-3" />
             <h3 className="font-display font-bold text-white/40 text-sm">No achievements posted yet</h3>
           </div>
@@ -575,8 +577,8 @@ export const Home: React.FC = () => {
             {recentAchievements.map((item) => (
               <motion.div
                 key={item.id}
-                whileHover={{ y: -6, borderColor: 'rgba(214, 90, 30, 0.3)', boxShadow: '0 15px 30px -10px rgba(0,0,0,0.3)' }}
-                className="glass-panel glow-card rounded-2xl border border-white/5 overflow-hidden flex flex-col transition-all duration-300 bg-[#0F1E42]/20"
+                whileHover={{ y: -6, borderColor: 'rgba(200, 75, 14, 0.4)', boxShadow: '0 20px 40px -15px rgba(200, 75, 14, 0.2)' }}
+                className="bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-2xl overflow-hidden flex flex-col transition-all duration-300 shadow-[0_8px_32px_rgba(5,11,24,0.4)]"
               >
                 {item.image_url ? (
                   <div className="h-48 overflow-hidden relative border-b border-white/5">
@@ -636,7 +638,7 @@ export const Home: React.FC = () => {
         </div>
 
         {upcomingEvents.length === 0 ? (
-          <div className="text-center py-16 glass-panel rounded-2xl border border-white/5">
+          <div className="text-center py-16 bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-2xl shadow-[0_8px_32px_rgba(5,11,24,0.4)]">
             <Calendar className="w-10 h-10 text-white/10 mx-auto mb-3" />
             <h3 className="font-display font-bold text-white/40 text-sm">No upcoming events scheduled</h3>
           </div>
@@ -650,7 +652,7 @@ export const Home: React.FC = () => {
               return (
                 <div
                   key={event.id}
-                  className="glass-panel glow-card rounded-2xl border border-white/5 overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-2xl bg-[#0F1E42]/20"
+                  className="bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:border-orange-burnt/40 shadow-[0_8px_32px_rgba(5,11,24,0.4)] hover:shadow-[0_20px_40px_-15px_rgba(200,75,14,0.15)]"
                 >
                   <div>
                     {/* Header Image/Banner */}

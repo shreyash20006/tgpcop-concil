@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Pin, Download, Calendar, Eye, ExternalLink, X, Loader2, FileText, AlertTriangle } from 'lucide-react';
+import { Pin, Download, Calendar, Eye, ExternalLink, X, FileText, AlertTriangle } from 'lucide-react';
+import { DNALoader } from './DNALoader';
 
 interface NoticeCardProps {
   notice: {
@@ -26,9 +27,9 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
   const getCategoryStyles = (category: string) => {
     switch (category) {
       case 'Academic': return 'bg-blue-500/10 text-blue-400 border-blue-500/25';
-      case 'Event':    return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25';
+      case 'Event':    return 'bg-orange-burnt/15 text-orange-burnt border-orange-burnt/35';
       case 'Alert':    return 'bg-red-500/10 text-red-400 border-red-500/25';
-      default:         return 'bg-amber-500/10 text-amber-400 border-amber-500/25';
+      default:         return 'bg-gold-accent/15 text-gold-accent border-gold-accent/35';
     }
   };
 
@@ -54,7 +55,7 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         whileHover={{ y: -5 }}
-        className="glass-panel glow-card rounded-2xl border border-white/5 p-6 relative flex flex-col justify-between bg-[#0F1E42]/10"
+        className="glass-panel glow-card rounded-2xl border border-orange-burnt/25 p-6 relative flex flex-col justify-between bg-[#0D1B3E]/85 backdrop-blur-[16px] shadow-[0_8px_32px_rgba(5,11,24,0.4)]"
       >
         <div>
           {/* Header Badge & Pin */}
@@ -188,7 +189,9 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
                 {/* Loading spinner */}
                 {isPdfLoading && !embedFailed && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#050B18] z-10">
-                    <Loader2 className="w-10 h-10 text-orange-burnt animate-spin mb-3" />
+                    <div className="mb-4">
+                      <DNALoader />
+                    </div>
                     <span className="text-xs font-bold tracking-wider font-display uppercase text-white/50">
                       Loading Document PDF...
                     </span>

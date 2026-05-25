@@ -77,6 +77,7 @@ export const Navbar: React.FC = () => {
     { name: 'Vote Now', path: '/vote', icon: '🗳️', desc: 'Participate in active polls' },
     { name: 'Leaderboard', path: '/leaderboard', icon: '🏆', desc: 'Top achievers' },
     { name: 'Message Board', path: '/board', icon: '💬', desc: 'Community board' },
+    { name: 'Study Store', path: '/store', icon: '📚', desc: 'Syllabus handbooks & exam keys' },
     { name: 'My Calendar', path: '/calendar', icon: '📅', desc: 'Your saved events' },
     { name: 'Mentors', path: '/mentors', icon: '🤝', desc: 'Connect with senior guides' },
     { name: 'Newsletter', path: '/newsletter', icon: '📰', desc: 'Monthly publications' },
@@ -90,12 +91,13 @@ export const Navbar: React.FC = () => {
       <header
         id="navbar"
         style={{
-          background: isScrolled ? 'var(--bg-nav)' : 'transparent',
-          borderBottomColor: isScrolled ? 'var(--border-subtle)' : 'transparent',
+          background: isScrolled ? 'rgba(13, 27, 62, 0.95)' : 'transparent',
+          borderBottom: isScrolled ? '1px solid rgba(200, 75, 14, 0.2)' : '1px solid transparent',
+          backdropFilter: isScrolled ? 'blur(20px)' : 'none',
         }}
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
           isScrolled
-            ? 'backdrop-blur-xl border-b py-2.5 shadow-2xl'
+            ? 'border-b py-2.5 shadow-2xl'
             : 'py-4'
         }`}
       >
@@ -346,8 +348,8 @@ export const Navbar: React.FC = () => {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              style={{ background: 'var(--bg-drawer)', borderLeftColor: 'var(--border-subtle)' }}
-              className="fixed right-0 top-0 bottom-0 w-[290px] backdrop-blur-2xl p-6 z-50 shadow-2xl flex flex-col justify-between md:hidden overflow-y-auto border-l animate-fade-in"
+              style={{ background: '#0D1B3E', borderLeft: '1px solid rgba(200, 75, 14, 0.2)' }}
+              className="fixed right-0 top-0 bottom-0 w-[290px] backdrop-blur-2xl p-6 z-50 shadow-2xl flex flex-col justify-between md:hidden overflow-y-auto"
             >
               <div>
                 <div className="flex items-center justify-between mb-8">
@@ -363,22 +365,28 @@ export const Navbar: React.FC = () => {
                 </div>
 
                 <nav className="flex flex-col space-y-4">
-                  {navLinks.map((link) => {
+                  {navLinks.map((link, idx) => {
                     const isActive = location.pathname === link.path;
                     return (
-                      <Link
+                      <motion.div
                         key={link.path}
-                        to={link.path}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`font-display font-semibold text-sm py-2 flex items-center justify-between border-b border-white/5 transition-colors ${
-                          isActive ? 'text-orange-burnt font-extrabold' : 'text-white/80 hover:text-white'
-                        }`}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.08, type: 'spring', stiffness: 100 }}
                       >
-                        {link.name}
-                        {isActive && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-orange-burnt shadow-md shadow-orange-burnt/50" />
-                        )}
-                      </Link>
+                        <Link
+                          to={link.path}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className={`font-display font-semibold text-sm py-2 flex items-center justify-between border-b border-white/5 transition-colors ${
+                            isActive ? 'text-orange-burnt font-extrabold' : 'text-white/80 hover:text-white'
+                          }`}
+                        >
+                          {link.name}
+                          {isActive && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-orange-burnt shadow-md shadow-orange-burnt/50" />
+                          )}
+                        </Link>
+                      </motion.div>
                     );
                   })}
 

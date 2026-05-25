@@ -60,20 +60,20 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({ events }) => {
   return (
     <div ref={containerRef} className="relative max-w-5xl mx-auto px-4 py-16">
       
-      {/* 1. Static grey background timeline track */}
-      <div className="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 top-4 bottom-4 w-1 bg-navy-dark/10 rounded-full" />
-
+      {/* 1. Static track styled dark-navy with orange outline */}
+      <div className="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 top-4 bottom-4 w-1 bg-white/10 rounded-full" />
+ 
       {/* 2. Dynamic animated foreground timeline track (draws on scroll) */}
       <motion.div
-        className="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 top-4 bottom-4 w-1 bg-gradient-to-b from-orange-burnt to-gold-accent origin-top rounded-full z-10"
+        className="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 top-4 bottom-4 w-1 bg-gradient-to-b from-orange-burnt via-gold-accent to-orange-burnt origin-top rounded-full z-10 shadow-[0_0_8px_rgba(214,90,30,0.5)]"
         style={{ scaleY }}
       />
-
+ 
       <div className="space-y-16">
         {displayEvents.map((event, idx) => {
           const isEven = idx % 2 === 0;
           const iconType = event.type || event.category || 'social';
-
+ 
           return (
             <div
               key={event.id}
@@ -86,12 +86,12 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({ events }) => {
                   whileInView={{ scale: 1, opacity: 1 }}
                   viewport={{ once: true, margin: '-100px' }}
                   transition={{ type: 'spring' as const, delay: 0.15 }}
-                  className="w-10 h-10 rounded-full bg-navy-dark border-4 border-orange-burnt flex items-center justify-center text-white shadow-lg shadow-orange-burnt/15"
+                  className="w-10 h-10 rounded-full bg-[#0D1B3E] border-4 border-orange-burnt flex items-center justify-center text-orange-burnt shadow-lg shadow-orange-burnt/30"
                 >
                   {getIcon(iconType)}
                 </motion.div>
               </div>
-
+ 
               {/* Layout Alignment Columns */}
               {/* Left Column (Content if Even, Spacer if Odd) */}
               <div className={`w-full md:w-[calc(50%-40px)] pl-16 md:pl-0 ${isEven ? 'md:text-right md:order-1' : 'md:order-3'}`}>
@@ -99,17 +99,17 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({ events }) => {
                   <TimelineCard event={event} isEven={isEven} getBadgeColors={getBadgeColors} />
                 )}
               </div>
-
+ 
               {/* Invisible Spacing center Column */}
               <div className="hidden md:block w-20 md:order-2" />
-
+ 
               {/* Right Column (Content if Odd, Spacer if Even) */}
               <div className={`w-full md:w-[calc(50%-40px)] pl-16 md:pl-0 ${isEven ? 'md:order-3' : 'md:order-1'}`}>
                 {!isEven && (
                   <TimelineCard event={event} isEven={isEven} getBadgeColors={getBadgeColors} />
                 )}
               </div>
-
+ 
             </div>
           );
         })}
@@ -117,7 +117,7 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({ events }) => {
     </div>
   );
 };
-
+ 
 // Helper card subcomponent to avoid code redundancy
 const TimelineCard: React.FC<{
   event: any;
@@ -130,10 +130,10 @@ const TimelineCard: React.FC<{
     day: 'numeric',
     year: 'numeric'
   }) : '');
-
+ 
   const seatsLeft = (event.capacity || 100) - (event.registered_count || 0);
   const isFull = seatsLeft <= 0;
-
+ 
   return (
     <motion.div
       initial={{ opacity: 0, x: isEven ? -40 : 40 }}
@@ -141,47 +141,47 @@ const TimelineCard: React.FC<{
       viewport={{ once: true, margin: '-100px' }}
       transition={{ type: 'spring' as const, stiffness: 100, damping: 15 }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className="bg-white p-6 rounded-xl shadow-md border border-navy-dark/5 hover:shadow-xl transition-shadow relative"
+      className="bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-2xl p-6 shadow-[0_8px_32px_rgba(5,11,24,0.4)] hover:border-orange-burnt/40 transition-all relative"
     >
       <div className={`flex items-center justify-between mb-3 ${isEven ? 'md:flex-row-reverse' : 'flex-row'}`}>
         {/* Category tag */}
         <span className={`inline-block text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${getBadgeColors(iconType)}`}>
           {iconType}
         </span>
-        <span className={`text-[10px] font-bold ${isFull ? 'text-red-500' : 'text-emerald-600'}`}>
-          {isFull ? '🔴 Full' : `🟢 ${seatsLeft} seats left`}
+        <span className={`text-[10px] font-bold ${isFull ? 'text-red-400' : 'text-emerald-400'}`}>
+          {isFull ? '🔴 House Full' : `🟢 ${seatsLeft} seats left`}
         </span>
       </div>
-
+ 
       {/* Date */}
-      <div className={`flex items-center space-x-1.5 text-orange-burnt font-semibold text-xs mb-2 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
+      <div className={`flex items-center space-x-1.5 text-orange-burnt font-bold text-xs mb-2 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
         <Calendar className="w-3.5 h-3.5" />
         <span>{displayDate}</span>
       </div>
-
+ 
       {/* Title */}
-      <h3 className={`font-display font-bold text-lg sm:text-xl text-navy-dark mb-2 leading-snug ${isEven ? 'md:text-right' : 'md:text-left'}`}>
+      <h3 className={`font-display font-bold text-lg sm:text-xl text-white mb-2 leading-snug ${isEven ? 'md:text-right' : 'md:text-left'}`}>
         {event.title || event.name}
       </h3>
-
+ 
       {/* Description */}
-      <p className={`text-navy-dark/80 text-sm leading-relaxed font-sans mb-5 ${isEven ? 'md:text-right' : 'md:text-left'}`}>
+      <p className={`text-white/70 text-sm leading-relaxed font-sans mb-5 ${isEven ? 'md:text-right' : 'md:text-left'}`}>
         {event.description}
       </p>
-
+ 
       {/* Action Button */}
       <div className={`flex ${isEven ? 'md:justify-end' : 'justify-start'}`}>
         {isFull ? (
           <button
             disabled
-            className="px-4 py-2 bg-navy-dark/10 text-navy-dark/40 font-display text-[11px] font-bold uppercase tracking-wider rounded-lg cursor-not-allowed"
+            className="px-4 py-2 bg-white/5 text-white/30 font-display text-[11px] font-bold uppercase tracking-wider rounded-lg cursor-not-allowed border border-white/5"
           >
-            Full
+            Sold Out
           </button>
         ) : (
           <Link
             to={`/register/${event.id}`}
-            className="inline-flex items-center space-x-1.5 px-4 py-2 bg-orange-burnt hover:bg-orange-burnt/95 text-white font-display text-[11px] font-bold uppercase tracking-wider rounded-lg shadow-sm hover:shadow-orange-burnt/10 active:scale-98 transition-all"
+            className="inline-flex items-center space-x-1.5 px-4 py-2 bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white font-display text-[11px] font-bold uppercase tracking-wider rounded-lg shadow-sm hover:shadow-orange-burnt/10 active:scale-98 transition-all border border-white/5"
           >
             <span>Register Now</span>
             <ArrowRight className="w-3.5 h-3.5" />

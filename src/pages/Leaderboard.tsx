@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
-import { Trophy, Medal, Star, ShieldAlert, Award, Search, Sparkles } from 'lucide-react';
+import { Trophy, Medal, Star, ShieldAlert, Award, Search } from 'lucide-react';
+import { PageHeader } from '../components/PageHeader';
+import { ScienceBackground } from '../components/ScienceBackground';
+import { DNALoader } from '../components/DNALoader';
 
 interface AchievementGroup {
   student_name: string;
@@ -77,38 +80,25 @@ export const Leaderboard: React.FC = () => {
   ];
 
   return (
-    <div className="relative min-h-screen bg-[#050B18] pt-32 pb-24 overflow-hidden">
+    <div className="relative min-h-screen bg-[#050B18] overflow-hidden pb-24">
       {/* Background decoration */}
+      <ScienceBackground />
       <div className="absolute top-[10%] right-[5%] w-[450px] h-[450px] rounded-full ambient-orb-orange z-0 pointer-events-none" />
       <div className="absolute bottom-[10%] left-[5%] w-[350px] h-[350px] rounded-full ambient-orb-gold z-0 pointer-events-none" />
       <div className="absolute inset-0 grid-bg-overlay opacity-15 z-0 pointer-events-none" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header Section */}
-        <div className="text-center max-w-3xl mx-auto mb-12 flex flex-col items-center space-y-3">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-12 h-12 rounded-xl bg-orange-burnt/10 flex items-center justify-center text-orange-burnt border border-orange-burnt/20 shadow-lg"
-          >
-            <Trophy className="w-6 h-6" />
-          </motion.div>
-          
-          <span className="text-orange-burnt text-xs font-bold uppercase tracking-widest flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5" />
-            TGPCOP Student Hall of Fame
-          </span>
-          <h1 className="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight uppercase">
-            Live Leaderboard
-          </h1>
-          <p className="text-white/60 text-xs sm:text-sm max-w-xl leading-relaxed">
-            Ranks are computed live based on total approved academic honors, sports accolades, research publishing, and contest medals.
-          </p>
-        </div>
+      {/* Reusable premium science page header */}
+      <PageHeader
+        icon={<Trophy className="w-6 h-6 animate-pulse" />}
+        title="Live Leaderboard"
+        subtitle="Ranks are computed live based on total approved academic honors, sports accolades, research publishing, and contest medals"
+        breadcrumb="Leaderboard"
+      />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
 
         {/* Categories Bar & Search */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-10 bg-[#080F25]/85 p-3 rounded-2xl border border-white/10 shadow-2xl">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-10 bg-[#0D1B3E]/85 backdrop-blur-[16px] p-4 rounded-2xl border border-orange-burnt/25 shadow-2xl">
           
           {/* Categories Tab slider */}
           <div className="flex flex-wrap gap-1.5 w-full md:w-auto">
@@ -145,8 +135,9 @@ export const Leaderboard: React.FC = () => {
 
         {/* Leaderboard layout (Podium at top, details list below) */}
         {isLoading ? (
-          <div className="flex justify-center items-center py-32">
-            <div className="w-10 h-10 border-2 border-orange-burnt border-t-transparent rounded-full animate-spin" />
+          <div className="flex flex-col justify-center items-center py-20">
+            <DNALoader />
+            <span className="text-xs font-bold font-display uppercase tracking-widest text-white/50 mt-4 animate-pulse">Computing Leaderboard...</span>
           </div>
         ) : rankedStudents.length === 0 ? (
           <div className="text-center py-20 bg-[#080F25]/90 border border-white/10 rounded-3xl shadow-2xl">
@@ -167,7 +158,7 @@ export const Leaderboard: React.FC = () => {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="order-2 md:order-1 bg-[#080F25]/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 text-center shadow-xl relative overflow-hidden flex flex-col justify-between md:h-[260px]"
+                    className="order-2 md:order-1 bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-3xl p-6 text-center shadow-xl relative overflow-hidden flex flex-col justify-between md:h-[260px]"
                   >
                     <div className="absolute top-2 left-2 text-[9px] font-bold text-white/20 uppercase tracking-widest">RANK #2</div>
                     
@@ -191,7 +182,7 @@ export const Leaderboard: React.FC = () => {
                   <motion.div 
                     initial={{ opacity: 0, y: 35 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="order-1 md:order-2 bg-gradient-to-b from-[#16203D]/90 to-[#0C1227]/95 backdrop-blur-2xl border border-orange-burnt/30 rounded-3xl p-6 text-center shadow-2xl relative overflow-hidden flex flex-col justify-between md:h-[300px]"
+                    className="order-1 md:order-2 bg-gradient-to-b from-[#16203D]/90 to-[#0C1227]/95 backdrop-blur-[16px] border border-orange-burnt/40 rounded-3xl p-6 text-center shadow-2xl relative overflow-hidden flex flex-col justify-between md:h-[300px]"
                   >
                     {/* Glowing golden rays background effect */}
                     <div className="absolute inset-0 bg-gradient-to-b from-orange-burnt/10 to-transparent pointer-events-none" />
@@ -223,7 +214,7 @@ export const Leaderboard: React.FC = () => {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="order-3 bg-[#080F25]/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 text-center shadow-xl relative overflow-hidden flex flex-col justify-between md:h-[230px]"
+                    className="order-3 bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-3xl p-6 text-center shadow-xl relative overflow-hidden flex flex-col justify-between md:h-[230px]"
                   >
                     <div className="absolute top-2 left-2 text-[9px] font-bold text-white/20 uppercase tracking-widest">RANK #3</div>
 
@@ -246,8 +237,8 @@ export const Leaderboard: React.FC = () => {
             )}
 
             {/* 🏆 LEADERBOARD RANKINGS DETAILS LIST */}
-            <div className="bg-[#080F25]/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl max-w-4xl mx-auto">
-              <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
+            <div className="bg-[#0D1B3E]/85 backdrop-blur-[16px] border border-orange-burnt/25 rounded-3xl p-6 shadow-2xl max-w-4xl mx-auto">
+              <div className="flex items-center justify-between border-b border-orange-burnt/10 pb-4 mb-4">
                 <span className="text-xs font-bold text-white/40 uppercase tracking-widest">Hall Achievers Rankings</span>
                 <span className="text-[10px] text-white/40">{rankedStudents.length} entries registered</span>
               </div>

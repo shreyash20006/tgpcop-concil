@@ -6,8 +6,34 @@ export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer id="footer" className="bg-[#050B18] text-white pt-20 pb-8 border-t border-white/5 relative overflow-hidden">
-      {/* Subtle bottom background light */}
+    <footer id="footer" className="bg-[#060D1F] text-white pt-20 pb-0 relative overflow-hidden select-none border-t border-white/5">
+      {/* Top Border orange gradient line */}
+      <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-orange-burnt via-gold-accent to-orange-burnt shadow-[0_0_10px_rgba(200,75,14,0.4)]" />
+
+      {/* Decorative slowly rotating mini DNA helix */}
+      <div className="absolute -left-10 top-1/4 opacity-20 text-orange-burnt select-none pointer-events-none animate-[dnaRotate_20s_linear_infinite] hidden lg:block">
+        <svg width="120" height="120" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <style>{`
+            @keyframes dnaRotate {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+          <path d="M30,20 C40,40 60,60 70,80" />
+          <path d="M70,20 C60,40 40,60 30,80" />
+          <line x1="33" y1="26" x2="67" y2="26" stroke="currentColor" strokeDasharray="2,2" />
+          <line x1="38" y1="36" x2="62" y2="36" stroke="currentColor" strokeDasharray="2,2" />
+          <line x1="45" y1="46" x2="55" y2="46" stroke="currentColor" strokeDasharray="2,2" />
+          <line x1="45" y1="54" x2="55" y2="54" stroke="currentColor" strokeDasharray="2,2" />
+          <line x1="38" y1="64" x2="62" y2="64" stroke="currentColor" strokeDasharray="2,2" />
+          <line x1="33" y1="74" x2="67" y2="74" stroke="currentColor" strokeDasharray="2,2" />
+          <circle cx="30" cy="20" r="3.5" fill="currentColor" />
+          <circle cx="70" cy="20" r="3.5" fill="currentColor" />
+          <circle cx="70" cy="80" r="3.5" fill="currentColor" />
+          <circle cx="30" cy="80" r="3.5" fill="currentColor" />
+        </svg>
+      </div>
+
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-burnt/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -60,14 +86,15 @@ export const Footer: React.FC = () => {
                 { name: '🏆 Achievements', path: '/achievements' },
                 { name: '🗳️ Live Voting', path: '/vote' },
                 { name: '🤝 Mentorship', path: '/mentors' },
-                { name: '📰 Newsletters', path: '/newsletter' }
+                { name: '📰 Newsletters', path: '/newsletter' },
+                { name: '📚 Study Store', path: '/store' }
               ].map((link) => (
                 <li key={link.path}>
                   <Link 
                     to={link.path} 
                     className="hover:text-orange-burnt transition-all duration-200 flex items-center space-x-1 hover:translate-x-1"
                   >
-                    <ChevronRight className="w-3 h-3 text-orange-burnt/50" />
+                    <ChevronRight className="w-3.5 h-3.5 text-orange-burnt/50" />
                     <span>{link.name}</span>
                   </Link>
                 </li>
@@ -97,7 +124,7 @@ export const Footer: React.FC = () => {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noreferrer"
-                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-orange-burnt hover:text-white flex items-center justify-center transition-all duration-300 border border-white/5 hover:scale-108 hover:-translate-y-0.5 shadow-md shadow-black/20"
+                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-orange-burnt hover:text-white flex items-center justify-center transition-all duration-300 border border-white/5 hover:scale-110 hover:rotate-6 hover:-translate-y-1 shadow-md shadow-black/20"
                 aria-label="Instagram Profile"
               >
                 <svg className="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24" fill="currentColor">
@@ -108,7 +135,7 @@ export const Footer: React.FC = () => {
                 href="https://whatsapp.com"
                 target="_blank"
                 rel="noreferrer"
-                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-orange-burnt hover:text-white flex items-center justify-center transition-all duration-300 border border-white/5 hover:scale-108 hover:-translate-y-0.5 shadow-md shadow-black/20"
+                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-orange-burnt hover:text-white flex items-center justify-center transition-all duration-300 border border-white/5 hover:scale-110 hover:rotate-6 hover:-translate-y-1 shadow-md shadow-black/20"
                 aria-label="WhatsApp Channel"
               >
                 <MessageCircle className="w-5 h-5" />
@@ -117,7 +144,7 @@ export const Footer: React.FC = () => {
                 href="https://youtube.com"
                 target="_blank"
                 rel="noreferrer"
-                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-orange-burnt hover:text-white flex items-center justify-center transition-all duration-300 border border-white/5 hover:scale-108 hover:-translate-y-0.5 shadow-md shadow-black/20"
+                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-orange-burnt hover:text-white flex items-center justify-center transition-all duration-300 border border-white/5 hover:scale-110 hover:rotate-6 hover:-translate-y-1 shadow-md shadow-black/20"
                 aria-label="YouTube Channel"
               >
                 <svg className="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24" fill="currentColor">
@@ -127,17 +154,19 @@ export const Footer: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Footer Base Strip */}
-        <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between text-[11px] sm:text-xs text-white/40 space-y-4 md:space-y-0">
+      {/* Darker base footer base strip */}
+      <div className="bg-[#030813] py-8 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between text-[11px] sm:text-xs text-white/40 space-y-4 md:space-y-0">
           <div className="flex flex-wrap justify-center md:justify-start items-center gap-x-3 gap-y-2">
             <span>© {currentYear} TGPCOP Student Council. All Rights Reserved.</span>
-            <span className="text-white/10 hidden sm:inline">|</span>
+            <span className="text-orange-burnt hidden sm:inline">•</span>
             <Link to="/admin" className="hover:text-orange-burnt transition-colors font-semibold tracking-wide flex items-center space-x-0.5">
               <span>🔐</span>
               <span>Portal Console</span>
             </Link>
-            <span className="text-white/10 hidden sm:inline">|</span>
+            <span className="text-orange-burnt hidden sm:inline">•</span>
             <Link to="/report" className="hover:text-orange-burnt transition-colors font-semibold tracking-wide flex items-center space-x-0.5">
               <span>⚠️</span>
               <span>Report a Bug</span>

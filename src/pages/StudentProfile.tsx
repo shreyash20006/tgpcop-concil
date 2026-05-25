@@ -502,11 +502,11 @@ export const StudentProfile: React.FC = () => {
                             >
                               <div className="flex justify-between items-center">
                                 <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                                  q.is_answered 
+                                  q.status === 'answered'
                                     ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' 
                                     : 'bg-yellow-500/10 border border-yellow-500/20 text-yellow-400'
                                 }`}>
-                                  {q.is_answered ? 'Answered' : 'Pending Reply'}
+                                  {q.status === 'answered' ? 'Answered' : 'Pending Reply'}
                                 </span>
                                 <span className="text-[9px] text-white/40">{new Date(q.created_at).toLocaleDateString('en-IN')}</span>
                               </div>
@@ -516,10 +516,10 @@ export const StudentProfile: React.FC = () => {
                                 <p className="text-xs text-white/80 font-sans">{q.question_text}</p>
                               </div>
 
-                              {q.is_answered && q.answer_text && (
+                              {q.status === 'answered' && q.admin_reply && (
                                 <div className="bg-orange-burnt/5 p-3 rounded-xl border border-orange-burnt/10 mt-2">
                                   <span className="block text-[9px] font-bold text-orange-burnt uppercase tracking-wider">Council Response</span>
-                                  <p className="text-xs text-white/70 font-sans mt-0.5">{q.answer_text}</p>
+                                  <p className="text-xs text-white/70 font-sans mt-0.5">{q.admin_reply}</p>
                                 </div>
                               )}
                             </div>

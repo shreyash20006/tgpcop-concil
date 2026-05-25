@@ -9,7 +9,7 @@ import { isMobile } from '../lib/device';
 
 export const DNAHero: React.FC = () => {
 
-  const [bannerUrl, setBannerUrl] = useState<string>('');
+  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
   const [mobileMode, setMobileMode] = useState(false);
 
   // Fetch dynamic banner settings & evaluate mobile mode
@@ -25,9 +25,12 @@ export const DNAHero: React.FC = () => {
           .maybeSingle();
         if (data?.value) {
           setBannerUrl(data.value);
+        } else {
+          setBannerUrl('https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086&auto=format&fit=crop');
         }
       } catch (err) {
         console.error('Error fetching dynamic banner setting:', err);
+        setBannerUrl('https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086&auto=format&fit=crop');
       }
     };
     fetchBanner();
@@ -41,11 +44,9 @@ export const DNAHero: React.FC = () => {
       <section className="relative w-full h-screen flex items-center justify-center overflow-hidden z-10">
         <div 
           className="absolute inset-0 bg-cover bg-center select-none"
-          style={{
-            backgroundImage: bannerUrl 
-              ? `url(${bannerUrl})` 
-              : `url('https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086&auto=format&fit=crop')`
-          }}
+          style={bannerUrl ? {
+            backgroundImage: `url(${bannerUrl})` 
+          } : undefined}
         />
         <div className="absolute inset-0 bg-[#0D1B3E] opacity-70 z-0 pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-br from-[#0D1B3E] via-[#1a2a5e] to-[#0D1B3E] opacity-85 z-0 pointer-events-none" />
@@ -106,11 +107,9 @@ export const DNAHero: React.FC = () => {
       {/* College Photo Base background */}
       <div 
         className="absolute inset-0 bg-cover bg-center z-0 pointer-events-none select-none"
-        style={{
-          backgroundImage: bannerUrl 
-            ? `url(${bannerUrl})` 
-            : `url('https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086&auto=format&fit=crop')`
-        }}
+        style={bannerUrl ? {
+          backgroundImage: `url(${bannerUrl})` 
+        } : undefined}
       />
 
       <div className="absolute inset-0 bg-[#0D1B3E] opacity-60 z-0 pointer-events-none" />

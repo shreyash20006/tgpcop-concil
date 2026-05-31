@@ -124,6 +124,7 @@ BEGIN
   -- Determine role based on email address matching the pre-allocated domains exactly
   assigned_role := CASE LOWER(new.email)
     WHEN 'sb108750@gmail.com' THEN 'super_admin'
+    WHEN 'innovate.tgpcet@gmail.com' THEN 'developer'
     WHEN 'developer@tgpcopcouncil.online' THEN 'developer'
     WHEN 'overall-secretary@tgpcopcouncil.online' THEN 'secretary'
     WHEN 'vicepresident@tgpcopcouncil.online' THEN 'vice_president'

@@ -8,6 +8,23 @@ import { useStudentAuth } from '../lib/StudentAuthProvider';
 import { CommandPalette } from './CommandPalette';
 import { NotificationBell } from './NotificationBell';
 
+const getPortalPath = (role?: string | null): string => {
+  if (!role) return '/admin';
+  const rolePaths: Record<string, string> = {
+    super_admin: '/super-admin',
+    admin: '/admin/dashboard',
+    developer: '/developer',
+    president: '/president',
+    vice_president: '/vice-president',
+    general_secretary: '/general-secretary',
+    secretary: '/secretary',
+    treasurer: '/treasurer',
+    coordinator: '/admin/dashboard',
+    student: '/dashboard'
+  };
+  return rolePaths[role] || '/dashboard';
+};
+
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -297,7 +314,7 @@ export const Navbar: React.FC = () => {
 
             {/* Portal Action button upgraded with gold active ring */}
             <Link
-              to="/admin"
+              to={getPortalPath(studentProfile?.role)}
               className="ml-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-[10px] font-display font-bold uppercase tracking-widest text-white transition-all duration-300 hover:scale-105 active:scale-95 flex items-center space-x-1.5 shrink-0 shadow-lg shadow-orange-burnt/15 border border-white/10 hover:shadow-orange-burnt/25"
             >
               <Lock className="w-3 h-3 text-white" />
@@ -474,7 +491,7 @@ export const Navbar: React.FC = () => {
           </button>
 
           <Link
-            to="/admin"
+            to={getPortalPath(studentProfile?.role)}
             onClick={() => setIsMobileMenuOpen(false)}
             className="w-full text-center py-3 bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white font-display text-xs font-bold uppercase tracking-widest rounded-xl shadow-lg shadow-orange-burnt/15 transition-all block mb-4 active:scale-98 border border-white/5"
           >

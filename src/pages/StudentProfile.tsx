@@ -3,9 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useStudentAuth } from '../lib/StudentAuthProvider';
+import { generateUploadAndDownloadReceipt } from '../lib/receiptPdf';
 import { 
   User, Mail, Phone, Calendar, LogOut, CheckCircle, 
-  MessageSquare, BookOpen, Clock, Heart
+  MessageSquare, BookOpen, Clock, Heart, CreditCard, Download, Loader2
 } from 'lucide-react';
 import { useToast } from '../components/admin/Toast';
 
@@ -46,7 +47,7 @@ export const StudentProfile: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const [activeTab, setActiveTab] = useState<'registrations' | 'bookmarks' | 'questions'>('registrations');
+  const [activeTab, setActiveTab] = useState<'registrations' | 'bookmarks' | 'questions' | 'payments'>('registrations');
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState('');
   const [year, setYear] = useState('First Year');
@@ -56,6 +57,8 @@ export const StudentProfile: React.FC = () => {
   const [registeredEvents, setRegisteredEvents] = useState<any[]>([]);
   const [bookmarkedEvents, setBookmarkedEvents] = useState<any[]>([]);
   const [askedQuestions, setAskedQuestions] = useState<any[]>([]);
+  const [myPayments, setMyPayments] = useState<any[]>([]);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
   // Sync state with profile
@@ -115,6 +118,15 @@ export const StudentProfile: React.FC = () => {
         if (!questsErr && quests) {
           setAskedQuestions(quests);
         }
+
+        // 4. Fetch payment history by email
+        const { data: pays } = await supabase
+          .from('payments')
+          .select('*')
+          .eq('student_email', studentProfile.email)
+          .order('created_at', { ascending: false });
+
+        setMyPayments(pays || []);
       } catch (err: any) {
         console.error('Error loading student profile data:', err.message);
       } finally {
@@ -376,11 +388,12 @@ export const StudentProfile: React.FC = () => {
           <div className="lg:col-span-2 space-y-6">
             
             {/* Tab controls */}
-            <div className="bg-[#080F25]/80 backdrop-blur-2xl border border-white/10 rounded-2xl p-1.5 flex gap-1">
+            <div className="bg-[#080F25]/80 backdrop-blur-2xl border border-white/10 rounded-2xl p-1.5 flex gap-1 flex-wrap">
               {[
-                { id: 'registrations', label: 'Registered Events', icon: CheckCircle },
-                { id: 'bookmarks', label: 'Saved Events', icon: Heart },
-                { id: 'questions', label: 'Q&A Questions', icon: MessageSquare }
+                { id: 'registrations', label: 'Events',   icon: CheckCircle },
+                { id: 'bookmarks',    label: 'Saved',    icon: Heart },
+                { id: 'questions',    label: 'Q&A',      icon: MessageSquare },
+                { id: 'payments',     label: 'Payments', icon: CreditCard },
               ].map(t => {
                 const Icon = t.icon;
                 const active = activeTab === t.id;
@@ -595,6 +608,115 @@ export const StudentProfile: React.FC = () => {
                               )}
                             </div>
                           ))}
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+
+                  {/* Tab 4: Payment History */}
+                  {activeTab === 'payments' && (
+                    <motion.div
+                      key="payments"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="space-y-4"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-display font-extrabold text-white text-base uppercase">Payment History</h3>
+                        <span className="text-[10px] text-white/50">{myPayments.filter(p => p.status === 'completed').length} successful</span>
+                      </div>
+
+                      {myPayments.length === 0 ? (
+                        <div className="text-center py-16 border border-white/5 rounded-2xl bg-white/[0.02]">
+                          <CreditCard className="w-12 h-12 mx-auto text-white/20 mb-3" />
+                          <p className="text-sm text-white/50 font-sans">No payments found for your account.</p>
+                          <Link to="/pay" className="mt-4 inline-block text-orange-burnt text-xs font-display font-bold uppercase hover:underline">
+                            Make a payment →
+                          </Link>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {myPayments.map((pay) => {
+                            const isCompleted = pay.status === 'completed';
+                            const isFailed    = pay.status === 'failed';
+                            return (
+                              <div
+                                key={pay.id}
+                                className="border border-white/10 bg-white/5 rounded-2xl p-4 hover:border-orange-burnt/30 transition-all"
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="flex-1 min-w-0">
+                                    {/* Purpose + Status */}
+                                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                                      <span className="font-display font-bold text-white text-sm leading-tight">{pay.purpose}</span>
+                                      <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border ${
+                                        isCompleted ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                                        : isFailed  ? 'bg-red-500/10 border-red-500/20 text-red-400'
+                                        : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+                                      }`}>
+                                        {isCompleted ? '✅ Paid' : isFailed ? '❌ Failed' : '⏳ Pending'}
+                                      </span>
+                                    </div>
+
+                                    {/* Amount */}
+                                    <p className="text-orange-burnt font-display font-extrabold text-base">₹{pay.amount}</p>
+
+                                    {/* Meta */}
+                                    <div className="mt-1 space-y-0.5">
+                                      {pay.order_id && (
+                                        <p className="text-[9px] text-white/40 font-mono">Order: {pay.order_id}</p>
+                                      )}
+                                      {pay.payment_id && (
+                                        <p className="text-[9px] text-white/40 font-mono">Payment: {pay.payment_id}</p>
+                                      )}
+                                      <p className="text-[10px] text-white/40 flex items-center space-x-1">
+                                        <Clock className="w-3 h-3" />
+                                        <span>{new Date(pay.created_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  {/* Download Receipt */}
+                                  {isCompleted && (
+                                    <button
+                                      onClick={async () => {
+                                        if (pay.receipt_url) {
+                                          window.open(pay.receipt_url, '_blank');
+                                          return;
+                                        }
+                                        // Generate on-the-fly
+                                        setDownloadingId(pay.id);
+                                        try {
+                                          await generateUploadAndDownloadReceipt({
+                                            paymentId:   pay.payment_id || pay.id,
+                                            orderId:     pay.order_id,
+                                            studentName: pay.student_name,
+                                            studentEmail: pay.student_email,
+                                            studentYear: pay.student_year,
+                                            purpose:     pay.purpose,
+                                            amount:      pay.amount,
+                                            status:      pay.status,
+                                            date:        new Date(pay.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                                          }, true);
+                                        } finally {
+                                          setDownloadingId(null);
+                                        }
+                                      }}
+                                      disabled={downloadingId === pay.id}
+                                      className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-orange-burnt/10 hover:bg-orange-burnt/20 border border-orange-burnt/20 text-orange-burnt text-[10px] font-display font-bold uppercase tracking-wider transition-all shrink-0 disabled:opacity-50"
+                                    >
+                                      {downloadingId === pay.id
+                                        ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                        : <Download className="w-3.5 h-3.5" />
+                                      }
+                                      <span>Receipt</span>
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </motion.div>

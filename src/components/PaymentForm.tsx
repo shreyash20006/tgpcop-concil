@@ -3,9 +3,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { initiatePayment } from '../lib/cashfree';
 import { sendPaymentReceiptEmail, sendAdminPaymentNotification } from '../lib/brevo';
+import { generateUploadAndDownloadReceipt } from '../lib/receiptPdf';
 import { DNALoader } from './DNALoader';
 import { useToast } from './admin/Toast';
-import { Lock, CreditCard, ChevronDown } from 'lucide-react';
+import { Lock, CreditCard, ChevronDown, UserCheck } from 'lucide-react';
 
 const FALLBACK_PURPOSES = [
   { name: 'NSS Fee', defaultAmount: 20 },
@@ -40,9 +41,29 @@ export const PaymentForm: React.FC = () => {
   const [purposesList, setPurposesList] = useState<any[]>(FALLBACK_PURPOSES);
   const [purpose, setPurpose] = useState(FALLBACK_PURPOSES[0].name);
   const [amount, setAmount] = useState<number>(FALLBACK_PURPOSES[0].defaultAmount);
-  
+  const [authUserId, setAuthUserId] = useState<string | null>(null);
+  const [isEmailFromAuth, setIsEmailFromAuth] = useState(false);
+
   const [isLocked, setIsLocked] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Auto-fill from Supabase Auth user
+  useEffect(() => {
+    const autoFillFromAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setAuthUserId(user.id);
+        const name = user.user_metadata?.full_name || user.user_metadata?.name || '';
+        const email = user.email || '';
+        if (name) setStudentName(name);
+        if (email) {
+          setStudentEmail(email);
+          setIsEmailFromAuth(true);
+        }
+      }
+    };
+    autoFillFromAuth();
+  }, []);
 
   // Load predefined purposes from Supabase with fallback
   useEffect(() => {
@@ -129,13 +150,14 @@ export const PaymentForm: React.FC = () => {
       const { data: record, error: dbError } = await supabase
         .from('payments')
         .insert({
-          student_name: studentName,
+          student_name:  studentName,
           student_email: studentEmail,
           student_phone: studentPhone,
-          student_year: studentYear,
-          purpose: purpose,
-          amount: amount,
-          status: 'pending'
+          student_year:  studentYear,
+          purpose:       purpose,
+          amount:        amount,
+          status:        'pending',
+          user_id:       authUserId || null,
         })
         .select()
         .single();
@@ -155,13 +177,26 @@ export const PaymentForm: React.FC = () => {
           minute: '2-digit',
         });
 
+        // Generate & upload receipt PDF
+        const receiptUrl = await generateUploadAndDownloadReceipt({
+          paymentId:   fakePaymentId,
+          studentName,
+          studentEmail,
+          studentYear,
+          purpose,
+          amount,
+          status:      'completed',
+          date:        formattedDate,
+        });
+
         // Update record
         const { error: updateError } = await supabase
           .from('payments')
           .update({
-            payment_id: fakePaymentId,
-            status: 'completed',
-            receipt_sent: true
+            payment_id:   fakePaymentId,
+            status:       'completed',
+            receipt_sent: true,
+            receipt_url:  receiptUrl || null,
           })
           .eq('id', record.id);
 
@@ -223,19 +258,34 @@ export const PaymentForm: React.FC = () => {
           minute: '2-digit',
         });
 
-        // 3. Update Supabase record as completed
+        // 3. Generate & upload receipt PDF
+        const receiptUrl = await generateUploadAndDownloadReceipt({
+          paymentId:   rzpResponse.razorpay_payment_id,
+          orderId:     rzpResponse.cfOrderId,
+          studentName,
+          studentEmail,
+          studentYear,
+          purpose,
+          amount,
+          status:      'completed',
+          date:        formattedDate,
+        });
+
+        // 4. Update Supabase record as completed
         const { error: updateError } = await supabase
           .from('payments')
           .update({
-            payment_id: rzpResponse.razorpay_payment_id,
-            status: 'completed',
-            receipt_sent: true
+            payment_id:   rzpResponse.razorpay_payment_id,
+            order_id:     rzpResponse.cfOrderId || null,
+            status:       'completed',
+            receipt_sent: true,
+            receipt_url:  receiptUrl || null,
           })
           .eq('id', record.id);
 
         if (updateError) throw updateError;
 
-        // 4. Send Brevo Receipt & Notification
+        // 5. Send Brevo Receipt & Notification
         await sendPaymentReceiptEmail({
           studentName,
           studentEmail,
@@ -342,18 +392,27 @@ export const PaymentForm: React.FC = () => {
           />
         </div>
 
-        {/* Email */}
+        {/* Email — readonly if logged in */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-display font-bold uppercase tracking-wider text-orange-burnt">
-            Your Email*
+          <label className="block text-xs font-display font-bold uppercase tracking-wider text-orange-burnt flex items-center space-x-1.5">
+            <span>Your Email*</span>
+            {isEmailFromAuth && (
+              <span className="flex items-center space-x-1 text-emerald-400 text-[9px] font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full normal-case tracking-normal">
+                <UserCheck className="w-3 h-3" />
+                <span>Auto-filled from your account</span>
+              </span>
+            )}
           </label>
           <input
             type="email"
             value={studentEmail}
             disabled={isSubmitting}
-            onChange={(e) => setStudentEmail(e.target.value)}
+            readOnly={isEmailFromAuth}
+            onChange={(e) => !isEmailFromAuth && setStudentEmail(e.target.value)}
             placeholder="rahul.singh@gmail.com"
-            className="w-full bg-[#070F25]/90 border border-white/15 rounded-xl px-4 py-3 text-sm font-sans focus:outline-none focus:border-orange-burnt"
+            className={`w-full bg-[#070F25]/90 border border-white/15 rounded-xl px-4 py-3 text-sm font-sans focus:outline-none focus:border-orange-burnt ${
+              isEmailFromAuth ? 'opacity-70 cursor-not-allowed select-none' : ''
+            }`}
             required
           />
         </div>

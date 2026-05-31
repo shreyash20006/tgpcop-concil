@@ -41,9 +41,11 @@ export const AdminPayments: React.FC = () => {
 
   // Statistics State
   const [stats, setStats] = useState({
-    totalPayments: 0,
+    totalCompleted: 0,
+    totalFailed:    0,
+    totalPending:   0,
     todayCollected: 0,
-    totalAmount: 0
+    totalAmount:    0
   });
 
   const fetchPayments = async () => {
@@ -71,14 +73,11 @@ export const AdminPayments: React.FC = () => {
 
   const calculateStats = (data: any[]) => {
     const completedPayments = data.filter(p => p.status === 'completed');
-    
-    // Total Payments
-    const totalPayments = completedPayments.length;
+    const failedPayments    = data.filter(p => p.status === 'failed');
+    const pendingPayments   = data.filter(p => p.status === 'pending');
 
-    // Total Amount Collected
     const totalAmount = completedPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
 
-    // Today Collected (Asia/Kolkata timezone)
     const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
     const todayCollected = completedPayments
       .filter(p => {
@@ -88,7 +87,9 @@ export const AdminPayments: React.FC = () => {
       .reduce((sum, p) => sum + (p.amount || 0), 0);
 
     setStats({
-      totalPayments,
+      totalCompleted: completedPayments.length,
+      totalFailed:    failedPayments.length,
+      totalPending:   pendingPayments.length,
       todayCollected,
       totalAmount
     });
@@ -220,46 +221,59 @@ export const AdminPayments: React.FC = () => {
       </div>
 
       {/* Stats Summary Widgets Ribbon */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="bg-white rounded-xl border border-navy-dark/10 p-5 shadow-sm flex items-center justify-between">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        {/* Successful */}
+        <div className="bg-white rounded-xl border border-navy-dark/10 p-4 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-navy-dark/40 mb-1">
-              Total Payments
-            </p>
-            <h3 className="text-2xl font-display font-extrabold text-navy-dark">
-              {stats.totalPayments}
-            </h3>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-navy-dark/40 mb-1">Successful</p>
+            <h3 className="text-2xl font-display font-extrabold text-emerald-600">{stats.totalCompleted}</h3>
           </div>
-          <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center border border-emerald-100">
-            <CheckCircle className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center border border-emerald-100">
+            <CheckCircle className="w-4 h-4" />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-navy-dark/10 p-5 shadow-sm flex items-center justify-between">
+        {/* Failed */}
+        <div className="bg-white rounded-xl border border-navy-dark/10 p-4 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-navy-dark/40 mb-1">
-              Today Collected
-            </p>
-            <h3 className="text-2xl font-display font-extrabold text-orange-burnt">
-              ₹{stats.todayCollected}
-            </h3>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-navy-dark/40 mb-1">Failed</p>
+            <h3 className="text-2xl font-display font-extrabold text-red-500">{stats.totalFailed}</h3>
           </div>
-          <div className="w-10 h-10 rounded-full bg-orange-50 text-orange-burnt flex items-center justify-center border border-orange-100">
-            <Calendar className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-full bg-red-50 text-red-500 flex items-center justify-center border border-red-100">
+            <span className="text-base">❌</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-navy-dark/10 p-5 shadow-sm flex items-center justify-between">
+        {/* Pending */}
+        <div className="bg-white rounded-xl border border-navy-dark/10 p-4 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-navy-dark/40 mb-1">
-              Total Collected Amount
-            </p>
-            <h3 className="text-2xl font-display font-extrabold text-indigo-600">
-              ₹{stats.totalAmount}
-            </h3>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-navy-dark/40 mb-1">Pending</p>
+            <h3 className="text-2xl font-display font-extrabold text-amber-500">{stats.totalPending}</h3>
           </div>
-          <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center border border-indigo-100">
-            <CreditCard className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center border border-amber-100">
+            <span className="text-base">⏳</span>
+          </div>
+        </div>
+
+        {/* Today */}
+        <div className="bg-white rounded-xl border border-navy-dark/10 p-4 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-navy-dark/40 mb-1">Today</p>
+            <h3 className="text-2xl font-display font-extrabold text-orange-burnt">₹{stats.todayCollected}</h3>
+          </div>
+          <div className="w-9 h-9 rounded-full bg-orange-50 text-orange-burnt flex items-center justify-center border border-orange-100">
+            <Calendar className="w-4 h-4" />
+          </div>
+        </div>
+
+        {/* Total */}
+        <div className="bg-white rounded-xl border border-navy-dark/10 p-4 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-navy-dark/40 mb-1">Total Collected</p>
+            <h3 className="text-2xl font-display font-extrabold text-indigo-600">₹{stats.totalAmount}</h3>
+          </div>
+          <div className="w-9 h-9 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center border border-indigo-100">
+            <CreditCard className="w-4 h-4" />
           </div>
         </div>
       </div>
@@ -534,6 +548,21 @@ export const AdminPayments: React.FC = () => {
                   <span className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/45 mb-0.5">Receipt Sent</span>
                   <span className="font-semibold text-xs">{selectedPayment.receipt_sent ? '📧 Resent Successfully' : '❌ Not Sent'}</span>
                 </div>
+
+                {selectedPayment.receipt_url && (
+                  <div>
+                    <span className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/45 mb-0.5">Receipt PDF</span>
+                    <a
+                      href={selectedPayment.receipt_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center space-x-1.5 px-3 py-1.5 mt-1 rounded-lg bg-orange-burnt/10 hover:bg-orange-burnt/20 border border-orange-burnt/20 text-orange-burnt text-xs font-display font-bold uppercase tracking-wider transition-all"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Download Receipt PDF</span>
+                    </a>
+                  </div>
+                )}
               </div>
 
               <div>

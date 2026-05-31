@@ -4,50 +4,48 @@ import { useAuth } from '../../components/admin/ProtectedRoute';
 import { useToast } from '../../components/admin/Toast';
 import { logActivity } from '../../lib/logs';
 import { sendAdminNotification } from '../../lib/brevo';
+import { 
+  getRoleDisplayName, 
+  ASSIGNABLE_ROLES, 
+  type Role 
+} from '../../hooks/useRole';
 import {
-  Users, Plus, Trash2, ShieldAlert, ShieldCheck, RotateCcw,
-  Loader2, Eye, EyeOff, X, Check
+  Users, ShieldAlert, ShieldCheck, Trash2, 
+  Loader2, Search, Filter, Ban
 } from 'lucide-react';
 
-const ROLES = ['admin', 'moderator', 'notice_manager', 'content_editor', 'developer'] as const;
-type Role = typeof ROLES[number];
+const RoleBadgeMap: Record<Role, string> = {
+  super_admin: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  admin: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  developer: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+  president: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  vice_president: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+  general_secretary: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
+  secretary: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+  treasurer: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  coordinator: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+  student: 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+};
 
-const RoleBadge: React.FC<{ role: string }> = ({ role }) => {
-  const map: Record<string, string> = {
-    super_admin: 'bg-purple-500/10 text-purple-600 border-purple-500/20',
-    admin: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
-    moderator: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
-    notice_manager: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
-    content_editor: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20',
-    developer: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20',
-  };
+const RoleBadge: React.FC<{ role: Role }> = ({ role }) => {
   return (
-    <span className={`inline-block text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${map[role] || 'bg-gray-100 text-gray-500 border-gray-200'}`}>
-      {role.replace('_', ' ')}
+    <span className={`inline-block text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${RoleBadgeMap[role] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}>
+      {getRoleDisplayName(role)}
     </span>
   );
 };
 
 export const AdminUsers: React.FC = () => {
-  const { email: myEmail } = useAuth();
+  const { email: myEmail, role: myRole, userId: myUserId } = useAuth();
   const toast = useToast();
 
   const [users, setUsers] = useState<any[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Add User Form
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newEmail, setNewEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [newRole, setNewRole] = useState<Role>('admin');
-  const [showPw, setShowPw] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-
-  // Reset password
-  const [resetTarget, setResetTarget] = useState<any>(null);
-  const [resetPw, setResetPw] = useState('');
-  const [showResetPw, setShowResetPw] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
+  // Search & Filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -58,6 +56,7 @@ export const AdminUsers: React.FC = () => {
         .order('created_at', { ascending: false });
       if (error) throw error;
       setUsers(data || []);
+      setFilteredUsers(data || []);
     } catch (err: any) {
       toast.error('❌ Failed to load users: ' + err.message);
     } finally {
@@ -65,220 +64,282 @@ export const AdminUsers: React.FC = () => {
     }
   };
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
-  // ── Create new user via RPC ──────────────────────────────────────────────
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newEmail || !newPassword) return;
-    if (newPassword.length < 8) {
-      toast.warning('⚠️ Password must be at least 8 characters.');
+  // Filter & Search Logic
+  useEffect(() => {
+    let result = [...users];
+
+    if (searchQuery.trim() !== '') {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(u => 
+        (u.email && u.email.toLowerCase().includes(query)) ||
+        (u.full_name && u.full_name.toLowerCase().includes(query))
+      );
+    }
+
+    if (roleFilter !== 'all') {
+      result = result.filter(u => u.role === roleFilter);
+    }
+
+    setFilteredUsers(result);
+  }, [searchQuery, roleFilter, users]);
+
+  // ── Toggle Suspension (is_active) ──────────────────────────────────────────
+  const handleToggleActive = async (user: any) => {
+    const nextActiveState = !user.is_active;
+    const actionName = nextActiveState ? 'reactivate' : 'suspend';
+
+    if (!window.confirm(`Are you sure you want to ${actionName} user "${user.email}"?`)) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_active: nextActiveState, updated_at: new Date().toISOString() })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      await logActivity(myEmail, 'user_active_toggle', `${nextActiveState ? 'Reactivated' : 'Suspended'} user "${user.email}"`);
+      
+      await sendAdminNotification({
+        subject: `👤 User Account ${nextActiveState ? 'Reactivated' : 'Suspended'}`,
+        title: `Roster Account Status Modification`,
+        bodyHtml: `<p><b>User:</b> ${user.email}</p><p><b>Status:</b> ${nextActiveState ? 'ACTIVE' : 'SUSPENDED'}</p><p>Modified by: ${myEmail}</p>`,
+      });
+
+      toast.success(`✅ User account ${nextActiveState ? 'reactivated' : 'suspended'} successfully.`);
+      fetchUsers();
+    } catch (err: any) {
+      toast.error(`❌ Failed to update status: ${err.message}`);
+    }
+  };
+
+  // ── Change Role Instantly ──────────────────────────────────────────────────
+  const handleRoleChange = async (user: any, newRoleVal: Role) => {
+    // Only super_admin or developer can assign super_admin role
+    if (newRoleVal === 'super_admin' && myRole !== 'super_admin' && myRole !== 'developer') {
+      toast.error('❌ Only Super Administrators can assign the Super Admin role.');
       return;
     }
-    setIsCreating(true);
-    try {
-      const { error } = await supabase.rpc('create_new_user', {
-        user_email: newEmail,
-        user_password: newPassword,
-        user_role: newRole,
-      });
-      if (error) throw error;
-      await logActivity(myEmail, 'user_create', `Created user "${newEmail}" with role "${newRole}"`);
-      await sendAdminNotification({
-        subject: '👤 New Admin User Created',
-        title: 'New User Added to Portal',
-        bodyHtml: `<p><b>Email:</b> ${newEmail}</p><p><b>Role:</b> ${newRole}</p><p>Created by: ${myEmail}</p>`,
-      });
-      toast.success(`✅ User "${newEmail}" created successfully!`);
-      setShowAddForm(false);
-      setNewEmail(''); setNewPassword(''); setNewRole('admin');
-      fetchUsers();
-    } catch (err: any) {
-      toast.error(`❌ Failed to create user: ${err.message}`);
-    } finally {
-      setIsCreating(false);
-    }
-  };
 
-  // ── Toggle Suspension ────────────────────────────────────────────────────
-  const handleToggleSuspend = async (user: any) => {
-    const action = user.is_suspended ? 'unsuspend' : 'suspend';
-    if (!window.confirm(`${action === 'suspend' ? 'Suspend' : 'Reinstate'} user "${user.email}"?`)) return;
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ is_suspended: !user.is_suspended })
+        .update({ role: newRoleVal, updated_at: new Date().toISOString() })
         .eq('id', user.id);
-      if (error) throw error;
-      await logActivity(myEmail, 'user_suspend', `${action === 'suspend' ? 'Suspended' : 'Reinstated'} user "${user.email}"`);
-      toast.success(`✅ User ${action === 'suspend' ? 'suspended' : 'reinstated'} successfully!`);
-      fetchUsers();
-    } catch (err: any) {
-      toast.error(`❌ Failed to update user: ${err.message}`);
-    }
-  };
 
-  // ── Change Role ──────────────────────────────────────────────────────────
-  const handleRoleChange = async (user: any, newRoleVal: Role) => {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: newRoleVal })
-        .eq('id', user.id);
       if (error) throw error;
+
       await logActivity(myEmail, 'user_role_change', `Changed "${user.email}" role from "${user.role}" to "${newRoleVal}"`);
-      toast.success(`✅ Role updated to "${newRoleVal}"!`);
+      
+      await sendAdminNotification({
+        subject: '👤 Roster Role Classification Modification',
+        title: 'User Role Updated',
+        bodyHtml: `<p><b>User:</b> ${user.email}</p><p><b>New Role:</b> ${getRoleDisplayName(newRoleVal)}</p><p>Modified by: ${myEmail}</p>`,
+      });
+
+      toast.success(`✅ Role updated to "${getRoleDisplayName(newRoleVal)}"`);
       fetchUsers();
     } catch (err: any) {
       toast.error(`❌ Failed to update role: ${err.message}`);
     }
   };
 
-  // ── Delete User ──────────────────────────────────────────────────────────
+  // ── Delete User Profile ───────────────────────────────────────────────────
   const handleDelete = async (user: any) => {
-    if (user.email === 'shrey@tgpcopconcil.com') {
-      toast.error('❌ Cannot delete the Super Admin account!');
+    if (user.role === 'super_admin') {
+      toast.error('❌ Cannot delete Super Admin accounts.');
       return;
     }
-    if (!window.confirm(`Permanently delete user "${user.email}"? This cannot be undone.`)) return;
+
+    if (!window.confirm(`Permanently delete user profile "${user.email}"? This action is irreversible.`)) return;
+
     try {
-      const { error } = await supabase.rpc('delete_user', { target_user_id: user.id });
+      // First attempt to delete from profiles table
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', user.id);
+
       if (error) throw error;
-      await logActivity(myEmail, 'user_delete', `Permanently deleted user "${user.email}"`);
-      toast.success(`✅ User "${user.email}" permanently removed!`);
+
+      // Optional cascade delete calling custom Auth user deletion RPC if exists
+      try {
+        await supabase.rpc('delete_user', { target_user_id: user.id });
+      } catch (e) {
+        // Fallback silently if custom RPC doesn't exist
+      }
+
+      await logActivity(myEmail, 'user_delete', `Permanently deleted profile "${user.email}"`);
+      toast.success(`✅ User profile "${user.email}" permanently removed.`);
       fetchUsers();
     } catch (err: any) {
-      toast.error(`❌ Failed to delete user: ${err.message}`);
-    }
-  };
-
-  // ── Reset Password ───────────────────────────────────────────────────────
-  const handleResetPw = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!resetPw || resetPw.length < 8) {
-      toast.warning('⚠️ New password must be at least 8 characters.');
-      return;
-    }
-    setIsResetting(true);
-    try {
-      const { error } = await supabase.rpc('reset_user_password', {
-        target_user_id: resetTarget.id,
-        new_password: resetPw,
-      });
-      if (error) throw error;
-      await logActivity(myEmail, 'user_pw_reset', `Reset password for "${resetTarget.email}"`);
-      toast.success(`✅ Password reset for "${resetTarget.email}"!`);
-      setResetTarget(null);
-      setResetPw('');
-    } catch (err: any) {
-      toast.error(`❌ Failed to reset password: ${err.message}`);
-    } finally {
-      setIsResetting(false);
+      toast.error(`❌ Failed to delete profile: ${err.message}`);
     }
   };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-
-      {/* Header */}
+      
+      {/* Page Header */}
       <div className="flex items-center justify-between bg-white border border-navy-dark/10 p-5 rounded-2xl shadow-xs">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-600">
-            <Users className="w-5 h-5" />
+            <Users className="w-5 h-5 animate-pulse" />
           </div>
           <div>
-            <h3 className="font-display font-extrabold text-base text-navy-dark">User Administration</h3>
-            <p className="text-[10px] text-navy-dark/45 font-sans leading-none mt-0.5">Create, suspend, and manage portal accounts & roles.</p>
+            <h3 className="font-display font-extrabold text-base text-navy-dark uppercase tracking-wide">
+              User Management
+            </h3>
+            <p className="text-[10px] text-navy-dark/45 font-sans leading-none mt-0.5 uppercase tracking-wider font-semibold">
+              Manage accounts, assign roles, and handle student council authorization.
+            </p>
           </div>
         </div>
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="flex items-center space-x-1.5 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-display text-xs font-bold shadow-md shadow-purple-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New User</span>
-        </button>
       </div>
 
-      {/* Users Table */}
+      {/* Filter and Search Controls */}
+      <div className="bg-white border border-navy-dark/10 p-4 rounded-2xl shadow-xs flex flex-col md:flex-row gap-4">
+        {/* Search */}
+        <div className="flex-1 relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-navy-dark/40" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search users by email or full name..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-navy-dark/10 focus:border-orange-burnt focus:ring-1 focus:ring-orange-burnt/10 outline-none text-xs font-sans text-navy-dark transition-all bg-[#050B18]/[0.02]"
+          />
+        </div>
+
+        {/* Role Filter */}
+        <div className="w-full md:w-64 relative flex items-center">
+          <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-navy-dark/40" />
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-navy-dark/10 focus:border-orange-burnt outline-none text-xs font-display font-bold uppercase tracking-wider text-navy-dark/70 bg-[#050B18]/[0.02] appearance-none cursor-pointer"
+          >
+            <option value="all">Filter by Role (All)</option>
+            {ASSIGNABLE_ROLES.map(r => (
+              <option key={r} value={r}>{getRoleDisplayName(r)}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Roster Users Table Grid */}
       <div className="bg-white border border-navy-dark/10 rounded-2xl shadow-xs overflow-hidden">
         {isLoading ? (
-          <div className="flex items-center justify-center py-20 text-navy-dark/40">
-            <Loader2 className="w-8 h-8 animate-spin mr-3" />
-            <span className="font-display text-sm">Loading users...</span>
+          <div className="flex flex-col items-center justify-center py-24 text-navy-dark/45 space-y-3">
+            <Loader2 className="w-8 h-8 animate-spin text-orange-burnt" />
+            <span className="font-display text-xs uppercase tracking-widest font-bold">Fetching Roster Profiles...</span>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-navy-dark/[0.03] border-b border-navy-dark/5">
                 <tr>
-                  {['Email', 'Role', 'Status', 'Joined', 'Actions'].map(h => (
+                  {['Student Profile / Email', 'Assigned Role', 'Account status', 'Registration Date', 'Access Action'].map(h => (
                     <th key={h} className="px-5 py-3 text-left text-[10px] font-extrabold uppercase tracking-widest text-navy-dark/50">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-navy-dark/5">
-                {users.map(user => (
-                  <tr key={user.id} className="hover:bg-navy-dark/[0.01] transition-colors">
+                {filteredUsers.map(user => (
+                  <tr key={user.id} className="hover:bg-navy-dark/[0.01] transition-colors select-none">
+                    {/* User name & email details */}
                     <td className="px-5 py-4">
-                      <div>
-                        <span className="font-display font-semibold text-sm text-navy-dark">{user.email}</span>
-                        {user.email === 'shrey@tgpcopconcil.com' && (
-                          <span className="ml-2 text-[9px] font-bold text-purple-600 bg-purple-100 px-1.5 py-0.5 rounded-full">OWNER</span>
+                      <div className="flex items-center space-x-3">
+                        {user.avatar_url ? (
+                          <img 
+                            src={user.avatar_url} 
+                            alt={user.full_name || 'avatar'} 
+                            className="w-9 h-9 rounded-full object-cover border border-white/10 shrink-0"
+                          />
+                        ) : (
+                          <div className="w-9 h-9 rounded-full bg-orange-burnt/10 border border-orange-burnt/25 flex items-center justify-center text-orange-burnt font-display font-bold text-xs shrink-0">
+                            {user.full_name ? user.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0,2) : 'ST'}
+                          </div>
                         )}
+                        <div className="min-w-0">
+                          <span className="block font-display font-bold text-sm text-navy-dark leading-tight truncate">
+                            {user.full_name || 'Unregistered Student'}
+                          </span>
+                          <span className="block text-[10px] text-navy-dark/50 font-sans mt-0.5 truncate font-semibold">
+                            {user.email}
+                          </span>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4">
-                      {user.role === 'super_admin' ? (
+
+                    {/* Role allocation */}
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      {user.role === 'super_admin' && myRole !== 'super_admin' ? (
                         <RoleBadge role={user.role} />
                       ) : (
                         <select
                           value={user.role}
                           onChange={e => handleRoleChange(user, e.target.value as Role)}
-                          className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full border bg-navy-dark/5 border-navy-dark/10 text-navy-dark outline-none cursor-pointer hover:border-orange-burnt transition-colors"
+                          className="text-[10px] font-display font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border bg-[#050B18]/[0.02] border-navy-dark/10 text-navy-dark/85 outline-none cursor-pointer hover:border-orange-burnt transition-colors select-none font-bold"
                         >
-                          {ROLES.map(r => <option key={r} value={r}>{r.replace('_', ' ')}</option>)}
+                          {ASSIGNABLE_ROLES.map(r => (
+                            <option key={r} value={r} className="bg-white text-navy-dark normal-case">
+                              {getRoleDisplayName(r)}
+                            </option>
+                          ))}
                         </select>
                       )}
                     </td>
-                    <td className="px-5 py-4">
-                      {user.is_suspended ? (
-                        <span className="inline-flex items-center space-x-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-red-500/10 text-red-600 border border-red-500/20">
-                          <ShieldAlert className="w-3 h-3" />
-                          <span>Suspended</span>
+
+                    {/* Active/Suspended status */}
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      {user.is_active ? (
+                        <span className="inline-flex items-center space-x-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                          <span>Active Access</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center space-x-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-                          <ShieldCheck className="w-3 h-3" />
-                          <span>Active</span>
+                        <span className="inline-flex items-center space-x-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-500/10 text-red-500 border border-red-500/20">
+                          <ShieldAlert className="w-3.5 h-3.5" />
+                          <span>Suspended</span>
                         </span>
                       )}
                     </td>
-                    <td className="px-5 py-4 text-xs text-navy-dark/50">
-                      {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+
+                    {/* Joined date */}
+                    <td className="px-5 py-4 text-xs font-semibold text-navy-dark/50 whitespace-nowrap">
+                      {new Date(user.created_at).toLocaleDateString('en-IN', { 
+                        day: 'numeric', 
+                        month: 'short', 
+                        year: 'numeric' 
+                      })}
                     </td>
+
+                    {/* Suspend / delete actions */}
                     <td className="px-5 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-2">
-                        {user.email !== 'shrey@tgpcopconcil.com' && (
+                        {user.id !== myUserId && user.role !== 'super_admin' && (
                           <>
                             <button
-                              onClick={() => handleToggleSuspend(user)}
-                              title={user.is_suspended ? 'Reinstate user' : 'Suspend user'}
-                              className={`p-1.5 rounded-lg transition-colors ${user.is_suspended ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'bg-red-50 text-red-500 hover:bg-red-100'}`}
+                              onClick={() => handleToggleActive(user)}
+                              title={user.is_active ? 'Suspend Account' : 'Reactivate Account'}
+                              className={`p-2 rounded-xl transition-all border cursor-pointer hover:scale-105 active:scale-95 ${
+                                user.is_active 
+                                  ? 'bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20' 
+                                  : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/20'
+                              }`}
                             >
-                              {user.is_suspended ? <ShieldCheck className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
+                              <Ban className="w-3.5 h-3.5" />
                             </button>
-                            <button
-                              onClick={() => { setResetTarget(user); setResetPw(''); }}
-                              title="Reset password"
-                              className="p-1.5 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
-                            >
-                              <RotateCcw className="w-3.5 h-3.5" />
-                            </button>
+                            
                             <button
                               onClick={() => handleDelete(user)}
-                              title="Delete user"
-                              className="p-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+                              title="Delete Profile permanently"
+                              className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-all cursor-pointer hover:scale-105 active:scale-95"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -290,99 +351,16 @@ export const AdminUsers: React.FC = () => {
                 ))}
               </tbody>
             </table>
-            {users.length === 0 && (
-              <div className="text-center py-16 text-navy-dark/40">
-                <Users className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                <p className="text-sm font-display">No users found. Add the first one!</p>
+
+            {filteredUsers.length === 0 && (
+              <div className="text-center py-20 text-navy-dark/40 flex flex-col items-center">
+                <Users className="w-12 h-12 mb-3 opacity-30 text-orange-burnt animate-pulse" />
+                <p className="font-display text-sm font-bold uppercase tracking-wider">No matching roster users found.</p>
               </div>
             )}
           </div>
         )}
       </div>
-
-      {/* ── Add User Modal ─────────────────────────────────────────────────── */}
-      {showAddForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-navy-dark/10 overflow-hidden">
-            <div className="bg-navy-dark text-white px-6 py-4 flex items-center justify-between">
-              <h4 className="font-display font-extrabold text-sm">Create New Portal User</h4>
-              <button onClick={() => setShowAddForm(false)} className="p-1 rounded-lg hover:bg-white/10 transition-colors"><X className="w-4 h-4" /></button>
-            </div>
-            <form onSubmit={handleCreate} className="p-6 space-y-4">
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60 mb-1.5">Email Address *</label>
-                <input
-                  type="email" required value={newEmail}
-                  onChange={e => setNewEmail(e.target.value)}
-                  placeholder="user@tgpcop.edu"
-                  className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-purple-500 outline-none text-sm font-sans text-navy-dark transition-colors"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60 mb-1.5">Password *</label>
-                <div className="relative">
-                  <input
-                    type={showPw ? 'text' : 'password'} required value={newPassword}
-                    onChange={e => setNewPassword(e.target.value)}
-                    placeholder="Min 8 characters"
-                    className="w-full px-4 py-2.5 pr-10 rounded-lg border border-navy-dark/15 focus:border-purple-500 outline-none text-sm font-sans text-navy-dark transition-colors"
-                  />
-                  <button type="button" onClick={() => setShowPw(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-navy-dark/40 hover:text-navy-dark transition-colors">
-                    {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-navy-dark/60 mb-1.5">Assign Role *</label>
-                <select
-                  value={newRole} onChange={e => setNewRole(e.target.value as Role)}
-                  className="w-full px-4 py-2.5 rounded-lg border border-navy-dark/15 focus:border-purple-500 outline-none text-sm font-sans text-navy-dark transition-colors bg-white"
-                >
-                  {ROLES.map(r => <option key={r} value={r}>{r.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</option>)}
-                </select>
-              </div>
-              <div className="flex space-x-3 pt-1">
-                <button type="button" onClick={() => setShowAddForm(false)} className="flex-1 py-2.5 rounded-lg border border-navy-dark/15 text-navy-dark/60 font-display text-xs font-bold hover:bg-navy-dark/5 transition-colors">Cancel</button>
-                <button type="submit" disabled={isCreating} className="flex-1 py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-display text-xs font-bold shadow-md transition-colors flex items-center justify-center space-x-1.5">
-                  {isCreating ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>Creating...</span></> : <><Check className="w-3.5 h-3.5" /><span>Create User</span></>}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ── Reset Password Modal ───────────────────────────────────────────── */}
-      {resetTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-navy-dark/10 overflow-hidden">
-            <div className="bg-amber-600 text-white px-6 py-4 flex items-center justify-between">
-              <h4 className="font-display font-extrabold text-sm">Reset Password</h4>
-              <button onClick={() => setResetTarget(null)} className="p-1 rounded-lg hover:bg-white/10 transition-colors"><X className="w-4 h-4" /></button>
-            </div>
-            <form onSubmit={handleResetPw} className="p-6 space-y-4">
-              <p className="text-xs text-navy-dark/60 font-sans">Setting new password for <strong className="text-navy-dark">{resetTarget.email}</strong>.</p>
-              <div className="relative">
-                <input
-                  type={showResetPw ? 'text' : 'password'} required value={resetPw}
-                  onChange={e => setResetPw(e.target.value)}
-                  placeholder="New password (min 8 chars)"
-                  className="w-full px-4 py-2.5 pr-10 rounded-lg border border-navy-dark/15 focus:border-amber-500 outline-none text-sm font-sans text-navy-dark transition-colors"
-                />
-                <button type="button" onClick={() => setShowResetPw(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-navy-dark/40 hover:text-navy-dark">
-                  {showResetPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-              <div className="flex space-x-3">
-                <button type="button" onClick={() => setResetTarget(null)} className="flex-1 py-2.5 rounded-lg border border-navy-dark/15 text-navy-dark/60 font-display text-xs font-bold hover:bg-navy-dark/5 transition-colors">Cancel</button>
-                <button type="submit" disabled={isResetting} className="flex-1 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-display text-xs font-bold shadow-md transition-colors flex items-center justify-center space-x-1.5">
-                  {isResetting ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>Resetting...</span></> : <><RotateCcw className="w-3.5 h-3.5" /><span>Reset Password</span></>}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
     </div>
   );

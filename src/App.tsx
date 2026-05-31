@@ -106,6 +106,7 @@ const AppContent: React.FC = () => {
             <Route path="/complaint" element={<Complaint />} />
             <Route path="/mentors" element={<Mentors />} />
             <Route path="/profile" element={<StudentProfile />} />
+            <Route path="/dashboard" element={<StudentProfile />} />
             <Route path="/calendar" element={<MyCalendar />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/board" element={<MessageBoard />} />
@@ -128,6 +129,14 @@ const AppContent: React.FC = () => {
                 </ProtectedRoute>
               }
             >
+              <Route path="/super-admin" element={<AdminDashboard />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/developer" element={<AdminDashboard />} />
+              <Route path="/president" element={<AdminDashboard />} />
+              <Route path="/vice-president" element={<AdminDashboard />} />
+              <Route path="/general-secretary" element={<AdminDashboard />} />
+              <Route path="/secretary" element={<AdminDashboard />} />
+              <Route path="/treasurer" element={<AdminDashboard />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/payments" element={<AdminPayments />} />
               <Route path="/admin/questions" element={<AdminQuestions />} />

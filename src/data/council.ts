@@ -20,63 +20,63 @@ export const councilMembers: CouncilMember[] = [
     role: "VICE PRESIDENT",
     name: "Harshal Hatwar",
     year: "B.Pharm II Year",
-    email: "harshal@tgpcopcouncil.com",
+    email: "vicepresident@tgpcopcouncil.online",
     avatarSeed: "HH"
   },
   {
     role: "GENERAL SECRETARY",
     name: "Vinay Deogade",
     year: "B.Pharm II Year",
-    email: "vinay@tgpcopcouncil.com",
+    email: "general-secretary@tgpcopcouncil.online",
     avatarSeed: "VD"
   },
   {
     role: "SECRETARY",
     name: "Varsha Damahe",
     year: "B.Pharm III Year",
-    email: "varsha@tgpcopcouncil.com",
+    email: "secretary@tgpcopcouncil.online",
     avatarSeed: "VD2"
   },
   {
     role: "TREASURER",
     name: "Laksh Jaiswal",
     year: "B.Pharm II Year",
-    email: "laksh@tgpcopcouncil.com",
+    email: "treasurer@tgpcopcouncil.online",
     avatarSeed: "LJ"
   },
   {
     role: "TREASURER",
     name: "Rohan Bhil",
     year: "B.Pharm III Year",
-    email: "rohan@tgpcopcouncil.com",
+    email: "treasure@tgpcopcouncil.online",
     avatarSeed: "RB"
   },
   {
     role: "NSS INCHARGE",
     name: "Shivam Waghmare",
     year: "B.Pharm III Year",
-    email: "shivam@tgpcopcouncil.com",
+    email: "nss-incharge@tgpcopcouncil.online",
     avatarSeed: "SW"
   },
   {
     role: "CULTURAL SECRETARY",
     name: "Shruti Kamble",
     year: "B.Pharm II Year",
-    email: "shruti@tgpcopcouncil.com",
+    email: "cultural-secretary@tgpcopcouncil.online",
     avatarSeed: "SK"
   },
   {
     role: "OVERALL SECRETARY",
     name: "Akash Gaiwad",
     year: "B.Pharm III Year",
-    email: "akash@tgpcopcouncil.com",
+    email: "overall-secretary@tgpcopcouncil.online",
     avatarSeed: "AG"
   },
   {
     role: "EVENTS COORDINATOR",
     name: "Nayan Thote",
     year: "B.Pharm I Year",
-    email: "nayan@tgpcopcouncil.com",
+    email: "events-coordinator@tgpcopcouncil.online",
     avatarSeed: "NT"
   },
   {

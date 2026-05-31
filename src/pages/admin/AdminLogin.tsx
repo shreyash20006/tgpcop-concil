@@ -8,22 +8,30 @@ import { useToast } from '../../components/admin/Toast';
 import { logAction } from '../../lib/logger';
 import { ScienceBackground } from '../../components/ScienceBackground';
 import { DNALoader } from '../../components/DNALoader';
+import { useAuth } from '../../lib/AuthProvider';
 
 export const AdminLogin: React.FC = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
   const toast = useToast();
+  const { role, email, isLoading } = useAuth();
 
   useEffect(() => {
-    // If user is already authenticated, send them to dashboard immediately
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        logAction('LOGIN', 'Administrator signed in via Google OAuth');
-        navigate('/admin/dashboard', { replace: true });
-      }
-    });
-  }, [navigate]);
+    if (!isLoading && email) {
+      logAction('LOGIN', `User ${email} signed in via Google OAuth with role ${role}`);
+      if (role === 'super_admin') navigate('/super-admin', { replace: true });
+      else if (role === 'admin') navigate('/admin', { replace: true });
+      else if (role === 'developer') navigate('/developer', { replace: true });
+      else if (role === 'president') navigate('/president', { replace: true });
+      else if (role === 'vice_president') navigate('/vice-president', { replace: true });
+      else if (role === 'general_secretary') navigate('/general-secretary', { replace: true });
+      else if (role === 'secretary') navigate('/secretary', { replace: true });
+      else if (role === 'treasurer') navigate('/treasurer', { replace: true });
+      else if (role === 'student') navigate('/dashboard', { replace: true });
+      else navigate('/admin/dashboard', { replace: true }); // fallback
+    }
+  }, [role, email, isLoading, navigate]);
 
   const handleGoogleLogin = async () => {
     setIsLoggingIn(true);

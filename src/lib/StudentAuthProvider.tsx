@@ -10,6 +10,8 @@ export interface StudentProfile {
   year: string;
   phone: string;
   created_at: string;
+  role?: string;
+  is_active?: boolean;
 }
 
 type StudentAuthContextType = {
@@ -47,9 +49,9 @@ export const StudentAuthProvider: React.FC<{ children: ReactNode }> = ({ childre
     try {
       // 1. Try to fetch existing student profile
       const { data: profile, error } = await supabase
-        .from('student_profiles')
+        .from('profiles')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .maybeSingle();
 
       if (error) {
@@ -61,16 +63,18 @@ export const StudentAuthProvider: React.FC<{ children: ReactNode }> = ({ childre
       } else {
         // 2. Profile doesn't exist, create it from auth metadata
         const newProfile = {
-          user_id: user.id,
-          full_name: user.user_metadata?.full_name || 'Student',
+          id: user.id,
+          full_name: user.user_metadata?.full_name || user.user_metadata?.name || 'Student',
           email: user.email,
           avatar_url: user.user_metadata?.avatar_url || '',
           year: 'First Year', // Default value
           phone: '',
+          role: 'student',
+          is_active: true
         };
 
         const { data: createdProfile, error: insertError } = await supabase
-          .from('student_profiles')
+          .from('profiles')
           .insert([newProfile])
           .select()
           .single();

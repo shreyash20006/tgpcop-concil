@@ -36,6 +36,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     let active = true;
+    
     const resolveProfile = async (userSession: any) => {
       if (!userSession?.user) {
         if (active) {
@@ -47,22 +48,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       try {
         const user = userSession.user;
-        const { data: roleData, error } = await supabase
-          .from('admin_roles')
+        
+        // Fetch user profile from unified public.profiles table
+        const { data: profileData, error } = await supabase
+          .from('profiles')
           .select('*')
-          .eq('email', user.email)
-          .single();
-        if (error) {
-          if (active) {
-            setRole(null);
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (error || !profileData) {
+          // Fallback: If no profile was created by the DB trigger, insert client-side dynamically to ensure 100% login success
+          const { data: newProfile, error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              id: user.id,
+              email: user.email,
+              full_name: user.user_metadata?.full_name || user.user_metadata?.name || 'Student',
+              avatar_url: user.user_metadata?.avatar_url || null,
+              role: 'student',
+              is_active: true
+            })
+            .select()
+            .single();
+
+          if (!insertError && newProfile && active) {
+            setRole(newProfile.role as Role);
+            setIsSuspended(!newProfile.is_active);
+          } else if (active) {
+            setRole('student');
             setIsSuspended(false);
           }
         } else if (active) {
-          setRole(roleData?.role || null);
-          setIsSuspended(false);
+          setRole(profileData.role as Role);
+          setIsSuspended(!profileData.is_active);
         }
       } catch (err) {
-        console.error('Error resolving admin profile:', err);
+        console.error('Error resolving unified user profile:', err);
         if (active) {
           setRole(null);
         }

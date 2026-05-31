@@ -2,28 +2,28 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 export type Role =
-  | 'developer'
   | 'super_admin'
   | 'admin'
+  | 'developer'
+  | 'president'
+  | 'vice_president'
+  | 'general_secretary'
   | 'secretary'
-  | 'events'
-  | 'gallery'
-  | 'questions'
   | 'treasurer'
-  | 'limited'
-  | 'antiragging';
+  | 'coordinator'
+  | 'student';
 
 export const ASSIGNABLE_ROLES: Role[] = [
   'super_admin',
   'admin',
-  'secretary',
-  'events',
-  'gallery',
-  'questions',
-  'treasurer',
-  'limited',
   'developer',
-  'antiragging',
+  'president',
+  'vice_president',
+  'general_secretary',
+  'secretary',
+  'treasurer',
+  'coordinator',
+  'student',
 ];
 
 export interface AdminUser {
@@ -38,39 +38,34 @@ export function isDeveloper(role?: Role | null): boolean {
 
 export function getRoleDisplayName(role: Role): string {
   const labels: Record<Role, string> = {
-    developer: 'Developer',
     super_admin: 'Super Admin',
     admin: 'Admin',
+    developer: 'Developer',
+    president: 'President',
+    vice_president: 'Vice President',
+    general_secretary: 'General Secretary',
     secretary: 'Secretary',
-    events: 'Events',
-    gallery: 'Gallery',
-    questions: 'Questions',
     treasurer: 'Treasurer',
-    limited: 'Limited',
-    antiragging: 'Anti-Ragging',
+    coordinator: 'Coordinator',
+    student: 'Student',
   };
-  return labels[role];
+  return labels[role] || 'Student';
 }
 
 export function getPositionTitle(role: Role): string {
   const titles: Record<Role, string> = {
-    developer: 'Developer',
-    super_admin: 'President',
-    admin: 'Executive',
-    secretary: 'Secretary',
-    events: 'Events Coordinator',
-    gallery: 'Gallery Manager',
-    questions: 'Questions Manager',
-    treasurer: 'Treasurer',
-    limited: 'Council Member',
-    antiragging: 'Anti-Ragging Cell',
+    super_admin: 'President Emeritus',
+    admin: 'Executive Administrator',
+    developer: 'Lead Systems Developer',
+    president: 'Student Council President',
+    vice_president: 'Council Vice President',
+    general_secretary: 'General Secretary',
+    secretary: 'Executive Secretary',
+    treasurer: 'Council Treasurer',
+    coordinator: 'Events Coordinator',
+    student: 'Student Pioneer',
   };
-  return titles[role];
-}
-
-function withDeveloper(roles: Role[]): Role[] {
-  if (roles.includes('developer')) return roles;
-  return [...roles, 'developer'];
+  return titles[role] || 'Student';
 }
 
 export function useRole() {
@@ -88,18 +83,22 @@ export function useRole() {
         }
 
         const { data, error: queryError } = await supabase
-          .from('admin_roles')
-          .select('email, name, role')
-          .eq('email', session.user.email)
+          .from('profiles')
+          .select('email, full_name, role')
+          .eq('id', session.user.id)
           .single();
 
-        if (queryError) {
-          setError('User role not found');
+        if (queryError || !data) {
+          setError('User profile not found in Supabase');
           setLoading(false);
           return;
         }
 
-        setAdminUser(data as AdminUser);
+        setAdminUser({
+          email: data.email,
+          name: data.full_name || 'Student',
+          role: data.role as Role
+        });
         setLoading(false);
       } catch (err) {
         console.error('Failed to fetch role:', err);
@@ -113,57 +112,70 @@ export function useRole() {
 
   const can = (action: string): boolean => {
     if (!adminUser) return false;
-    if (adminUser.role === 'developer') return true;
-
+    
     const role = adminUser.role;
+    
+    // super_admin gets full access
+    if (role === 'super_admin') return true;
 
-    const permissions: Record<string, Role[]> = {
-      view_questions: withDeveloper([
-        'super_admin',
-        'admin',
-        'secretary',
-        'questions',
-        'limited',
-      ]),
-      reply_questions: withDeveloper([
-        'super_admin',
-        'admin',
-        'secretary',
-        'questions',
-      ]),
-      delete_questions: withDeveloper(['super_admin', 'admin']),
-      add_notices: withDeveloper(['super_admin', 'admin', 'secretary']),
-      edit_notices: withDeveloper(['super_admin', 'admin', 'secretary']),
-      delete_notices: withDeveloper(['super_admin', 'admin']),
-      add_events: withDeveloper(['super_admin', 'admin', 'events']),
-      edit_events: withDeveloper(['super_admin', 'admin', 'events']),
-      delete_events: withDeveloper(['super_admin', 'admin']),
-      upload_gallery: withDeveloper(['super_admin', 'admin', 'events', 'gallery']),
-      delete_gallery: withDeveloper(['super_admin', 'admin']),
-      manage_settings: withDeveloper(['super_admin', 'admin']),
-      view_dashboard: withDeveloper([
-        'super_admin',
-        'admin',
-        'secretary',
-        'events',
-        'gallery',
-        'questions',
-        'treasurer',
-        'limited',
-      ]),
-      view_database: ['developer'],
-      manage_admins: ['developer'],
-      developer_settings: ['developer'],
-      view_registrations: withDeveloper(['super_admin', 'admin', 'events']),
-      manage_polls: withDeveloper(['super_admin', 'admin']),
-      view_feedback: withDeveloper(['super_admin', 'admin', 'events']),
-      manage_achievements: withDeveloper(['super_admin', 'admin']),
-      manage_newsletter: withDeveloper(['super_admin', 'admin', 'secretary']),
-      view_complaints: withDeveloper(['super_admin', 'antiragging']),
-      manage_mentors: withDeveloper(['super_admin', 'admin']),
-    };
+    // developer gets most access except changing other admins' roles
+    if (role === 'developer') {
+      const devRestricted = ['manage_all_roles'];
+      if (devRestricted.includes(action)) return false;
+      return true; 
+    }
 
-    return permissions[action]?.includes(role) ?? false;
+    // Role-specific actions matching specified permissions
+    switch (action) {
+      case 'view_dashboard':
+        return role !== 'student';
+      case 'add_notices':
+      case 'edit_notices':
+        return ['admin', 'developer', 'president', 'general_secretary'].includes(role);
+      case 'delete_notices':
+        return ['admin', 'developer', 'president'].includes(role);
+      case 'add_events':
+      case 'edit_events':
+        return ['admin', 'developer', 'vice_president', 'coordinator'].includes(role);
+      case 'delete_events':
+        return ['admin', 'developer'].includes(role);
+      case 'upload_gallery':
+        return ['admin', 'developer', 'vice_president', 'coordinator'].includes(role);
+      case 'delete_gallery':
+        return ['admin', 'developer'].includes(role);
+      case 'view_registrations':
+        return ['admin', 'developer', 'vice_president', 'general_secretary', 'coordinator'].includes(role);
+      case 'manage_polls':
+        return ['admin', 'developer', 'president', 'vice_president'].includes(role);
+      case 'view_feedback':
+        return ['admin', 'developer', 'president', 'vice_president'].includes(role);
+      case 'manage_achievements':
+        return ['admin', 'developer', 'president'].includes(role);
+      case 'manage_newsletter':
+        return ['admin', 'developer', 'president', 'general_secretary', 'secretary'].includes(role);
+      case 'view_complaints':
+        return ['president'].includes(role);
+      case 'manage_mentors':
+        return ['admin', 'developer', 'president', 'vice_president'].includes(role);
+      case 'view_questions':
+      case 'reply_questions':
+        return ['admin', 'developer', 'president', 'general_secretary', 'secretary'].includes(role);
+      case 'delete_questions':
+        return ['admin', 'developer', 'president'].includes(role);
+      case 'manage_settings':
+        return ['admin', 'developer', 'president'].includes(role);
+      case 'view_payments':
+      case 'manage_payments':
+        return ['admin', 'developer', 'treasurer'].includes(role);
+      case 'view_reports':
+        return ['president', 'treasurer'].includes(role);
+      case 'view_database':
+      case 'manage_admins':
+      case 'developer_settings':
+        return ['developer'].includes(role);
+      default:
+        return false;
+    }
   };
 
   return {

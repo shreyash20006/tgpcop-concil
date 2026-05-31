@@ -59,6 +59,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
+  // Redirect student role to dashboard directly
+  if (role === 'student') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   if (!role) {
     return (
       <div className="min-h-screen bg-navy-dark flex items-center justify-center p-4">

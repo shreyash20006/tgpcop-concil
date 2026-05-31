@@ -34,6 +34,19 @@ interface AdminSidebarProps {
   onClose?: () => void;
 }
 
+const RoleSidebarBadgeMap: Record<string, string> = {
+  super_admin: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+  admin: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+  developer: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+  president: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+  vice_president: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
+  general_secretary: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
+  secretary: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
+  treasurer: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+  coordinator: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+  student: 'bg-slate-500/20 text-slate-300 border-slate-500/30'
+};
+
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   pendingQuestionsCount = 0,
   onClose,
@@ -146,7 +159,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   navItems.push(...baseNavItems);
 
   // Append specialized role tabs
-  if (role === 'super_admin' || role === 'developer' || role === 'antiragging') {
+  if (role === 'super_admin' || role === 'developer') {
     navItems.push({
       path: '/admin/complaints',
       name: 'Complaints',
@@ -254,11 +267,18 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <span className="block text-xs font-display font-extrabold text-white truncate leading-tight">
-              {fullName || 'Admin User'}
-            </span>
+            <div className="flex items-center space-x-1.5 min-w-0">
+              <span className="block text-xs font-display font-extrabold text-white truncate leading-tight">
+                {fullName || 'Admin User'}
+              </span>
+              {role && (
+                <span className={`inline-block text-[7px] font-extrabold uppercase px-1.5 py-0.5 rounded-md border shrink-0 leading-none ${RoleSidebarBadgeMap[role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'}`}>
+                  {getRoleDisplayName(role)}
+                </span>
+              )}
+            </div>
             <span className="block text-[9px] font-sans font-bold text-white/50 truncate leading-relaxed mt-0.5">
-              {role ? `${getPositionTitle(role)} • ${getRoleDisplayName(role)}` : 'Council Member'}
+              {role ? getPositionTitle(role) : 'Council Member'}
             </span>
           </div>
         </div>

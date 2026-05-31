@@ -19,7 +19,7 @@ alter table payments enable row level security;
 
 -- Configure Security Policies
 create policy "Anyone can insert payments"
-  on payments for insert to anon with check (true);
+  on payments for insert with check (true);
 
 create policy "Auth users manage payments"
   on payments for all to authenticated using (true);

@@ -299,6 +299,38 @@ export const StudentProfile: React.FC = () => {
                 </button>
               </div>
             </motion.div>
+
+            {/* DBATU ERP Portal Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="mt-6 bg-[#080F25]/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl relative overflow-hidden"
+            >
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-orange-burnt/5 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3 text-orange-burnt">
+                  <BookOpen className="w-5 h-5" />
+                  <h3 className="font-display font-extrabold text-sm uppercase tracking-wider text-white">
+                    DBATU ERP Portal
+                  </h3>
+                </div>
+                
+                <p className="text-white/60 text-xs leading-relaxed">
+                  Access the official Dr. Babasaheb Ambedkar Technological University portal directly to fill out exam forms, view results, and manage your university registration.
+                </p>
+
+                <a
+                  href="https://mis.dbatu.ac.in/erp/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white font-display text-xs font-bold uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center space-x-2 border border-white/10 hover:shadow-lg shadow-orange-burnt/10 cursor-pointer"
+                >
+                  <span>Launch ERP Portal ↗</span>
+                </a>
+              </div>
+            </motion.div>
           </div>
 
           {/* Right Column: Portal Activity & Event Lists */}

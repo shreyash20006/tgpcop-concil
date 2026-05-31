@@ -96,16 +96,29 @@ export const Footer: React.FC = () => {
                 { name: '🤝 Mentorship', path: '/mentors' },
                 { name: '📰 Newsletters', path: '/newsletter' },
                 { name: '📚 Study Store', path: '/store' },
-                { name: '💳 Pay Fees', path: '/pay' }
+                { name: '💳 Pay Fees', path: '/pay' },
+                { name: '🏫 DBATU ERP', path: '', url: 'https://mis.dbatu.ac.in/erp/' }
               ].map((link) => (
-                <li key={link.path}>
-                  <Link 
-                    to={link.path} 
-                    className="hover:text-orange-burnt transition-all duration-200 flex items-center space-x-1 hover:translate-x-1"
-                  >
-                    <ChevronRight className="w-3.5 h-3.5 text-orange-burnt/50" />
-                    <span>{link.name}</span>
-                  </Link>
+                <li key={link.path || link.url}>
+                  {link.url ? (
+                    <a 
+                      href={link.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:text-orange-burnt transition-all duration-200 flex items-center space-x-1 hover:translate-x-1"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5 text-orange-burnt/50" />
+                      <span>{link.name}</span>
+                    </a>
+                  ) : (
+                    <Link 
+                      to={link.path || '/'} 
+                      className="hover:text-orange-burnt transition-all duration-200 flex items-center space-x-1 hover:translate-x-1"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5 text-orange-burnt/50" />
+                      <span>{link.name}</span>
+                    </Link>
+                  )}
                 </li>
               ))}
               <li className="col-span-2 pt-2">

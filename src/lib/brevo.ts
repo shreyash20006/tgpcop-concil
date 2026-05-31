@@ -48,7 +48,7 @@ export async function sendQuestionEmail({
             <p style="background:rgba(255,255,255,0.1);padding:15px;border-radius:8px;line-height:1.6;">
               ${questionText}
             </p>
-            <a href="https://tgpcop-council.vercel.app/admin"
+            <a href="https://tgpcopcouncil.online/admin"
               style="background:#C84B0E;color:white;padding:12px 24px;
               border-radius:8px;text-decoration:none;display:inline-block;
               margin-top:20px;font-weight:bold;">
@@ -109,7 +109,7 @@ export async function sendAdminNotification({
             <div style="line-height:1.6;font-size:14px;color:rgba(255,255,255,0.95);">
               ${bodyHtml}
             </div>
-            <a href="https://tgpcop-council.vercel.app/admin"
+            <a href="https://tgpcopcouncil.online/admin"
               style="background:#C84B0E;color:white;padding:12px 24px;
               border-radius:8px;text-decoration:none;display:inline-block;
               margin-top:30px;font-weight:bold;font-size:14px;">
@@ -376,7 +376,7 @@ export async function sendAdminPaymentNotification({
               <p style="margin:4px 0;"><b>Purpose:</b> ${purpose}</p>
               <p style="margin:4px 0;font-size:16px;color:#F5A623;"><b>Amount:</b> ₹${amount}</p>
             </div>
-            <a href="https://tgpcop-council.vercel.app/admin/payments"
+            <a href="https://tgpcopcouncil.online/admin/payments"
               style="background:#C84B0E;color:white;padding:12px 24px;
               border-radius:8px;text-decoration:none;display:block;text-align:center;
               margin-top:30px;font-weight:bold;font-size:14px;">

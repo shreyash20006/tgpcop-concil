@@ -96,6 +96,7 @@ const AppContent: React.FC = () => {
             <Route path="/notices" element={<Notices />} />
             <Route path="/events" element={<Events />} />
             <Route path="/media" element={<Gallery />} />
+            <Route path="/gallery" element={<Gallery />} />
             <Route path="/report" element={<ReportBug />} />
             <Route path="/register/:eventId" element={<EventRegister />} />
             <Route path="/vote" element={<Vote />} />
@@ -113,7 +114,9 @@ const AppContent: React.FC = () => {
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/terms-and-conditions" element={<Terms />} />
             <Route path="/refunds" element={<Refunds />} />
+            <Route path="/refunds-and-cancellations" element={<Refunds />} />
 
             {/* Secure Admin Routes */}
             <Route path="/admin" element={<AdminLogin />} />

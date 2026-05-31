@@ -54,6 +54,7 @@ export const AdminUsers: React.FC = () => {
 
   const [users, setUsers] = useState<any[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
+  const [preAuthorized, setPreAuthorized] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Search & Filter state
@@ -71,13 +72,14 @@ export const AdminUsers: React.FC = () => {
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      setUsers(data || []);
-      setFilteredUsers(data || []);
+      const [profilesRes, preAuthRes] = await Promise.all([
+        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+        supabase.from('pre_authorized_emails').select('*').eq('is_used', false).order('created_at', { ascending: false }),
+      ]);
+      if (profilesRes.error) throw profilesRes.error;
+      setUsers(profilesRes.data || []);
+      setFilteredUsers(profilesRes.data || []);
+      setPreAuthorized(preAuthRes.data || []);
     } catch (err: any) {
       toast.error('❌ Failed to load users: ' + err.message);
     } finally {
@@ -114,32 +116,36 @@ export const AdminUsers: React.FC = () => {
     }
 
     const emailLower = newEmail.trim().toLowerCase();
-    const existing = users.find(u => u.email?.toLowerCase() === emailLower);
-    if (existing) {
-      toast.warning(`⚠️ User "${emailLower}" already exists with role: ${getRoleDisplayName(existing.role)}`);
+
+    // Check both profiles and pre_authorized_emails
+    const existsInProfiles = users.find(u => u.email?.toLowerCase() === emailLower);
+    const existsInPreAuth  = preAuthorized.find(u => u.email?.toLowerCase() === emailLower);
+
+    if (existsInProfiles) {
+      toast.warning(`⚠️ "${emailLower}" already exists as an active user with role: ${getRoleDisplayName(existsInProfiles.role)}`);
+      return;
+    }
+    if (existsInPreAuth) {
+      toast.warning(`⚠️ "${emailLower}" is already pending authorization.`);
       return;
     }
 
     setIsAdding(true);
     try {
-      // Insert a pre-authorized profile. When user logs in via Google OAuth,
-      // the handle_new_user trigger will update the profile ID to match auth.users.id
+      // Insert into pre_authorized_emails — no FK constraint here
+      // When user logs in via Google OAuth, handle_new_user trigger reads this table
       const { error } = await supabase
-        .from('profiles')
+        .from('pre_authorized_emails')
         .insert({
-          // Use a temporary placeholder UUID — it will be corrected by sync_profile_id RPC on first login
-          id: crypto.randomUUID(),
-          email: emailLower,
+          email:     emailLower,
+          role:      newRole,
           full_name: newName.trim() || getRoleDisplayName(newRole),
-          role: newRole,
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          added_by:  myEmail,
         });
 
       if (error) throw error;
 
-      await logActivity(myEmail, 'user_preauthorize', `Pre-authorized workspace user "${emailLower}" with role="${newRole}"`);
+      await logActivity(myEmail, 'user_preauthorize', `Pre-authorized "${emailLower}" with role="${newRole}"`);
 
       await sendAdminNotification({
         subject: '👤 New Workspace User Pre-authorized',
@@ -157,6 +163,19 @@ export const AdminUsers: React.FC = () => {
       toast.error(`❌ Failed to add user: ${err.message}`);
     } finally {
       setIsAdding(false);
+    }
+  };
+
+  // ── Delete Pre-authorized entry ───────────────────────────────────────────
+  const handleDeletePreAuth = async (entry: any) => {
+    if (!window.confirm(`Remove pre-authorization for "${entry.email}"?`)) return;
+    try {
+      const { error } = await supabase.from('pre_authorized_emails').delete().eq('id', entry.id);
+      if (error) throw error;
+      toast.success(`✅ Removed pre-authorization for "${entry.email}"`);
+      fetchUsers();
+    } catch (err: any) {
+      toast.error(`❌ ${err.message}`);
     }
   };
 
@@ -281,10 +300,55 @@ export const AdminUsers: React.FC = () => {
           <p className="text-xs font-display font-bold text-indigo-400 uppercase tracking-wider">Google Workspace Integration</p>
           <p className="text-xs text-navy-dark/60 font-sans mt-0.5 leading-relaxed">
             Pre-authorize workspace emails (<span className="font-mono text-indigo-500">@tgpcopcouncil.online</span>) or any Gmail account here. 
-            When they sign in with Google for the first time, their role will be automatically applied.
+            When they sign in with Google for the first time, their role is automatically applied.
           </p>
         </div>
       </div>
+
+      {/* Pending Pre-Authorized Users */}
+      {preAuthorized.length > 0 && (
+        <div className="bg-white border border-amber-400/30 rounded-2xl shadow-xs overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3 bg-amber-400/5 border-b border-amber-400/20">
+            <div className="flex items-center space-x-2">
+              <Mail className="w-4 h-4 text-amber-500" />
+              <span className="text-xs font-display font-extrabold text-amber-600 uppercase tracking-widest">
+                Pending Authorization — Awaiting First Login
+              </span>
+            </div>
+            <span className="text-[10px] font-bold text-amber-500 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">
+              {preAuthorized.length} pending
+            </span>
+          </div>
+          <div className="divide-y divide-amber-400/10">
+            {preAuthorized.map(entry => (
+              <div key={entry.id} className="flex items-center justify-between px-5 py-3">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-full bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-600 font-display font-bold text-xs shrink-0">
+                    {entry.full_name?.[0]?.toUpperCase() || '?'}
+                  </div>
+                  <div>
+                    <span className="block font-display font-bold text-sm text-navy-dark">{entry.full_name}</span>
+                    <span className="block text-[10px] font-mono text-navy-dark/50">{entry.email}</span>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border ${RoleBadgeMap[entry.role as Role] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}>
+                    {getRoleDisplayName(entry.role)}
+                  </span>
+                  <span className="text-[9px] text-amber-500 font-bold bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-full">⏳ Awaiting Login</span>
+                  <button
+                    onClick={() => handleDeletePreAuth(entry)}
+                    title="Remove pre-authorization"
+                    className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-all"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Filter and Search Controls */}
       <div className="bg-white border border-navy-dark/10 p-4 rounded-2xl shadow-xs flex flex-col md:flex-row gap-4">

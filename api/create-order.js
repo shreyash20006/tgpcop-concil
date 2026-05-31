@@ -32,7 +32,20 @@ export default async function handler(req, res) {
       ? 'https://api.cashfree.com/pg/orders'
       : 'https://sandbox.cashfree.com/pg/orders';
 
-    const orderId = `order_${recordId.slice(0, 8)}_${Date.now().toString().slice(-6)}`;
+    // ── Sanitize helper: keep only alphanumeric, underscore, hyphen ──────────
+    const sanitizeId = (str) =>
+      String(str || '')
+        .replace(/[^a-zA-Z0-9_-]/g, '')
+        .substring(0, 50) || 'unknown';
+
+    // ── Safe customer_id: timestamp + random suffix (always valid) ───────────
+    const rawCustomerId = `cust_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const customerId = sanitizeId(rawCustomerId);
+
+    // ── Safe order_id: strip any invalid chars from recordId slice ───────────
+    const safeRecordSlice = sanitizeId(recordId).substring(0, 8);
+    const orderId = `order_${safeRecordSlice}_${Date.now().toString().slice(-6)}`;
+
     const origin = req.headers.origin || 'https://tgpcopcouncil.online';
 
     const response = await fetch(apiEndpoint, {
@@ -48,10 +61,10 @@ export default async function handler(req, res) {
         order_amount: amount,
         order_currency: 'INR',
         customer_details: {
-          customer_id: `cust_${studentPhone.slice(-6)}_${Math.random().toString(36).substring(2, 6)}`,
-          customer_name: studentName,
-          customer_email: studentEmail,
-          customer_phone: studentPhone
+          customer_id: customerId,
+          customer_name: studentName  || 'Student',
+          customer_email: studentEmail || '',
+          customer_phone: String(studentPhone || '').replace(/\D/g, '').substring(0, 10)
         },
         order_meta: {
           return_url: `${origin}/payment-success?id=${recordId}&cf_order_id={order_id}`
@@ -59,6 +72,7 @@ export default async function handler(req, res) {
         order_note: description || purpose
       })
     });
+
 
     if (!response.ok) {
       const errorText = await response.text();

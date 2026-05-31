@@ -148,11 +148,12 @@ BEGIN
     now(),
     now()
   )
-  ON CONFLICT (id) DO UPDATE SET
-    email = EXCLUDED.email,
+  ON CONFLICT (email) DO UPDATE SET
+    id = EXCLUDED.id,
     full_name = COALESCE(EXCLUDED.full_name, profiles.full_name),
     avatar_url = COALESCE(EXCLUDED.avatar_url, profiles.avatar_url),
-    role = CASE WHEN profiles.role = 'student' THEN EXCLUDED.role ELSE profiles.role END, -- preserve custom assigned roles if any
+    role = EXCLUDED.role,
+    is_active = true,
     updated_at = now();
   RETURN NEW;
 END;

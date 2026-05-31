@@ -180,6 +180,18 @@ export const Footer: React.FC = () => {
               <span>⚠️</span>
               <span>Report a Bug</span>
             </Link>
+            <span className="text-orange-burnt hidden sm:inline">•</span>
+            <Link to="/contact" className="hover:text-orange-burnt transition-colors font-semibold tracking-wide">
+              Contact Us
+            </Link>
+            <span className="text-orange-burnt hidden sm:inline">•</span>
+            <Link to="/terms" className="hover:text-orange-burnt transition-colors font-semibold tracking-wide">
+              Terms & Conditions
+            </Link>
+            <span className="text-orange-burnt hidden sm:inline">•</span>
+            <Link to="/refunds" className="hover:text-orange-burnt transition-colors font-semibold tracking-wide">
+              Refunds & Cancellations
+            </Link>
           </div>
           <p className="flex items-center space-x-1.5 shrink-0">
             <span>Crafted with</span>

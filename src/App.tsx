@@ -36,6 +36,9 @@ const MessageBoard = lazy(() => import('./pages/MessageBoard'));
 const Store = lazy(() => import('./pages/Store'));
 const Pay = lazy(() => import('./pages/Pay'));
 const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Refunds = lazy(() => import('./pages/Refunds'));
 
 // Lazy load all admin pages
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
@@ -108,6 +111,9 @@ const AppContent: React.FC = () => {
             <Route path="/store" element={<Store />} />
             <Route path="/pay" element={<Pay />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/refunds" element={<Refunds />} />
 
             {/* Secure Admin Routes */}
             <Route path="/admin" element={<AdminLogin />} />

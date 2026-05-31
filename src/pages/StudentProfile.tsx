@@ -60,6 +60,7 @@ export const StudentProfile: React.FC = () => {
   const [myPayments, setMyPayments] = useState<any[]>([]);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [isLoadingPayments, setIsLoadingPayments] = useState(false);
 
   // Sync state with profile
   useEffect(() => {
@@ -119,34 +120,6 @@ export const StudentProfile: React.FC = () => {
           setAskedQuestions(quests);
         }
 
-        // 4. Fetch payment history — by student_email OR user_id (auth)
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        
-        // Build OR filter: match by email (case-insensitive) or user_id
-        let payQuery = supabase
-          .from('payments')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (authUser?.id && authUser?.email) {
-          // Match by email (primary) or by linked user_id
-          payQuery = payQuery.or(
-            `student_email.ilike.${authUser.email},user_id.eq.${authUser.id}`
-          );
-        } else if (studentProfile.email) {
-          payQuery = payQuery.ilike('student_email', studentProfile.email);
-        }
-
-        const { data: pays, error: paysErr } = await payQuery;
-        if (paysErr) {
-          console.error('Payment fetch error:', paysErr.message, paysErr.code);
-        }
-        // Deduplicate by id (in case or filter returns duplicates)
-        const unique = pays
-          ? pays.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i)
-          : [];
-        setMyPayments(unique);
-
       } catch (err: any) {
         console.error('Error loading student profile data:', err.message);
       } finally {
@@ -156,6 +129,46 @@ export const StudentProfile: React.FC = () => {
 
     fetchProfileData();
   }, [studentProfile]);
+
+  // ── Standalone payment fetcher — called on mount AND on tab switch ────────
+  const fetchMyPayments = async () => {
+    setIsLoadingPayments(true);
+    try {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+
+      let query = supabase
+        .from('payments')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (authUser?.id && authUser?.email) {
+        // Use proper Supabase OR syntax with quoted string value
+        query = query.or(`student_email.eq.${authUser.email},user_id.eq.${authUser.id}`);
+      } else if (studentProfile?.email) {
+        query = query.eq('student_email', studentProfile.email);
+      }
+
+      const { data: pays, error: paysErr } = await query;
+      if (paysErr) {
+        console.error('Payment fetch error:', paysErr.message, paysErr.code, paysErr.details);
+      }
+      // Deduplicate by id
+      const unique = pays
+        ? pays.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i)
+        : [];
+      setMyPayments(unique);
+    } catch (err: any) {
+      console.error('Payment fetch exception:', err.message);
+    } finally {
+      setIsLoadingPayments(false);
+    }
+  };
+
+  // Fetch payments on mount (when profile ready) and whenever Payments tab is opened
+  useEffect(() => {
+    if (!studentProfile) return;
+    fetchMyPayments();
+  }, [studentProfile]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -420,7 +433,11 @@ export const StudentProfile: React.FC = () => {
                 return (
                   <button
                     key={t.id}
-                    onClick={() => setActiveTab(t.id as any)}
+                    onClick={() => {
+                      setActiveTab(t.id as any);
+                      // Re-fetch payments every time Payments tab is opened
+                      if (t.id === 'payments') fetchMyPayments();
+                    }}
                     className={`flex-1 flex items-center justify-center space-x-2 py-2.5 rounded-xl text-xs font-display font-bold uppercase tracking-wide transition-all ${
                       active 
                         ? 'bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white shadow-lg shadow-orange-burnt/10'
@@ -437,7 +454,7 @@ export const StudentProfile: React.FC = () => {
             {/* Content Lists */}
             <div className="bg-[#080F25]/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 min-h-[400px] shadow-2xl relative">
               
-              {isLoadingData ? (
+              {(isLoadingData || (activeTab === 'payments' && isLoadingPayments)) ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-8 h-8 border-2 border-orange-burnt border-t-transparent rounded-full animate-spin" />
                 </div>
@@ -644,17 +661,35 @@ export const StudentProfile: React.FC = () => {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-display font-extrabold text-white text-base uppercase">Payment History</h3>
-                        <span className="text-[10px] text-white/50">{myPayments.filter(p => p.status === 'completed').length} successful</span>
+                        <div className="flex items-center space-x-3">
+                          <span className="text-[10px] text-white/50">{myPayments.filter(p => p.status === 'completed').length} successful</span>
+                          <button
+                            onClick={fetchMyPayments}
+                            disabled={isLoadingPayments}
+                            className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-orange-burnt/10 border border-white/10 hover:border-orange-burnt/30 text-white/50 hover:text-orange-burnt text-[10px] font-display font-bold uppercase transition-all disabled:opacity-40"
+                          >
+                            <Loader2 className={`w-3 h-3 ${isLoadingPayments ? 'animate-spin' : ''}`} />
+                            <span>Refresh</span>
+                          </button>
+                        </div>
                       </div>
 
                       {myPayments.length === 0 ? (
                         <div className="text-center py-16 border border-white/5 rounded-2xl bg-white/[0.02]">
                           <CreditCard className="w-12 h-12 mx-auto text-white/20 mb-3" />
                           <p className="text-sm text-white/50 font-sans">No payments found for your account.</p>
-                          <Link to="/pay" className="mt-4 inline-block text-orange-burnt text-xs font-display font-bold uppercase hover:underline">
+                          <button
+                            onClick={fetchMyPayments}
+                            className="mt-3 inline-block text-orange-burnt/70 hover:text-orange-burnt text-xs font-display font-bold uppercase hover:underline"
+                          >
+                            Try refreshing →
+                          </button>
+                          <br />
+                          <Link to="/pay" className="mt-2 inline-block text-orange-burnt text-xs font-display font-bold uppercase hover:underline">
                             Make a payment →
                           </Link>
                         </div>
+
                       ) : (
                         <div className="space-y-3">
                           {myPayments.map((pay) => {

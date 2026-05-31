@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { initiatePayment } from '../lib/razorpay';
+import { initiatePayment } from '../lib/cashfree';
 import { sendPaymentReceiptEmail, sendAdminPaymentNotification } from '../lib/brevo';
 import { DNALoader } from './DNALoader';
 import { useToast } from './admin/Toast';
@@ -189,7 +189,7 @@ export const PaymentForm: React.FC = () => {
         return;
       }
 
-      // 2. Launch Razorpay dynamic modal checkout
+      // 2. Launch Cashfree dynamic modal checkout
       let rzpResponse: any;
       try {
         rzpResponse = await initiatePayment({
@@ -198,7 +198,8 @@ export const PaymentForm: React.FC = () => {
           studentPhone,
           amount,
           purpose,
-          description: `Fee: ${purpose}`
+          description: `Fee: ${purpose}`,
+          recordId: record.id
         });
       } catch (payError: any) {
         // Update payment record to failed
@@ -422,7 +423,7 @@ export const PaymentForm: React.FC = () => {
         </button>
 
         <p className="text-[10px] text-white/40 text-center font-semibold">
-          Powered by Razorpay • Secure 256-bit SSL Encrypted Connection
+          Powered by Cashfree • Secure 256-bit SSL Encrypted Connection
         </p>
       </form>
     </div>

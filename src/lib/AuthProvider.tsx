@@ -39,6 +39,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     
     const resolveProfile = async (userSession: any) => {
       if (!userSession?.user) {
+        console.log('[useAuth] No active session found.');
         if (active) {
           setRole(null);
           setIsSuspended(false);
@@ -48,42 +49,78 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       try {
         const user = userSession.user;
+        console.log(`[useAuth] Active session user: email=${user.email}, id=${user.id}`);
         
-        // Fetch user profile from unified public.profiles table
+        // Fetch user profile from unified public.profiles table by user ID
         const { data: profileData, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
           .maybeSingle();
 
-        if (error || !profileData) {
-          // Fallback: If no profile was created by the DB trigger, insert client-side dynamically to ensure 100% login success
-          const { data: newProfile, error: insertError } = await supabase
-            .from('profiles')
-            .insert({
-              id: user.id,
-              email: user.email,
-              full_name: user.user_metadata?.full_name || user.user_metadata?.name || 'Student',
-              avatar_url: user.user_metadata?.avatar_url || null,
-              role: 'student',
-              is_active: true
-            })
-            .select()
-            .single();
+        if (error) {
+          console.error('[useAuth] Database error fetching profile by ID:', error);
+        }
 
-          if (!insertError && newProfile && active) {
-            setRole(newProfile.role as Role);
-            setIsSuspended(!newProfile.is_active);
-          } else if (active) {
-            setRole('student');
-            setIsSuspended(false);
+        if (profileData) {
+          console.log(`[useAuth] Found profile for ID ${user.id}: email=${profileData.email}, role=${profileData.role}, is_active=${profileData.is_active}`);
+          if (active) {
+            setRole(profileData.role as Role);
+            setIsSuspended(!profileData.is_active);
           }
-        } else if (active) {
-          setRole(profileData.role as Role);
-          setIsSuspended(!profileData.is_active);
+        } else {
+          console.warn(`[useAuth] No profile found in profiles table for ID ${user.id}. Querying by email fallback...`);
+          
+          // Fallback: Check if a profile exists under this email (e.g. pre-seeded or mismatched ID)
+          const { data: profileByEmail, error: emailErr } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('email', user.email)
+            .maybeSingle();
+
+          if (emailErr) {
+            console.error('[useAuth] Database error fetching profile by email fallback:', emailErr);
+          }
+
+          if (profileByEmail) {
+            console.log(`[useAuth] SELF-HEALING: Found profile by email ${user.email} but with mismatched ID! Database ID=${profileByEmail.id}, Google ID=${user.id}. Role=${profileByEmail.role}`);
+            // Note: Directly updating profiles.id client-side may fail due to RLS policies.
+            // We set the role from the found email profile so the UI functions immediately.
+            if (active) {
+              setRole(profileByEmail.role as Role);
+              setIsSuspended(!profileByEmail.is_active);
+            }
+          } else {
+            console.log(`[useAuth] No profile exists for email ${user.email} either. Creating a new student profile client-side...`);
+            
+            const { data: newProfile, error: insertError } = await supabase
+              .from('profiles')
+              .insert({
+                id: user.id,
+                email: user.email,
+                full_name: user.user_metadata?.full_name || user.user_metadata?.name || 'Student',
+                avatar_url: user.user_metadata?.avatar_url || null,
+                role: 'student',
+                is_active: true
+              })
+              .select()
+              .single();
+
+            if (insertError) {
+              console.error('[useAuth] Client-side profile creation failed:', insertError);
+              if (active) {
+                setRole('student');
+                setIsSuspended(false);
+              }
+            } else if (newProfile && active) {
+              console.log('[useAuth] Client-side student profile successfully created:', newProfile);
+              setRole(newProfile.role as Role);
+              setIsSuspended(!newProfile.is_active);
+            }
+          }
         }
       } catch (err) {
-        console.error('Error resolving unified user profile:', err);
+        console.error('[useAuth] Exception in resolveProfile:', err);
         if (active) {
           setRole(null);
         }

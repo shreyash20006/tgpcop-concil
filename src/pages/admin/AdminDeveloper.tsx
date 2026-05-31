@@ -35,12 +35,12 @@ import {
 } from 'lucide-react';
 
 export const AdminDeveloper: React.FC = () => {
-  const { role, email } = useAuth();
+  const { role } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
 
-  // Route security gate: developer & sb108750@gmail.com only
-  const isAuthorized = role === 'developer' && email === 'sb108750@gmail.com';
+  // Route security gate: authorized system developers only
+  const isAuthorized = role === 'developer';
 
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -349,7 +349,7 @@ export const AdminDeveloper: React.FC = () => {
           </div>
           <h2 className="font-display font-extrabold text-2xl text-white mb-2">🚫 Access Denied</h2>
           <p className="text-white/60 text-sm leading-relaxed mb-6 font-sans">
-            This developer control center is strictly restricted to system developers (`sb108750@gmail.com`). Your account is not authorized to view this page.
+            This developer control center is strictly restricted to authorized system developers. Your account is not authorized to view this page.
           </p>
           <button
             onClick={() => navigate('/admin/dashboard')}
@@ -439,7 +439,7 @@ export const AdminDeveloper: React.FC = () => {
             <span>🛠️ Developer Control Center</span>
           </h2>
           <p className="text-xs text-white/55 font-sans mt-1">
-            System core registry audit & live dashboard metrics — <span className="font-mono text-orange-burnt">sb108750@gmail.com</span>
+            System core registry audit & live dashboard metrics — <span className="font-mono text-orange-burnt">Authorized Systems Developer Control Panel</span>
           </p>
         </div>
         <button

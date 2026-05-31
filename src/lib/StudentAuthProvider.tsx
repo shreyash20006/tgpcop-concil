@@ -47,7 +47,9 @@ export const StudentAuthProvider: React.FC<{ children: ReactNode }> = ({ childre
     }
 
     try {
-      // 1. Try to fetch existing student profile
+      console.log(`[StudentAuth] Syncing profile for user: email=${user.email}, id=${user.id}`);
+      
+      // 1. Try to fetch existing student profile by ID
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
@@ -55,38 +57,58 @@ export const StudentAuthProvider: React.FC<{ children: ReactNode }> = ({ childre
         .maybeSingle();
 
       if (error) {
-        console.error('Error fetching student profile:', error);
+        console.error('[StudentAuth] Error fetching student profile:', error);
       }
 
       if (profile) {
+        console.log('[StudentAuth] Found profile by ID:', profile);
         setStudentProfile(profile);
       } else {
-        // 2. Profile doesn't exist, create it from auth metadata
-        const newProfile = {
-          id: user.id,
-          full_name: user.user_metadata?.full_name || user.user_metadata?.name || 'Student',
-          email: user.email,
-          avatar_url: user.user_metadata?.avatar_url || '',
-          year: 'First Year', // Default value
-          phone: '',
-          role: 'student',
-          is_active: true
-        };
-
-        const { data: createdProfile, error: insertError } = await supabase
+        console.warn(`[StudentAuth] Profile not found for ID ${user.id}. Querying by email fallback...`);
+        
+        // 2. Fallback: Query by email to handle pre-seeded/mismatched profiles
+        const { data: profileByEmail, error: emailErr } = await supabase
           .from('profiles')
-          .insert([newProfile])
-          .select()
-          .single();
+          .select('*')
+          .eq('email', user.email)
+          .maybeSingle();
 
-        if (insertError) {
-          console.error('Error creating student profile:', insertError);
-        } else if (createdProfile) {
-          setStudentProfile(createdProfile);
+        if (emailErr) {
+          console.error('[StudentAuth] Database error fetching profile by email fallback:', emailErr);
+        }
+
+        if (profileByEmail) {
+          console.log(`[StudentAuth] SELF-HEALING: Found profile by email ${user.email} but with mismatched ID! Database ID=${profileByEmail.id}, Google ID=${user.id}.`);
+          setStudentProfile(profileByEmail);
+        } else {
+          console.log('[StudentAuth] No profile exists. Creating new student profile client-side...');
+          const newProfile = {
+            id: user.id,
+            full_name: user.user_metadata?.full_name || user.user_metadata?.name || 'Student',
+            email: user.email,
+            avatar_url: user.user_metadata?.avatar_url || '',
+            year: 'First Year', // Default value
+            phone: '',
+            role: 'student',
+            is_active: true
+          };
+
+          const { data: createdProfile, error: insertError } = await supabase
+            .from('profiles')
+            .insert([newProfile])
+            .select()
+            .single();
+
+          if (insertError) {
+            console.error('[StudentAuth] Error creating student profile:', insertError);
+          } else if (createdProfile) {
+            console.log('[StudentAuth] Created new student profile successfully:', createdProfile);
+            setStudentProfile(createdProfile);
+          }
         }
       }
     } catch (err) {
-      console.error('Failed to sync student profile:', err);
+      console.error('[StudentAuth] Failed to sync student profile:', err);
     } finally {
       setIsLoading(false);
     }

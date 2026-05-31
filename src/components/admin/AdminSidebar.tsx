@@ -53,7 +53,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { role, email, fullName, avatarUrl } = useAuth();
+  const { role, fullName, avatarUrl } = useAuth();
   const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
 
   const toggleDarkMode = () => {
@@ -148,7 +148,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   ];
 
   const navItems: any[] = [];
-  if (role === 'developer' && email === 'sb108750@gmail.com') {
+  if (role === 'developer') {
     navItems.push({
       path: '/admin/developer',
       name: 'Dev Dashboard',

@@ -15,23 +15,32 @@ export const AdminLogin: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
   const toast = useToast();
-  const { role, email, isLoading } = useAuth();
+  const { role, email, userId, isLoading } = useAuth();
 
   useEffect(() => {
     if (!isLoading && email) {
+      let redirectPath = '/admin/dashboard';
+      if (role === 'super_admin') redirectPath = '/super-admin';
+      else if (role === 'admin') redirectPath = '/admin';
+      else if (role === 'developer') redirectPath = '/developer';
+      else if (role === 'president') redirectPath = '/president';
+      else if (role === 'vice_president') redirectPath = '/vice-president';
+      else if (role === 'general_secretary') redirectPath = '/general-secretary';
+      else if (role === 'secretary') redirectPath = '/secretary';
+      else if (role === 'treasurer') redirectPath = '/treasurer';
+      else if (role === 'student') redirectPath = '/dashboard';
+
+      console.log('--- LOGIN AUTHENTICATION DEBUG LOG ---');
+      console.log(`[Login] Auth User ID:  ${userId}`);
+      console.log(`[Login] Auth Email:    ${email}`);
+      console.log(`[Login] Profile Role:  ${role}`);
+      console.log(`[Login] Redirect Path: ${redirectPath}`);
+      console.log('---------------------------------------');
+
       logAction('LOGIN', `User ${email} signed in via Google OAuth with role ${role}`);
-      if (role === 'super_admin') navigate('/super-admin', { replace: true });
-      else if (role === 'admin') navigate('/admin', { replace: true });
-      else if (role === 'developer') navigate('/developer', { replace: true });
-      else if (role === 'president') navigate('/president', { replace: true });
-      else if (role === 'vice_president') navigate('/vice-president', { replace: true });
-      else if (role === 'general_secretary') navigate('/general-secretary', { replace: true });
-      else if (role === 'secretary') navigate('/secretary', { replace: true });
-      else if (role === 'treasurer') navigate('/treasurer', { replace: true });
-      else if (role === 'student') navigate('/dashboard', { replace: true });
-      else navigate('/admin/dashboard', { replace: true }); // fallback
+      navigate(redirectPath, { replace: true });
     }
-  }, [role, email, isLoading, navigate]);
+  }, [role, email, userId, isLoading, navigate]);
 
   const handleGoogleLogin = async () => {
     setIsLoggingIn(true);

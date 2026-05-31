@@ -54,8 +54,7 @@ export default async function handler(req, res) {
           customer_phone: studentPhone
         },
         order_meta: {
-          return_url: `${origin}/payment-success?id=${recordId}&cf_order_id={order_id}`,
-          payment_methods: 'cc,dc,ccc,ppc,nb,upi,paypal,eminointerest,emipartner,paylater'
+          return_url: `${origin}/payment-success?id=${recordId}&cf_order_id={order_id}`
         },
         order_note: description || purpose
       })
@@ -64,8 +63,14 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Cashfree PG Server Failure:', errorText);
+      let parsedError = {};
+      try {
+        parsedError = JSON.parse(errorText);
+      } catch (e) {}
+      
+      const errorMessage = parsedError.message || `Cashfree gateway error: ${response.statusText}`;
       return res.status(response.status).json({ 
-        error: `Cashfree gateway error: ${response.statusText}`, 
+        error: errorMessage, 
         details: errorText 
       });
     }

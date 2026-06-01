@@ -28,7 +28,6 @@ export const AdminGallery: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [photoToEdit, setPhotoToEdit] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [hasUrlError, setHasUrlError] = useState(false);
   const toast = useToast();
 
   // Form State
@@ -84,7 +83,6 @@ export const AdminGallery: React.FC = () => {
         media_type: 'image',
       });
     }
-    setHasUrlError(false);
   }, [photoToEdit, isModalOpen]);
 
   const handleDelete = async (id: string) => {
@@ -114,27 +112,25 @@ export const AdminGallery: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.media_url) return;
-
-    // Strict validation check before saving
     const trimmedUrl = formData.media_url.trim();
-
-    const isHttps = trimmedUrl.toLowerCase().startsWith('https://');
-    let isFormatValid = true;
-
-    if (formData.media_type === 'video') {
-      isFormatValid = trimmedUrl.toLowerCase().includes('.mp4') || 
-                      trimmedUrl.toLowerCase().includes('.mov') || 
-                      trimmedUrl.toLowerCase().includes('.avi');
-    } else if (formData.media_type === 'audio') {
-      isFormatValid = trimmedUrl.toLowerCase().includes('.mp3') || 
-                      trimmedUrl.toLowerCase().includes('.wav') || 
-                      trimmedUrl.toLowerCase().includes('.m4a');
+    if (!formData.title || !trimmedUrl) {
+      toast.error('❌ Title and media URL are required.');
+      return;
     }
 
-    if (hasUrlError || !isHttps || !isFormatValid) {
-      toast.error("❌ Upload failed! Check the URL and try again.");
+    const isHttps = trimmedUrl.toLowerCase().startsWith('https://');
+    if (!isHttps) {
+      toast.error('❌ URL must start with https://');
       return;
+    }
+
+    // Format check only for video/audio (images may not have extension in URL)
+    if (formData.media_type === 'video') {
+      const hasVideoExt = ['.mp4', '.mov', '.avi', '.webm'].some(ext => trimmedUrl.toLowerCase().includes(ext));
+      if (!hasVideoExt) { toast.error('❌ Video URL must be .mp4, .mov, .avi or .webm'); return; }
+    } else if (formData.media_type === 'audio') {
+      const hasAudioExt = ['.mp3', '.wav', '.m4a', '.ogg'].some(ext => trimmedUrl.toLowerCase().includes(ext));
+      if (!hasAudioExt) { toast.error('❌ Audio URL must be .mp3, .wav, .m4a or .ogg'); return; }
     }
 
     setIsSaving(true);
@@ -181,9 +177,13 @@ export const AdminGallery: React.FC = () => {
       }
 
       fetchPhotos();
+      // Reset form explicitly so user can immediately add another photo
+      setFormData({ title: '', media_url: '', category: 'Events', media_type: 'image' });
+      setPhotoToEdit(null);
       setIsModalOpen(false);
     } catch (err: any) {
-      toast.error("❌ Upload failed! Check the URL and try again.");
+      const msg = err?.message || 'Unknown error';
+      toast.error(`❌ Save failed: ${msg}`);
     } finally {
       setIsSaving(false);
     }
@@ -467,7 +467,6 @@ export const AdminGallery: React.FC = () => {
             mediaType={formData.media_type}
             value={formData.media_url}
             onChange={(val) => setFormData({ ...formData, media_url: val })}
-            onValidationError={setHasUrlError}
           />
 
           {/* Action buttons */}

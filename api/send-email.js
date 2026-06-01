@@ -62,6 +62,27 @@ export default async function handler(req, res) {
       };
     } else if (action === 'sendAdminNotification') {
       const { subject, title, bodyHtml } = payload;
+      
+      // Dispatch alert to Pabbly Connect Webhook for complaints
+      if (subject && subject.includes('Complaint')) {
+        try {
+          await fetch("https://connect.pabbly.com/webhook-listener/webhook/IjU3NjMwNTZkMDYzNzA0MzU1MjZjNTUzNiI_3D_pc/IjU3NjcwNTZlMDYzZjA0MzQ1MjZmNTUzNjUxMzIi_pc", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              event: "new_complaint",
+              subject,
+              title,
+              bodyHtml,
+              timestamp: new Date().toISOString()
+            })
+          });
+          console.log("✅ Successfully dispatched complaint alert to Pabbly webhook.");
+        } catch (webhookErr) {
+          console.error("⚠️ Pabbly Connect webhook dispatch failed:", webhookErr);
+        }
+      }
+
       const adminEmail = "contact@tgpcopcouncil.online";
       emailBody = {
         sender: { name: "TGPCOP Alert System", email: "contact@tgpcopcouncil.online" },

@@ -268,12 +268,12 @@ export const App: React.FC = () => {
     if (isMobile()) return;
 
     const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // GPU physics based easing curve
+      duration: 0.6,
+      easing: (t) => 1 - Math.pow(1 - t, 4), // Highly responsive quartic out easing curve
       orientation: 'vertical',
       smoothWheel: true,
-      wheelMultiplier: 0.8,
-      touchMultiplier: 1.5,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.0,
       infinite: false,
     });
 

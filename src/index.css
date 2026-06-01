@@ -116,6 +116,7 @@ html.lenis, html.lenis body { height: auto; }
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-subtle);
+  transform: translate3d(0, 0, 0);
 }
 
 .glass-panel-dark {
@@ -123,6 +124,7 @@ html.lenis, html.lenis body { height: auto; }
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-subtle);
+  transform: translate3d(0, 0, 0);
 }
 
 /* Glow card border on hover */
@@ -143,14 +145,12 @@ html.lenis, html.lenis body { height: auto; }
 }
 .glow-card:hover::after { opacity: 1; }
 
-/* Ambient orbs */
+/* Ambient orbs (Optimized with natural radial gradients, eliminating heavy filter blurs) */
 .ambient-orb-orange {
-  filter: blur(140px);
-  background: radial-gradient(circle, rgba(214,90,30,0.12) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(214,90,30,0.12) 0%, rgba(214,90,30,0.04) 40%, transparent 70%);
 }
 .ambient-orb-gold {
-  filter: blur(140px);
-  background: radial-gradient(circle, rgba(255,179,56,0.08) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(255,179,56,0.08) 0%, rgba(255,179,56,0.02) 40%, transparent 70%);
 }
 
 /* Grid overlay */
@@ -340,13 +340,17 @@ canvas {
   display: block;
 }
 
-/* Force GPU layers on animated elements */
+/* Force GPU hardware-acceleration layers on heavy visual elements */
 .dna-canvas,
 .science-bg,
-.motion-card {
-  transform: translateZ(0);
+.motion-card,
+.glass-panel,
+.glow-card,
+.glass-panel-dark {
+  transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   perspective: 1000px;
+  will-change: transform;
 }
 
 /* Reduce paint areas */

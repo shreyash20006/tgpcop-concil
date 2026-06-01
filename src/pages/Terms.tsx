@@ -141,7 +141,7 @@ export const Terms: React.FC = () => {
               <div className="mt-2 p-3 bg-white/[0.03] rounded-lg border border-white/5 text-sm space-y-1">
                 <p className="text-white font-bold">TGPCOP Student Council</p>
                 <p className="text-white/60">Tulsiramji Gaikwad Patil College of Pharmacy, Nagpur</p>
-                <p className="text-orange-burnt font-mono">developer@tgpcopcouncil.online</p>
+                <p className="text-orange-burnt font-mono">contact@tgpcopcouncil.online</p>
                 <p className="text-white/60">Website: <a href="https://www.tgpcopcouncil.online" className="text-orange-burnt hover:underline">www.tgpcopcouncil.online</a></p>
               </div>
             </div>

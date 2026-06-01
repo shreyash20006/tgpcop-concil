@@ -33,7 +33,7 @@ export async function sendQuestionEmail({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        sender: { name: "TGPCOP Student Council", email: "sb108750@gmail.com" },
+        sender: { name: "TGPCOP Student Council", email: "contact@tgpcopcouncil.online" },
         to: [{ email: memberEmail, name: directedTo }],
         subject: `New Student Question — ${directedTo}`,
         htmlContent: `
@@ -78,7 +78,7 @@ export async function sendAdminNotification({
   bodyHtml: string;
 }) {
   const brevoApiKey = import.meta.env.VITE_BREVO_API_KEY;
-  const adminEmail = "sb108750@gmail.com"; // Primary alert inbox
+  const adminEmail = "contact@tgpcopcouncil.online"; // Primary alert inbox
 
   if (!brevoApiKey || brevoApiKey.includes("your_brevo_key")) {
     console.warn("⚠️ Brevo API Key is not set or has placeholders! Logging email values instead.");
@@ -98,7 +98,7 @@ export async function sendAdminNotification({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        sender: { name: "TGPCOP Alert System", email: "sb108750@gmail.com" },
+        sender: { name: "TGPCOP Alert System", email: "contact@tgpcopcouncil.online" },
         to: [{ email: adminEmail, name: "TGPCOP Super Admin" }],
         subject: subject,
         htmlContent: `
@@ -164,7 +164,7 @@ export async function sendQuestionReplyEmail({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        sender: { name: "TGPCOP Student Council", email: "sb108750@gmail.com" },
+        sender: { name: "TGPCOP Student Council", email: "contact@tgpcopcouncil.online" },
         to: [{ email: studentEmail, name: studentName }],
         subject: `📬 Student Council Response: Re: ${directedTo}`,
         htmlContent: `
@@ -242,7 +242,7 @@ export async function sendPaymentReceiptEmail({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        sender: { name: "TGPCOP Student Council", email: "sb108750@gmail.com" },
+        sender: { name: "TGPCOP Student Council", email: "contact@tgpcopcouncil.online" },
         to: [{ email: studentEmail, name: studentName }],
         subject: `✅ Payment Receipt — TGPCOP Council`,
         htmlContent: `
@@ -313,7 +313,7 @@ export async function sendPaymentReceiptEmail({
 
             <p style="color:#ffffff60;font-size:12px;text-align:center;margin-top:24px;">
               Keep this receipt for your records.<br/>
-              For queries contact: <a href="mailto:president@tgpcop.com" style="color:#C84B0E;text-decoration:none;">president@tgpcop.com</a>
+              For queries contact: <a href="mailto:contact@tgpcopcouncil.online" style="color:#C84B0E;text-decoration:none;">contact@tgpcopcouncil.online</a>
             </p>
             
             <p style="color:#C84B0E;text-align:center;margin-top:16px;font-size:11px;font-weight:bold;letter-spacing:0.5px;">
@@ -343,7 +343,7 @@ export async function sendAdminPaymentNotification({
   amount: number;
 }) {
   const brevoApiKey = import.meta.env.VITE_BREVO_API_KEY;
-  const adminEmail = "president@tgpcop.com";
+  const adminEmail = "contact@tgpcopcouncil.online";
 
   if (!brevoApiKey || brevoApiKey.includes("your_brevo_key")) {
     console.warn("⚠️ Brevo API Key is not set or has placeholders! Logging email values instead.");
@@ -363,7 +363,7 @@ export async function sendAdminPaymentNotification({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        sender: { name: "TGPCOP Alert System", email: "sb108750@gmail.com" },
+        sender: { name: "TGPCOP Alert System", email: "contact@tgpcopcouncil.online" },
         to: [{ email: adminEmail, name: "TGPCOP Student Council President" }],
         subject: `💰 New Payment — ${studentName} — ₹${amount}`,
         htmlContent: `

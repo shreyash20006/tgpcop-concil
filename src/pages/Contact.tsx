@@ -43,8 +43,8 @@ export const Contact: React.FC = () => {
               <div>
                 <h3 className="font-display font-bold text-lg text-white mb-1">Support Email</h3>
                 <p className="text-white/60 text-sm">
-                  <a href="mailto:president@tgpcop.com" className="hover:text-orange-burnt transition-colors">
-                    president@tgpcop.com
+                  <a href="mailto:contact@tgpcopcouncil.online" className="hover:text-orange-burnt transition-colors">
+                    contact@tgpcopcouncil.online
                   </a>
                 </p>
               </div>

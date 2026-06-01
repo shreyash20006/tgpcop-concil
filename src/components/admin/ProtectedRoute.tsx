@@ -77,7 +77,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
             Your Google account (`{email}`) is not authorized for this admin panel. Only authorized college emails can access this console.
           </p>
           <p className="text-white/40 text-xs mb-6 font-sans">
-            Contact: <span className="font-mono text-orange-burnt">president@tgpcop.edu</span> for access privileges.
+            Contact: <span className="font-mono text-orange-burnt">contact@tgpcopcouncil.online</span> for access privileges.
           </p>
           <button
             onClick={handleAccessDeniedExit}

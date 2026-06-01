@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { motion } from 'framer-motion';
-import { ShieldCheck, ArrowLeft, GraduationCap, Bug } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, GraduationCap, Bug, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../../components/admin/Toast';
 import { logAction } from '../../lib/logger';
@@ -27,6 +27,10 @@ export const AdminLogin: React.FC = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showDebug, setShowDebug] = useState(false);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isEmailLoggingIn, setIsEmailLoggingIn] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
   const { role, email, userId, provider, isLoading } = useAuth();
@@ -68,6 +72,29 @@ export const AdminLogin: React.FC = () => {
       setErrorMessage(errMsg);
       toast.error(`❌ Google login failed! ${errMsg}`);
       setIsLoggingIn(false);
+    }
+  };
+
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginEmail || !loginPassword) {
+      setErrorMessage('Email and password required.');
+      return;
+    }
+    setIsEmailLoggingIn(true);
+    setErrorMessage('');
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginEmail.trim(),
+        password: loginPassword,
+      });
+      if (error) throw error;
+      // Auth state change will handle redirect via useEffect
+    } catch (err: any) {
+      const errMsg = err.message || 'Login failed. Check credentials.';
+      setErrorMessage(errMsg);
+      toast.error(`❌ Login failed: ${errMsg}`);
+      setIsEmailLoggingIn(false);
     }
   };
 
@@ -123,12 +150,59 @@ export const AdminLogin: React.FC = () => {
             </motion.div>
           )}
 
+          {/* Email + Password Login */}
+          <form onSubmit={handleEmailLogin} className="space-y-3 mb-4">
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+              <input
+                type="email"
+                value={loginEmail}
+                onChange={e => setLoginEmail(e.target.value)}
+                placeholder="admin@tgpcopcouncil.online"
+                autoComplete="email"
+                className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-orange-burnt/50 focus:ring-1 focus:ring-orange-burnt/20 transition-all"
+              />
+            </div>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={loginPassword}
+                onChange={e => setLoginPassword(e.target.value)}
+                placeholder="Password"
+                autoComplete="current-password"
+                className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-10 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-orange-burnt/50 focus:ring-1 focus:ring-orange-burnt/20 transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            <button
+              type="submit"
+              disabled={isEmailLoggingIn}
+              className="w-full py-3 px-4 bg-gradient-to-r from-orange-burnt to-[#E06D2B] hover:from-[#E06D2B] hover:to-orange-burnt disabled:opacity-50 text-white font-display font-bold rounded-xl text-sm shadow-lg transition-all"
+            >
+              {isEmailLoggingIn ? 'Signing in...' : 'Sign in with Email'}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="text-white/25 text-[10px] font-bold uppercase tracking-wider">or</span>
+            <div className="flex-1 h-px bg-white/10" />
+          </div>
+
           {/* Google Sign-In Button */}
           <div className="space-y-4">
             <button
               onClick={handleGoogleLogin}
               disabled={isLoggingIn}
-              className="relative w-full flex items-center justify-center py-3.5 px-4 bg-white hover:bg-gray-100 disabled:opacity-50 text-navy-dark font-display font-extrabold rounded-xl text-sm sm:text-base shadow-lg hover:shadow-white/10 active:scale-98 transition-all duration-200 cursor-pointer"
+              className="relative w-full flex items-center justify-center py-3 px-4 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 disabled:opacity-50 text-white font-display font-bold rounded-xl text-sm shadow-lg transition-all duration-200 cursor-pointer"
             >
               {isLoggingIn ? (
                 <div className="flex items-center space-x-3">
@@ -143,13 +217,13 @@ export const AdminLogin: React.FC = () => {
                     <path fill="#FBBC05" d="M5.19 14.24A7.2 7.2 0 014.8 12c0-.79.13-1.57.39-2.31V6.59H1.23A11.96 11.96 0 000 12c0 2.23.6 4.32 1.66 6.13l3.53-2.89z" />
                     <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.22 0 12 0 7.34 0 3.37 2.67 1.23 6.59l3.96 3.1c.96-2.88 3.64-5.02 6.81-5.02z" />
                   </svg>
-                  <span>Sign in with Google</span>
+                  <span>Continue with Google</span>
                 </>
               )}
             </button>
 
-            <p className="text-white/50 text-[10px] text-center font-sans leading-relaxed">
-              Use your authorized Google or Google Workspace account linked to this system.
+            <p className="text-white/30 text-[10px] text-center font-sans leading-relaxed">
+              Use your authorized email or Google Workspace account.
             </p>
           </div>
 

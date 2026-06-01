@@ -92,10 +92,10 @@ export const Navbar: React.FC = () => {
   const moreLinks = [
     { name: 'Achievements', path: '/achievements', icon: '🏆', desc: 'Student hall of fame' },
     { name: 'Vote Now', path: '/vote', icon: '🗳️', desc: 'Participate in active polls' },
-    { name: 'Leaderboard', path: '/leaderboard', icon: '🏆', desc: 'Top achievers' },
+    { name: 'Leaderboard', path: '/leaderboard', icon: '🏆', desc: 'Top achievers', desktopOnly: true },
     { name: 'Message Board', path: '/board', icon: '💬', desc: 'Community board' },
-    { name: 'Study Store', path: '/store', icon: '📚', desc: 'Syllabus handbooks & exam keys' },
-    { name: 'My Calendar', path: '/calendar', icon: '📅', desc: 'Your saved events' },
+    { name: 'Study Store', path: '/store', icon: '📚', desc: 'Syllabus handbooks & exam keys', desktopOnly: true },
+    { name: 'My Calendar', path: '/calendar', icon: '📅', desc: 'Your saved events', desktopOnly: true },
     { name: 'Mentors', path: '/mentors', icon: '🤝', desc: 'Connect with senior guides' },
     { name: 'Newsletter', path: '/newsletter', icon: '📰', desc: 'Monthly publications' },
     { name: 'Pay Fees', path: '/pay', icon: '💳', desc: 'Secure online student payment' },
@@ -413,7 +413,7 @@ export const Navbar: React.FC = () => {
 
               {isMobileMoreOpen && (
                 <div className="pl-4 pb-2 mt-2 space-y-3 overflow-hidden flex flex-col border-l border-white/5 text-xs">
-                  {moreLinks.map((subLink) => {
+                  {moreLinks.filter(l => !l.desktopOnly).map((subLink) => {
                     const isSubActive = location.pathname === subLink.path;
                     return (
                       <Link

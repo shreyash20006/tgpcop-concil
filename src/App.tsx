@@ -13,6 +13,7 @@ import { Footer } from './components/Footer';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { ProtectedRoute } from './components/admin/ProtectedRoute';
 import { DNALoader } from './components/DNALoader';
+import { DesktopOnlyWrapper } from './components/DesktopOnlyWrapper';
 
 // Lazy load ALL pages for dynamic bundle code-splitting & minimal first-paint loading times
 const Home = lazy(() => import('./pages/Home'));
@@ -116,10 +117,10 @@ const AppContent: React.FC = () => {
             <Route path="/mentors" element={<Mentors />} />
             <Route path="/profile" element={<StudentProfile />} />
             <Route path="/dashboard" element={<StudentProfile />} />
-            <Route path="/calendar" element={<MyCalendar />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/calendar" element={<DesktopOnlyWrapper><MyCalendar /></DesktopOnlyWrapper>} />
+            <Route path="/leaderboard" element={<DesktopOnlyWrapper><Leaderboard /></DesktopOnlyWrapper>} />
             <Route path="/board" element={<MessageBoard />} />
-            <Route path="/store" element={<Store />} />
+            <Route path="/store" element={<DesktopOnlyWrapper><Store /></DesktopOnlyWrapper>} />
             <Route path="/pay" element={<Pay />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/contact" element={<Contact />} />

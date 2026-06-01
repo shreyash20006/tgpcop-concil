@@ -222,96 +222,37 @@ export const AdminDeveloper: React.FC = () => {
 
   const fetchVercelDeployments = async () => {
     setIsVercelLoading(true);
-    const vercelToken = import.meta.env.VITE_VERCEL_TOKEN;
-    const projectId = import.meta.env.VITE_VERCEL_PROJECT_ID || 'tgpcop-concil';
-
-    if (!vercelToken || vercelToken === 'your_vercel_token') {
-      // Setup dynamic premium simulated fallback logs matching real repository
-      const mockDeployments = [
-        {
-          uid: 'dep_1',
-          url: 'tgpcop-concil.vercel.app',
-          state: 'READY',
-          created: new Date(+new Date() - 7200000).toISOString(), // 2 hours ago
-          meta: {
-            githubCommitRef: 'main',
-            githubCommitMessage: 'feat: migrate admin authentication to Google OAuth and update sidebar footer'
-          }
-        },
-        {
-          uid: 'dep_2',
-          url: 'tgpcop-concil-git-main.vercel.app',
-          state: 'READY',
-          created: new Date(+new Date() - 18000000).toISOString(), // 5 hours ago
-          meta: {
-            githubCommitRef: 'main',
-            githubCommitMessage: 'bugfix: resolve unique email card card overlays in council roster'
-          }
-        },
-        {
-          uid: 'dep_3',
-          url: 'tgpcop-concil-failed.vercel.app',
-          state: 'ERROR',
-          created: new Date(+new Date() - 86400000).toISOString(), // 1 day ago
-          meta: {
-            githubCommitRef: 'main',
-            githubCommitMessage: 'chore: attempt deployment configuration edits'
-          }
-        },
-        {
-          uid: 'dep_4',
-          url: 'tgpcop-concil-git-main.vercel.app',
-          state: 'READY',
-          created: new Date(+new Date() - 172800000).toISOString(), // 2 days ago
-          meta: {
-            githubCommitRef: 'main',
-            githubCommitMessage: 'feat: add public complaints system and mentorship connectivity'
-          }
-        },
-        {
-          uid: 'dep_5',
-          url: 'tgpcop-concil-git-main.vercel.app',
-          state: 'READY',
-          created: new Date(+new Date() - 259200000).toISOString(), // 3 days ago
-          meta: {
-            githubCommitRef: 'main',
-            githubCommitMessage: 'feat: configure Brevo alert dispatch engines'
-          }
-        }
-      ];
-      setVercelDeployments(mockDeployments);
-      setVercelStatus('Unconfigured');
-      setIsVercelLoading(false);
-      return;
-    }
-
     try {
-      const res = await fetch(`https://api.vercel.com/v6/deployments?projectId=${projectId}`, {
-        headers: {
-          Authorization: `Bearer ${vercelToken}`
-        }
-      });
+      const res = await fetch('/api/vercel-deployments');
       if (res.ok) {
         const data = await res.json();
         setVercelDeployments(data.deployments || []);
-        setVercelStatus('Connected');
+        setVercelStatus(data.configured ? 'Connected' : 'Unconfigured');
       } else {
-        throw new Error('Vercel API error');
+        throw new Error('Vercel serverless fetch failed');
       }
     } catch (err) {
-      console.warn('Vercel API token handshake failed. Using simulated log logs.');
+      console.warn('Vercel serverless fetch failed. Using empty deployments state.', err);
       setVercelStatus('Unconfigured');
     } finally {
       setIsVercelLoading(false);
     }
   };
 
-  const evaluateSystemHealthEnv = () => {
-    // Brevo API Key presence check
-    const brevoKey = import.meta.env.VITE_BREVO_API_KEY;
-    if (brevoKey && !brevoKey.includes('your_brevo_key')) {
-      setBrevoStatus('Connected');
-    } else {
+  const evaluateSystemHealthEnv = async () => {
+    try {
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'checkConfig' }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setBrevoStatus(data.configured ? 'Connected' : 'Unconfigured');
+      } else {
+        setBrevoStatus('Unconfigured');
+      }
+    } catch (err) {
       setBrevoStatus('Unconfigured');
     }
 

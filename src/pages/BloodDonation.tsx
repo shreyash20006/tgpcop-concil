@@ -4,11 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { sendAdminNotification } from '../lib/brevo';
 import { 
-  Heart, Calendar, MapPin, Gift, Award, CheckCircle2, 
+  Heart, Calendar, MapPin, Gift, 
   AlertTriangle, ArrowLeft, Loader2, User, Phone, Mail, 
   GraduationCap, Sparkles, ShieldCheck, HeartHandshake
 } from 'lucide-react';
-import { PageHeader } from '../components/PageHeader';
 import { ScienceBackground } from '../components/ScienceBackground';
 
 export const BloodDonation: React.FC = () => {
@@ -85,7 +84,7 @@ export const BloodDonation: React.FC = () => {
         .update({ registered_count: newCount })
         .eq('id', eventId);
 
-      setEvent(prev => prev ? { ...prev, registered_count: newCount } : null);
+      setEvent((prev: any) => prev ? { ...prev, registered_count: newCount } : null);
       setStatus('success');
 
       // Send confirmation notification

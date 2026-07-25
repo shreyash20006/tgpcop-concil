@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { HelpCircle, User, Mail, Phone, ArrowUpRight } from 'lucide-react';
 import type { CouncilMember } from '../data/council';
 import { Card, CardBadge } from './ui/Card';
+import TiltCard from './TiltCard';
 
 interface CouncilCardProps {
   member: CouncilMember;
@@ -24,8 +25,9 @@ const cardVariants = {
 
 export const CouncilCard: React.FC<CouncilCardProps> = React.memo(({ member }) => {
   return (
-    <motion.div variants={cardVariants} whileHover={{ y: -4 }}>
-      <Card variant="default" padding="lg" hover className="flex flex-col h-full group">
+    <TiltCard>
+      <motion.div variants={cardVariants} whileHover={{ y: -4 }}>
+        <Card variant="default" padding="lg" hover className="flex flex-col h-full group glass">
         {/* Top row: avatar + year tag */}
         <div className="flex items-start justify-between mb-5">
           {/* Spinning gradient ring avatar */}
@@ -98,6 +100,7 @@ export const CouncilCard: React.FC<CouncilCardProps> = React.memo(({ member }) =
         </Link>
       </Card>
     </motion.div>
+    </TiltCard>
   );
 });
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -6,6 +6,11 @@ import {
   ArrowUpRight, Bell, Users,
 } from 'lucide-react';
 import { Section, SectionHeader } from './Section';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const quickLinks = [
   {
@@ -66,6 +71,31 @@ const cardVariants = {
 };
 
 export const HomeQuickLinks: React.FC = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    if (!sectionRef.current) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    ScrollTrigger.matchMedia({
+      // Desktop only — mobile pe pinning off
+      "(min-width: 768px)": () => {
+        const panels = gsap.utils.toArray<HTMLElement>(".pin-panel");
+        ScrollTrigger.create({
+          trigger: sectionRef.current,
+          start: "top top",
+          end: `+=${panels.length * 100}%`,
+          pin: true,
+          scrub: true,
+          onUpdate: (self) => {
+            const idx = Math.min(panels.length - 1, Math.floor(self.progress * panels.length));
+            panels.forEach((p, i) => p.classList.toggle("active", i === idx));
+          },
+        });
+      },
+    });
+  }, { scope: sectionRef });
+
   return (
     <div
       className="relative z-10 border-y py-24 sm:py-28"
@@ -87,7 +117,7 @@ export const HomeQuickLinks: React.FC = () => {
           />
         </div>
 
-        <div className="pin-section">
+        <div ref={sectionRef} className="pin-section">
           <motion.div
             initial="hidden"
             whileInView="visible"

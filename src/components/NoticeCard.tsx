@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Pin, Download, Calendar, Eye, ExternalLink, X, FileText, AlertTriangle } from 'lucide-react';
 import { DNALoader } from './DNALoader';
 import { supabase } from '../lib/supabase';
+import TiltCard from './TiltCard';
 
 interface NoticeCardProps {
   notice: {
@@ -252,6 +253,7 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({ notice }) => {
           )}
         </div>
       </motion.div>
+      </TiltCard>
 
       {/* ── PDF Preview Modal (Upgraded with Glassmorphism Dark Layout) ── */}
       <AnimatePresence>

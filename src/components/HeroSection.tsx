@@ -1,9 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowUpRight, HelpCircle, Sparkles, FileText } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { AnimatedLogo } from './ui/AnimatedLogo';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+
+// Lazy load 3D DNA hero for performance
+const DNAHero3D = lazy(() => import('./DNAHero3D'));
 
 const isVideoUrl = (url: string | null): boolean => {
   if (!url) return false;
@@ -46,6 +51,7 @@ const SplitText: React.FC<{ text: string; className?: string; delayStart?: numbe
 };
 
 export const HeroSection: React.FC = () => {
+  const heroRef = useRef<HTMLDivElement>(null);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
   const [heroBadgeText, setHeroBadgeText] = useState<string>('Tulsiramji Gaikwad Patil College of Pharmacy');
   const [heroTitleText1, setHeroTitleText1] = useState<string>('TGPCOP');
@@ -61,6 +67,16 @@ export const HeroSection: React.FC = () => {
   const [logoOrbitEnabled, setLogoOrbitEnabled] = useState<boolean>(true);
   const [heroTextVisible, setHeroTextVisible] = useState<boolean>(true);
   const [videoObjectFit, setVideoObjectFit] = useState<'cover' | 'contain'>('contain');
+
+  // Hero entrance animation
+  useGSAP(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    gsap.timeline()
+      .from(".hero-title", { opacity: 0, y: 40, duration: 1, ease: "power3.out" })
+      .from(".hero-subtitle", { opacity: 0, y: 30, duration: 0.8, ease: "power3.out" }, "-=0.5")
+      .from(".hero-cta", { opacity: 0, scale: 0.9, duration: 0.6, ease: "back.out(1.7)" }, "-=0.4");
+  }, { scope: heroRef });
 
   // Scroll-linked parallax
   const { scrollY } = useScroll();
@@ -108,10 +124,19 @@ export const HeroSection: React.FC = () => {
 
   return (
     <section
-      className="relative w-full min-h-[100svh] overflow-hidden bg-[#050B1F] text-white flex items-end"
+      className="hero relative w-full min-h-[100svh] overflow-hidden bg-[#050B1F] text-white flex items-end"
       data-testid="hero-section"
       data-keep-dark="true"
     >
+      {/* 3D DNA Hero Background */}
+      <Suspense fallback={null}>
+        <DNAHero3D />
+      </Suspense>
+
+      {/* Ambient glow blobs */}
+      <div className="glow-blob glow-cyan" style={{ top: "-10%", left: "-8%" }} />
+      <div className="glow-blob glow-violet" style={{ bottom: "-12%", right: "-6%" }} />
+
       {/* Parallax background */}
       <motion.div className="absolute inset-0 z-0" style={{ y: bgY }}>
         {bannerUrl && isVideoUrl(bannerUrl) ? (
@@ -165,7 +190,7 @@ export const HeroSection: React.FC = () => {
       {/* Asymmetric content — hidden in cinema mode */}
       {heroTextVisible && (
       <motion.div
-        className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-24 sm:pt-40 sm:pb-32"
+        className="hero-content relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-24 sm:pt-40 sm:pb-32"
         style={{ y: contentY, opacity: contentOpacity }}
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-end">
@@ -199,7 +224,7 @@ export const HeroSection: React.FC = () => {
 
             {/* Headline with split-text reveal */}
             <h1
-              className="font-display font-black tracking-tight leading-[0.95] text-white hero-title"
+              className="font-display font-black tracking-tight leading-[0.95] text-white hero-title gradient-text"
               style={{ fontSize: 'clamp(2.75rem, 8vw, 6.5rem)' }}
             >
               <SplitText text={heroTitleText1} className="block" delayStart={0.15} />
@@ -214,6 +239,7 @@ export const HeroSection: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 1.0 }}
               className="text-white/75 text-base sm:text-xl max-w-2xl font-sans leading-relaxed hero-subtitle"
+              data-reveal
             >
               {subtitleParts[0]}
               {subtitleParts[1] && (
@@ -235,7 +261,7 @@ export const HeroSection: React.FC = () => {
                 <Link
                   to="/ask"
                   data-testid="hero-primary-cta"
-                  className="group inline-flex items-center justify-center gap-3 px-7 py-4 bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white font-display text-sm font-bold uppercase tracking-[0.18em] rounded-full shadow-xl shadow-orange-burnt/25 hover:shadow-orange-burnt/40 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 border border-white/10"
+                  className="btn-primary hero-cta group inline-flex items-center justify-center gap-3 px-7 py-4 text-white font-display text-sm font-bold uppercase tracking-[0.18em] rounded-full shadow-xl shadow-orange-burnt/25 hover:shadow-orange-burnt/40 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 border border-white/10"
                 >
                   <HelpCircle className="w-4 h-4" strokeWidth={2.4} />
                   <span>Ask the Council</span>

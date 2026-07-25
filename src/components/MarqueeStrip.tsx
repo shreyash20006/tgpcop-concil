@@ -1,16 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { AlertCircle } from 'lucide-react';
-import { useMarqueeAnimation } from '../hooks/useGSAPAnimations';
 
 export const MarqueeStrip: React.FC = () => {
   const [marqueeItems, setMarqueeItems] = useState<{ id: string; text: string }[]>([]);
-  const [isHovered, setIsHovered] = useState(false);
-
-  // Initialize marquee animation
-  useMarqueeAnimation();
 
   useEffect(() => {
     const fetchNotices = async () => {
@@ -52,8 +46,8 @@ export const MarqueeStrip: React.FC = () => {
 
   if (marqueeItems.length === 0) return null;
 
-  // Quadruplicate to guarantee a flawless, gap-free infinite scrolling loop on wide viewports
-  const duplicatedItems = [...marqueeItems, ...marqueeItems, ...marqueeItems, ...marqueeItems];
+  // Duplicate items for seamless infinite loop
+  const duplicatedItems = [...marqueeItems, ...marqueeItems];
 
   return (
     <div className="bg-navy-dark/70 backdrop-blur-md py-3.5 border-y border-white/5 overflow-hidden w-full flex items-center relative z-20 shadow-md">
@@ -63,32 +57,20 @@ export const MarqueeStrip: React.FC = () => {
         Latest Updates
       </div>
 
-      {/* Infinite Ticker Track with Pause-on-Hover dynamics */}
-      <div
-        className="w-full overflow-hidden"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <motion.div
-          className="marquee__track flex whitespace-nowrap pl-40 gap-12"
-          animate={{ x: [0, -1200] }}
-          transition={{
-            ease: 'linear',
-            duration: isHovered ? 120 : 25, // Fluidly slows down speed on hover
-            repeat: Infinity,
-          }}
-        >
+      {/* Infinite Marquee Track */}
+      <div className="marquee w-full overflow-hidden">
+        <div className="marquee__track flex whitespace-nowrap pl-40 gap-12">
           {duplicatedItems.map((item, idx) => (
             <Link
               key={`${item.id}-${idx}`}
               to="/notices"
-              className="inline-flex items-center text-white/80 hover:text-orange-burnt font-display font-medium text-xs sm:text-sm tracking-wide transition-all duration-300 transform hover:scale-102"
+              className="marquee__item inline-flex items-center text-white/80 hover:text-orange-burnt font-display font-medium text-xs sm:text-sm tracking-wide transition-all duration-300 transform hover:scale-102"
             >
               <span className="mr-2 text-gold-accent select-none">✦</span>
               {item.text}
             </Link>
           ))}
-        </motion.div>
+        </div>
       </div>
     </div>
   );

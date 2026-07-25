@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Trophy, Users, Hourglass, ArrowRight, Heart } from 'lucide-react';
+import TiltCard from './TiltCard';
 
 interface CompetitionCardProps {
   competition: any;
@@ -168,11 +169,12 @@ export const CompetitionCard: React.FC<CompetitionCardProps> = ({ competition })
   };
 
   return (
-    <motion.div
-      variants={cardVariants}
-      whileHover={{ y: -6, boxShadow: '0 20px 40px -15px rgba(214, 90, 30, 0.25)' }}
-      className="bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-2xl overflow-hidden flex flex-col justify-between shadow-[0_8px_32px_rgba(5,11,24,0.4)]"
-    >
+    <TiltCard>
+      <motion.div
+        variants={cardVariants}
+        whileHover={{ y: -6, boxShadow: '0 20px 40px -15px rgba(214, 90, 30, 0.25)' }}
+        className="bg-[#0D1B3E]/85 border border-orange-burnt/25 backdrop-blur-[16px] rounded-2xl overflow-hidden flex flex-col justify-between shadow-[0_8px_32px_rgba(5,11,24,0.4)] glass"
+      >
       {/* Upper Color Strip */}
       <div className="bg-gradient-to-r from-orange-burnt via-gold-accent to-orange-burnt h-1.5 w-full shadow-[0_0_8px_rgba(214,90,30,0.3)]" />
 
@@ -285,6 +287,7 @@ export const CompetitionCard: React.FC<CompetitionCardProps> = ({ competition })
         </div>
       </div>
     </motion.div>
+    </TiltCard>
   );
 };
 

@@ -4,7 +4,7 @@ import { ScienceBackground } from '../components/ScienceBackground';
 import { MarqueeStrip } from '../components/MarqueeStrip';
 import { useHomePageData } from '../hooks/useHomePageData';
 import { HomeStories } from '../components/home/HomeStories';
-import { useGSAPAnimations } from '../hooks/useGSAPAnimations';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 // Lazy-load below-fold sections for faster TTI
 const HomeAbout = lazy(() => import('../components/home/HomeAbout').then((m) => ({ default: m.HomeAbout })));
@@ -45,11 +45,12 @@ export const Home: React.FC = () => {
     refreshPollVotes,
   } = useHomePageData();
 
-  // Initialize GSAP animations
-  useGSAPAnimations();
+  // Initialize scroll reveal animations
+  const mainSectionRef = useScrollReveal<HTMLDivElement>();
 
   return (
     <div
+      ref={mainSectionRef}
       className="relative min-h-screen bg-[#050B18] overflow-hidden pb-20"
       data-testid="home-page"
     >

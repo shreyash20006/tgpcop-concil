@@ -6,6 +6,7 @@ import { Card } from '../ui/Card';
 import { Section } from './Section';
 import { Parallax } from '../ui/Reveal';
 import { supabase } from '../../lib/supabase';
+import StatCounter from './StatCounter';
 
 interface HomeAboutProps {
   counts: { notices: number; events: number; students: number; members: number };
@@ -190,9 +191,7 @@ export const HomeAbout: React.FC<HomeAboutProps> = ({ counts }) => {
                       </div>
 
                       <h3 className="font-display font-extrabold text-4xl sm:text-5xl text-white leading-none mb-2 tracking-tight">
-                        <span className="stat-count" data-target={stat.value} data-suffix={stat.suffix}>
-                          {stat.value}
-                        </span>
+                        <StatCounter target={stat.value} suffix={stat.suffix} label="" />
                       </h3>
                       <p className="font-display font-bold text-[11px] text-orange-burnt uppercase tracking-[0.18em]">
                         {stat.label}

@@ -16,6 +16,15 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
 }
 
+.card-hover {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s;
+}
+
+.card-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+}
+
 /* Pinned scrollytelling panel styles */
 .pin-panel {
   opacity: 0.25;
@@ -29,14 +38,90 @@
 }
 
 /* Marquee animation */
+.marquee { overflow: hidden; white-space: nowrap; }
 .marquee__track {
-  will-change: transform;
+  display: inline-flex; gap: 3rem; width: max-content;
+  animation: marquee 25s linear infinite; will-change: transform;
 }
+.marquee:hover .marquee__track { animation-play-state: paused; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
 /* Reveal animation base state */
 .reveal {
   opacity: 0;
 }
+
+/* ============================================
+   PROFESSIONAL DESIGN SYSTEM
+   ============================================ */
+
+:root {
+  --bg: #070b14;
+  --surface: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.09);
+  --accent: #22d3ee;      /* cyan — pharma/science feel */
+  --accent-2: #a78bfa;    /* violet */
+  --text: #e6edf6;
+  --text-dim: #8b98ab;
+}
+
+/* Glassmorphism cards */
+.glass {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 18px;
+}
+
+/* Gradient headline (Juspay-style) */
+.gradient-text {
+  background: linear-gradient(92deg, #fff 30%, var(--accent) 70%, var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Ambient glow blobs behind hero */
+.glow-blob {
+  position: absolute; border-radius: 50%; filter: blur(120px);
+  opacity: .35; pointer-events: none; z-index: 0;
+}
+.glow-cyan   { background: #0891b2; width: 480px; height: 480px; }
+.glow-violet { background: #6d28d9; width: 400px; height: 400px; }
+
+/* Section spacing rhythm — professional feel ka secret */
+section { padding-block: clamp(4rem, 9vw, 8rem); }
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(92deg, var(--accent), var(--accent-2));
+  border-radius: 999px; padding: .9rem 2rem; font-weight: 600; color: #05070d;
+  transition: transform .25s, box-shadow .25s;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(34,211,238,.35); }
+
+/* Hero 3D container */
+.hero-3d { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.hero-content { position: relative; z-index: 1; }
+
+/* Tilt card styles */
+.tilt-card {
+  transition: transform .25s ease-out, box-shadow .3s;
+  transform-style: preserve-3d;
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+}
+.tilt-card:hover { box-shadow: 0 25px 60px rgba(34, 211, 238, .18); }
+/* Moving shine */
+.tilt-card::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(420px circle at var(--shine-x, 50%) var(--shine-y, 50%),
+              rgba(255,255,255,.14), transparent 45%);
+  opacity: 0; transition: opacity .3s;
+}
+.tilt-card:hover::after { opacity: 1; }
 
 /* ============================================
    DESIGN TOKENS Ã¢â‚¬â€ PW INSPIRED CLEAN DESIGN

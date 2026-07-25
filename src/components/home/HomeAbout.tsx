@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { ArrowUpRight, Users, Megaphone, Calendar, Award, Sparkles } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Section } from './Section';
-import { AnimatedCounter } from './AnimatedCounter';
 import { Parallax } from '../ui/Reveal';
 import { supabase } from '../../lib/supabase';
 
@@ -115,7 +114,7 @@ export const HomeAbout: React.FC<HomeAboutProps> = ({ counts }) => {
       <Section id="about">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
           {/* LEFT — narrative */}
-          <motion.div variants={itemFade} className="lg:col-span-5 space-y-6 lg:sticky lg:top-28 lg:self-start">
+          <motion.div variants={itemFade} className="lg:col-span-5 space-y-6 lg:sticky lg:top-28 lg:self-start reveal">
             <div className="flex items-center space-x-2 text-orange-burnt text-[11px] font-extrabold uppercase tracking-[0.22em]">
               <span className="w-6 h-[1.5px] bg-orange-burnt" />
               <span>{content.eyebrow}</span>
@@ -169,7 +168,7 @@ export const HomeAbout: React.FC<HomeAboutProps> = ({ counts }) => {
                       variant={isPrimary ? 'highlight' : isGold ? 'glow' : 'default'}
                       padding="lg"
                       hover
-                      className={`${stat.span} group`}
+                      className={`${stat.span} group reveal`}
                       testId={`stat-card-${idx}`}
                     >
                       <div className="flex items-start justify-between mb-6">
@@ -191,7 +190,9 @@ export const HomeAbout: React.FC<HomeAboutProps> = ({ counts }) => {
                       </div>
 
                       <h3 className="font-display font-extrabold text-4xl sm:text-5xl text-white leading-none mb-2 tracking-tight">
-                        <AnimatedCounter target={stat.value} suffix={stat.suffix} />
+                        <span className="stat-count" data-target={stat.value} data-suffix={stat.suffix}>
+                          {stat.value}
+                        </span>
                       </h3>
                       <p className="font-display font-bold text-[11px] text-orange-burnt uppercase tracking-[0.18em]">
                         {stat.label}

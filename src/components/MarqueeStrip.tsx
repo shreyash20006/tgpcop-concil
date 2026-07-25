@@ -3,10 +3,14 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { AlertCircle } from 'lucide-react';
+import { useMarqueeAnimation } from '../hooks/useGSAPAnimations';
 
 export const MarqueeStrip: React.FC = () => {
   const [marqueeItems, setMarqueeItems] = useState<{ id: string; text: string }[]>([]);
   const [isHovered, setIsHovered] = useState(false);
+
+  // Initialize marquee animation
+  useMarqueeAnimation();
 
   useEffect(() => {
     const fetchNotices = async () => {
@@ -19,7 +23,7 @@ export const MarqueeStrip: React.FC = () => {
           .limit(8);
 
         if (error) throw error;
-        
+
         if (data && data.length > 0) {
           const items = data.map((n) => ({
             id: n.id,
@@ -60,13 +64,13 @@ export const MarqueeStrip: React.FC = () => {
       </div>
 
       {/* Infinite Ticker Track with Pause-on-Hover dynamics */}
-      <div 
+      <div
         className="w-full overflow-hidden"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         <motion.div
-          className="flex whitespace-nowrap pl-40 gap-12"
+          className="marquee__track flex whitespace-nowrap pl-40 gap-12"
           animate={{ x: [0, -1200] }}
           transition={{
             ease: 'linear',

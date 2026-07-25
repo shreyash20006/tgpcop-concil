@@ -78,27 +78,31 @@ export const HomeQuickLinks: React.FC = () => {
       </div>
 
       <Section noPadding className="!py-0 relative z-10">
-        <SectionHeader
-          eyebrow="Student Resource Hub"
-          align="center"
-          title="Everything You Need"
-          description="Connect with council operations, check vital exam data, read live alerts, or submit a suggestion — all in one place."
-        />
+        <div className="reveal">
+          <SectionHeader
+            eyebrow="Student Resource Hub"
+            align="center"
+            title="Everything You Need"
+            description="Connect with council operations, check vital exam data, read live alerts, or submit a suggestion — all in one place."
+          />
+        </div>
 
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-60px' }}
-          variants={containerVariants}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6"
-        >
+        <div className="pin-section">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-60px' }}
+            variants={containerVariants}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6"
+          >
           {quickLinks.map((item, idx) => {
             const Icon = item.icon;
             return (
               <motion.div key={idx} variants={cardVariants}>
                 <Link
                   to={item.link}
-                  className="group bento-card flex flex-col gap-5 h-full relative overflow-hidden"
+                  className={`group bento-card flex flex-col gap-5 h-full relative overflow-hidden pin-panel ${idx === 0 ? 'active' : ''}`}
+                  data-step={idx}
                   data-testid={`quicklink-card-${idx}`}
                 >
                   {/* Card gradient background on hover */}
@@ -157,6 +161,7 @@ export const HomeQuickLinks: React.FC = () => {
             );
           })}
         </motion.div>
+        </div>
 
         {/* Additional quick stats row */}
         <motion.div

@@ -3,6 +3,42 @@
 @plugin "@tailwindcss/typography";
 
 /* ============================================
+   JUSPAY-STYLE ANIMATIONS
+   ============================================ */
+
+/* Card hover micro-interactions */
+.bento-card {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s;
+}
+
+.bento-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+}
+
+/* Pinned scrollytelling panel styles */
+.pin-panel {
+  opacity: 0.25;
+  transform: scale(0.96);
+  transition: all 0.5s ease;
+}
+
+.pin-panel.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Marquee animation */
+.marquee__track {
+  will-change: transform;
+}
+
+/* Reveal animation base state */
+.reveal {
+  opacity: 0;
+}
+
+/* ============================================
    DESIGN TOKENS Ã¢â‚¬â€ PW INSPIRED CLEAN DESIGN
    Primary: Purple  #1E7B34 / #166B2A
    Accent:  Yellow  #F57C00 / #E65100

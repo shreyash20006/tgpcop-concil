@@ -4,6 +4,7 @@ import { ScienceBackground } from '../components/ScienceBackground';
 import { MarqueeStrip } from '../components/MarqueeStrip';
 import { useHomePageData } from '../hooks/useHomePageData';
 import { HomeStories } from '../components/home/HomeStories';
+import { useGSAPAnimations } from '../hooks/useGSAPAnimations';
 
 // Lazy-load below-fold sections for faster TTI
 const HomeAbout = lazy(() => import('../components/home/HomeAbout').then((m) => ({ default: m.HomeAbout })));
@@ -43,6 +44,9 @@ export const Home: React.FC = () => {
     counts,
     refreshPollVotes,
   } = useHomePageData();
+
+  // Initialize GSAP animations
+  useGSAPAnimations();
 
   return (
     <div

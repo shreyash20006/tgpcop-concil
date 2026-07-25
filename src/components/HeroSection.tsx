@@ -199,7 +199,7 @@ export const HeroSection: React.FC = () => {
 
             {/* Headline with split-text reveal */}
             <h1
-              className="font-display font-black tracking-tight leading-[0.95] text-white"
+              className="font-display font-black tracking-tight leading-[0.95] text-white hero-title"
               style={{ fontSize: 'clamp(2.75rem, 8vw, 6.5rem)' }}
             >
               <SplitText text={heroTitleText1} className="block" delayStart={0.15} />
@@ -213,7 +213,7 @@ export const HeroSection: React.FC = () => {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 1.0 }}
-              className="text-white/75 text-base sm:text-xl max-w-2xl font-sans leading-relaxed"
+              className="text-white/75 text-base sm:text-xl max-w-2xl font-sans leading-relaxed hero-subtitle"
             >
               {subtitleParts[0]}
               {subtitleParts[1] && (
@@ -229,7 +229,7 @@ export const HeroSection: React.FC = () => {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.2 }}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4"
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4 hero-cta"
             >
               {heroAskButtonEnabled && (
                 <Link

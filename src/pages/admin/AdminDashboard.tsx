@@ -111,6 +111,7 @@ export const AdminDashboard: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="flex flex-col md:flex-row md:items-end md:justify-between gap-4"
+        data-reveal
       >
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-orange-burnt text-[10px] font-extrabold tracking-[0.22em] uppercase font-display">
@@ -144,7 +145,7 @@ export const AdminDashboard: React.FC = () => {
         animate="show"
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
       >
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} data-reveal>
           <StatsCard
             label="Total Questions"
             value={stats.totalQuestions}
@@ -154,7 +155,7 @@ export const AdminDashboard: React.FC = () => {
             testId="stat-total-questions"
           />
         </motion.div>
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} data-reveal>
           <StatsCard
             label="Pending Reply"
             value={stats.pendingQuestions}
@@ -164,7 +165,7 @@ export const AdminDashboard: React.FC = () => {
             testId="stat-pending"
           />
         </motion.div>
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} data-reveal>
           <StatsCard
             label="Verified Students"
             value={`${stats.verifiedPercentage}%`}
@@ -174,7 +175,7 @@ export const AdminDashboard: React.FC = () => {
             testId="stat-verified"
           />
         </motion.div>
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} data-reveal>
           <StatsCard
             label="Active Events"
             value={stats.activeEventsCount}
@@ -194,6 +195,7 @@ export const AdminDashboard: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
           className="lg:col-span-8 rounded-2xl bg-[#0D1B3E]/55 border border-white/[0.06] backdrop-blur-md overflow-hidden"
+          data-reveal
         >
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
             <div className="flex items-center gap-2.5">
@@ -284,6 +286,7 @@ export const AdminDashboard: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.25 }}
             className="rounded-2xl bg-gradient-to-br from-[#0D1B3E]/75 to-[#0A1428]/85 border border-gold-accent/25 backdrop-blur-md p-6 overflow-hidden relative"
+            data-reveal
           >
             <div className="absolute -top-10 -right-10 w-32 h-32 ambient-orb-gold rounded-full pointer-events-none" />
             <div className="relative z-10">
@@ -326,6 +329,7 @@ export const AdminDashboard: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
             className="rounded-2xl bg-[#0D1B3E]/55 border border-white/[0.06] backdrop-blur-md overflow-hidden"
+            data-reveal
           >
             <div className="px-5 py-4 border-b border-white/[0.06] flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-orange-burnt" strokeWidth={2.4} />
@@ -368,6 +372,7 @@ export const AdminDashboard: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.35 }}
             className="grid grid-cols-2 gap-3"
+            data-reveal
           >
             <Link
               to="/admin/notices"

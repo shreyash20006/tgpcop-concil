@@ -280,7 +280,7 @@ export const AdminNotices: React.FC = () => {
           });
 
           return (
-            <tr key={item.id} className="hover:bg-white/[0.02] transition-colors">
+            <tr key={item.id} className="hover:bg-white/[0.02] transition-colors" data-reveal>
               {/* Pinned Icon cell */}
               <td className="px-6 py-4 whitespace-nowrap">
                 {item.is_pinned ? (

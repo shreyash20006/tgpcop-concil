@@ -5,6 +5,7 @@ import { AdminSidebar } from '../../components/admin/AdminSidebar';
 import { AdminHeader } from '../../components/admin/AdminHeader';
 import { supabase } from '../../lib/supabase';
 import { ToastProvider } from '../../components/admin/Toast';
+import { useScrollReveal } from '../../hooks/useScrollReveal';
 
 const PAGE_TITLES: Record<string, string> = {
   '/admin/dashboard': 'Dashboard Overview',
@@ -41,6 +42,7 @@ export const AdminLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const location = useLocation();
+  const mainRef = useScrollReveal();
 
   const pageTitle = PAGE_TITLES[location.pathname] ?? 'Admin Console';
 
@@ -137,6 +139,7 @@ export const AdminLayout: React.FC = () => {
 
           <main
             id="admin-main-scroll"
+            ref={mainRef}
             className="flex-grow overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar relative"
           >
             <AnimatePresence mode="wait">

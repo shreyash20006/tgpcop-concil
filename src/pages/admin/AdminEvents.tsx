@@ -230,7 +230,7 @@ export const AdminEvents: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-6 animate-in fade-in duration-300" data-reveal>
       
       {/* Dynamic Tab Filter Bar & Add Buttons */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -287,7 +287,7 @@ export const AdminEvents: React.FC = () => {
             : 'No Target Set';
 
           return (
-            <tr key={item.id} className="hover:bg-white/[0.02] transition-colors">
+            <tr key={item.id} className="hover:bg-white/[0.02] transition-colors" data-reveal>
               {/* Active Badge cell */}
               <td className="px-6 py-4 whitespace-nowrap">
                 {item.is_active ? (

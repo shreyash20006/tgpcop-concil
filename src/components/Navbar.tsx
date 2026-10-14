@@ -183,7 +183,7 @@ export const Navbar: React.FC = () => {
               />
               <div className="absolute inset-[2px] rounded-[10px] bg-[#050B18] group-hover:bg-[#0A1428] transition-colors" />
               <img
-                src="https://res.cloudinary.com/dsqxboxoc/image/upload/v1779522116/WhatsApp_Image_2026-05-23_at_1.10.29_PM_susb5a.jpg"
+                src="https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg"
                 alt="TGPCOP Logo"
                 className="w-full h-full object-cover error-fallback-hide absolute inset-0 transition-transform duration-500 group-hover:scale-110"
                 onError={(e) => {

@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const LOGO_URL =
-  'https://res.cloudinary.com/dsqxboxoc/image/upload/q_auto/f_auto/v1779522116/WhatsApp_Image_2026-05-23_at_1.10.29_PM_susb5a.jpg';
+  'https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg';
 
 type LogoSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 type LogoVariant = 'default' | 'minimal' | 'orbit' | 'pulse' | 'static';

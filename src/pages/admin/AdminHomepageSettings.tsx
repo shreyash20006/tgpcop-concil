@@ -31,7 +31,7 @@ const DEFAULTS: Record<string, string> = {
   about_headline_post: 'at Nagpur.',
   about_description:
     'The Student Council of TGPCOP is the official voice of 500+ aspiring pharmacists. We balance intensive research with vibrant campus culture — from rural healthcare drives and AURA symposiums to anti-ragging networks and NotesDrive resources.',
-  about_bg_video_url: '',
+  about_bg_video_url: 'https://res.cloudinary.com/icgawsqe/video/upload/v1791988468/VID-20261013-WA0225_1.mp4',
   about_tags: 'Anti-Ragging,Healthcare Drives,NotesDrive,AURA Symposium,Cultural Fests',
 };
 

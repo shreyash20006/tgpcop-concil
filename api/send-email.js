@@ -152,7 +152,7 @@ export default async function handler(req, res) {
           <div style="font-family:sans-serif;max-width:600px;margin:auto;
           background:#0D1B3E;color:white;padding:30px;border-radius:12px;">
             <div style="text-align:center;margin-bottom:24px;">
-              <img src="https://res.cloudinary.com/dsqxboxoc/image/upload/v1779522116/WhatsApp_Image_2026-05-23_at_1.10.29_PM_susb5a.jpg" width="60" style="border-radius:8px;"/>
+              <img src="https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg" width="60" style="border-radius:8px;"/>
               <h2 style="color:#C84B0E;margin:8px 0;font-size:22px;">
                 TGPCOP Student Council
               </h2>

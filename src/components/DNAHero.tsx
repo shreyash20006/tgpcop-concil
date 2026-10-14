@@ -45,7 +45,7 @@ export const DNAHero: React.FC = () => {
           const map: Record<string, string> = {};
           data.forEach(row => { map[row.key] = row.value; });
           
-          setBannerUrl(map['banner_url'] || 'https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086&auto=format&fit=crop');
+          setBannerUrl(map['banner_url'] || 'https://res.cloudinary.com/icgawsqe/video/upload/v1791987752/Cultural_Day_2K26_Day2Theme_LED_loop_1080p_small.mp4');
           setHeroBadgeText(map['hero_badge_text'] ?? 'Tulsiramji Gaikwad Patil College of Pharmacy');
           setHeroTitleText1(map['hero_title_text_1'] ?? 'TGPCOP');
           setHeroTitleText2(map['hero_title_text_2'] ?? 'STUDENT COUNCIL');
@@ -58,7 +58,7 @@ export const DNAHero: React.FC = () => {
         }
       } catch (err) {
         console.error('Error fetching dynamic hero setting:', err);
-        setBannerUrl('https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086&auto=format&fit=crop');
+        setBannerUrl('https://res.cloudinary.com/icgawsqe/video/upload/v1791987752/Cultural_Day_2K26_Day2Theme_LED_loop_1080p_small.mp4');
       }
     };
 

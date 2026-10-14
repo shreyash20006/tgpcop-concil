@@ -9,7 +9,7 @@ import {
 import { supabase } from '../lib/supabase';
 
 // Category icons mapping
-const CATEGORY_ICONS: Record<string, React.ElementType> = {
+const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Events: Calendar,
   Workshops: BookOpen,
   Seminars: Sparkles,

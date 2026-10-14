@@ -95,7 +95,7 @@ export const HeroSection: React.FC = () => {
           });
           setBannerUrl(
             map['banner_url'] ||
-              'https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086&auto=format&fit=crop'
+              'https://res.cloudinary.com/icgawsqe/video/upload/v1791987752/Cultural_Day_2K26_Day2Theme_LED_loop_1080p_small.mp4'
           );
           if (map['hero_badge_text'] !== undefined) setHeroBadgeText(map['hero_badge_text']);
           if (map['hero_title_text_1'] !== undefined) setHeroTitleText1(map['hero_title_text_1']);
@@ -114,7 +114,7 @@ export const HeroSection: React.FC = () => {
           if (map['hero_video_object_fit'] === 'cover') setVideoObjectFit('cover');
         }
       } catch {
-        setBannerUrl('https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086&auto=format&fit=crop');
+        setBannerUrl('https://res.cloudinary.com/icgawsqe/video/upload/v1791987752/Cultural_Day_2K26_Day2Theme_LED_loop_1080p_small.mp4');
       }
     };
     fetchSettings();

@@ -30,7 +30,7 @@ export const HomeAppPromo: React.FC = () => {
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-[20px] bg-gradient-to-br from-orange-burnt via-[#E06D2B] to-gold-accent p-0.5 flex-shrink-0 shadow-lg shadow-orange-burnt/25 self-center md:self-start overflow-hidden">
                 <div className="w-full h-full bg-[#050B1F] rounded-[18px] flex items-center justify-center overflow-hidden">
                   <img
-                    src="https://res.cloudinary.com/dsqxboxoc/image/upload/q_auto/f_auto/v1779522116/WhatsApp_Image_2026-05-23_at_1.10.29_PM_susb5a.jpg"
+                    src="https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg"
                     alt="TGPCOP Student Council Logo"
                     className="w-full h-full object-cover rounded-[18px]"
                   />

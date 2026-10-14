@@ -24,7 +24,7 @@ const DEFAULTS = {
   headlinePost: 'at Nagpur.',
   description:
     'The Student Council of TGPCOP is the official voice of 500+ aspiring pharmacists. We balance intensive research with vibrant campus culture — from rural healthcare drives and AURA symposiums to anti-ragging networks and NotesDrive resources.',
-  bgVideoUrl: '',
+  bgVideoUrl: 'https://res.cloudinary.com/icgawsqe/video/upload/v1791988468/VID-20261013-WA0225_1.mp4',
   tags: ['Anti-Ragging', 'Healthcare Drives', 'NotesDrive', 'AURA Symposium', 'Cultural Fests'],
 };
 
@@ -46,7 +46,7 @@ export const HomeAbout: React.FC<HomeAboutProps> = ({ counts }) => {
             headlineHighlight: map['about_headline_highlight'] || DEFAULTS.headlineHighlight,
             headlinePost: map['about_headline_post'] || DEFAULTS.headlinePost,
             description: map['about_description'] || DEFAULTS.description,
-            bgVideoUrl: map['about_bg_video_url'] || '',
+            bgVideoUrl: map['about_bg_video_url'] || DEFAULTS.bgVideoUrl,
             tags: (map['about_tags'] || DEFAULTS.tags.join(','))
               .split(',')
               .map((t) => t.trim())

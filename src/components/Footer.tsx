@@ -52,7 +52,7 @@ export const Footer: React.FC = () => {
             <Link to="/" className="flex items-center space-x-3 group">
               <div className="relative overflow-hidden w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/10 shadow-lg">
                 <img
-                  src="https://res.cloudinary.com/dsqxboxoc/image/upload/v1779522116/WhatsApp_Image_2026-05-23_at_1.10.29_PM_susb5a.jpg"
+                  src="https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg"
                   alt="TGPCOP Logo"
                   className="w-full h-full object-cover error-fallback-hide absolute inset-0 transition-transform duration-300 group-hover:scale-108"
                   onError={(e) => {

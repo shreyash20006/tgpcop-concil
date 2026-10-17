@@ -159,8 +159,17 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       {/* Branding */}
       <div className="px-5 py-5 border-b border-white/[0.06] flex items-center justify-between">
         <Link to="/admin/dashboard" className="flex items-center gap-3 group" onClick={onClose}>
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-burnt to-[#E06D2B] flex items-center justify-center text-white font-display font-extrabold text-[11px] shadow-lg shadow-orange-burnt/20 shrink-0 group-hover:scale-105 transition-transform">
-            SC
+          <div className="w-9 h-9 rounded-xl bg-white border border-white/20 p-0.5 overflow-hidden flex items-center justify-center shadow-lg shadow-orange-burnt/20 shrink-0 group-hover:scale-105 transition-transform">
+            <img
+              src="/logo.jpg"
+              alt="TGPCOP Logo"
+              width="36"
+              height="36"
+              className="w-full h-full object-contain rounded-lg"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = 'https://res.cloudinary.com/dzbbqslbe/image/upload/v1773854898/IMG-20261008-WA0059_sq1kox.jpg';
+              }}
+            />
           </div>
           <div className="min-w-0">
             <p className="font-display font-extrabold text-sm text-white leading-none tracking-tight">TGPCOP</p>

@@ -1,0 +1,23 @@
+{
+  "short_name": "TGPCOP Council",
+  "name": "TGPCOP Student Council",
+  "icons": [
+    {
+      "src": "/logo.jpg",
+      "type": "image/jpeg",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "type": "image/jpeg",
+      "sizes": "1024x1024",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#050B18",
+  "theme_color": "#C84B0E",
+  "display": "standalone",
+  "orientation": "portrait"
+}

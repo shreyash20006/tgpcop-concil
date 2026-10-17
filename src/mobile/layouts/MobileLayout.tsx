@@ -217,11 +217,16 @@ export const MobileLayout: React.FC = () => {
           </div>
         ) : (
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-orange-burnt/10 border border-orange-burnt/35 flex items-center justify-center overflow-hidden">
+            <div className="w-9 h-9 rounded-full bg-orange-burnt/10 border border-orange-burnt/35 flex items-center justify-center overflow-hidden shrink-0">
               <img
-                alt="Council Logo"
+                alt="TGPCOP Council Logo"
+                width={36}
+                height={36}
                 className="w-full h-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjyoTFvyEFR975TtIY9lyKfrLHfAXGGF7JVgRdFBnE3cjc_gdwumA6XC0MYZ8tDiGPAd-05hNEfr_es_OMw0IXeZI0U3ByOSbo7Aw6AWqidd0bijT8_gmtzYoRal4igXr20dWvPdxxXpI6MAorWCQbO3ZWGMqvhJ1-k2d_VLPgdNUj20x2iOPW87FxHEiITNw-wgKgekzPjPx8DckrX8giHDyjcoz5gw-mLAv8it8EbMsQEgTAoAXLylFsQjS52NE90FdsyerwVJc"
+                src="/logo.jpg"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg';
+                }}
               />
             </div>
             <h1 className="font-display font-extrabold text-base tracking-wide text-orange-burnt uppercase">

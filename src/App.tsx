@@ -53,6 +53,7 @@ const Search = lazy(() => import('./pages/Search'));
 const ExamSchedule = lazy(() => import('./pages/ExamSchedule'));
 const CompleteProfile = lazy(() => import('./pages/CompleteProfile'));
 const BloodDonation = lazy(() => import('./pages/BloodDonation'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 const MobileEventRegister = lazy(() => import('./mobile/screens/EventRegister'));
 const MobileEventFeedback = lazy(() => import('./mobile/screens/EventFeedback'));
@@ -345,6 +346,9 @@ const AppContent: React.FC = () => {
               <Route path="/admin/qr-scanner" element={<AdminQrScanner />} />
               <Route path="/admin/attendance" element={<AdminAttendance />} />
             </Route>
+
+            {/* Catch-all 404 Route */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </main>

@@ -40,6 +40,8 @@ export const Navbar: React.FC = () => {
   const { theme, toggleTheme } = useThemeContext();
   const { studentProfile, signInWithGoogle } = useStudentAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string>('/logo.jpg');
+  const [logoFailed, setLogoFailed] = useState<boolean>(false);
 
   const handleLogin = async () => {
     setIsLoggingIn(true);
@@ -167,13 +169,13 @@ export const Navbar: React.FC = () => {
           {/* Logo & College Name */}
           <Link to="/" className="flex items-center space-x-3 group relative z-50" data-testid="navbar-logo-link">
             <motion.div
-              className="relative w-10 h-10 rounded-xl shrink-0 overflow-hidden border border-white/10 shadow-lg group-hover:border-orange-burnt/50 transition-colors"
+              className="relative w-10 h-10 rounded-xl shrink-0 overflow-hidden border border-white/10 dark:border-white/10 border-navy-dark/15 shadow-lg group-hover:border-orange-burnt/50 transition-colors"
               whileHover={{ scale: 1.08, rotate: 5 }}
               transition={{ type: 'spring', stiffness: 320, damping: 14 }}
             >
               {/* Animated gradient ring on hover */}
               <motion.div
-                className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20"
                 style={{
                   background:
                     'conic-gradient(from 0deg, #D65A1E, #FFB338, #D65A1E, #142B5C, #D65A1E)',
@@ -182,15 +184,25 @@ export const Navbar: React.FC = () => {
                 transition={{ duration: 6, ease: 'linear', repeat: Infinity }}
               />
               <div className="absolute inset-[2px] rounded-[10px] bg-[#050B18] group-hover:bg-[#0A1428] transition-colors" />
-              <img
-                src="https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg"
-                alt="TGPCOP Logo"
-                className="w-full h-full object-cover error-fallback-hide absolute inset-0 transition-transform duration-500 group-hover:scale-110"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-              <GraduationCap className="w-5 h-5 text-orange-burnt absolute inset-0 m-auto" />
+              {!logoFailed ? (
+                <img
+                  src={logoUrl}
+                  alt="TGPCOP Student Council Logo"
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-cover relative z-10 transition-transform duration-500 group-hover:scale-110"
+                  onError={() => {
+                    if (logoUrl === '/logo.jpg') {
+                      setLogoUrl('https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg');
+                    } else {
+                      setLogoFailed(true);
+                    }
+                  }}
+                  loading="eager"
+                />
+              ) : (
+                <GraduationCap className="w-5 h-5 text-orange-burnt absolute inset-0 m-auto z-10" />
+              )}
             </motion.div>
             <div>
               <span
@@ -421,8 +433,17 @@ export const Navbar: React.FC = () => {
           {/* Drawer header */}
           <div className="flex items-center justify-between mb-7">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-burnt to-[#E06D2B] flex items-center justify-center shadow-md shadow-orange-burnt/20">
-                <GraduationCap className="w-4 h-4 text-white" />
+              <div className="w-9 h-9 rounded-xl bg-[#050B18] border border-orange-burnt/40 flex items-center justify-center shadow-md shadow-orange-burnt/20 overflow-hidden shrink-0 p-0.5">
+                <img
+                  src="/logo.jpg"
+                  alt="TGPCOP Logo"
+                  width={36}
+                  height={36}
+                  className="w-full h-full object-cover rounded-[10px]"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg';
+                  }}
+                />
               </div>
               <div>
                 <span className="font-display font-extrabold text-sm block" style={{ color: 'var(--text-primary)' }}>TGPCOP</span>

@@ -360,11 +360,19 @@ export const Login: React.FC<LoginProps> = ({ onLoginComplete }) => {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', duration: 1 }}
-          className="w-20 h-20 mx-auto bg-gradient-to-tr from-orange-burnt to-[#FF8C42] rounded-2xl flex items-center justify-center shadow-lg shadow-orange-burnt/10 border border-white/10 mb-5 relative"
+          className="w-20 h-20 mx-auto bg-[#050B18] rounded-2xl flex items-center justify-center shadow-lg shadow-orange-burnt/10 border-2 border-orange-burnt/40 mb-5 relative overflow-hidden p-1"
         >
-          {/* Custom logo details */}
-          <span className="text-3xl font-display font-black text-white select-none">T</span>
-          <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-blue-500 rounded-full border-2 border-[#050B18] flex items-center justify-center">
+          <img
+            src="/logo.jpg"
+            alt="TGPCOP Student Council Logo"
+            width={72}
+            height={72}
+            className="w-full h-full object-cover rounded-xl"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg';
+            }}
+          />
+          <div className="absolute -top-1 -right-1 w-5 h-5 bg-orange-burnt rounded-full border-2 border-[#050B18] flex items-center justify-center">
             <Sparkles className="w-2.5 h-2.5 text-white animate-spin-slow" />
           </div>
         </motion.div>

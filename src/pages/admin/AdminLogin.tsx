@@ -430,9 +430,18 @@ export const AdminLogin: React.FC = () => {
 
       {/* Header navigation */}
       <nav className="relative z-30 flex justify-between items-center w-full px-6 md:px-12 py-6 max-w-7xl mx-auto">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg bg-[#C84B0E] flex items-center justify-center shadow-[0_0_15px_rgba(200,75,14,0.4)]">
-            <ShieldCheck className="w-5 h-5 text-white" />
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="w-9 h-9 rounded-xl overflow-hidden border border-[#C84B0E]/40 bg-white shadow-[0_0_15px_rgba(200,75,14,0.35)] flex items-center justify-center p-0.5 group-hover:scale-105 transition-transform">
+            <img
+              src="/logo.jpg"
+              alt="TGPCOP Council Logo"
+              width="36"
+              height="36"
+              className="w-full h-full object-contain rounded-lg"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = 'https://res.cloudinary.com/dzbbqslbe/image/upload/v1773854898/IMG-20261008-WA0059_sq1kox.jpg';
+              }}
+            />
           </div>
           <span className="text-white font-bold text-lg tracking-wider font-sans group-hover:text-white/90 transition-colors">
             TGPCOP
@@ -518,8 +527,17 @@ export const AdminLogin: React.FC = () => {
 
               {/* Header */}
               <div className="flex flex-col items-center text-center mb-8 relative z-10">
-                <div className="w-12 h-12 rounded-xl bg-[#C84B0E]/10 border border-[#C84B0E]/20 flex items-center justify-center mb-4">
-                  <Lock className="w-6 h-6 text-[#C84B0E]" />
+                <div className="w-16 h-16 rounded-2xl bg-white border border-[#C84B0E]/30 p-1 flex items-center justify-center mb-4 shadow-[0_8px_25px_rgba(200,75,14,0.3)]">
+                  <img
+                    src="/logo.jpg"
+                    alt="TGPCOP Students Council Logo"
+                    width="60"
+                    height="60"
+                    className="w-full h-full object-contain rounded-xl"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = 'https://res.cloudinary.com/dzbbqslbe/image/upload/v1773854898/IMG-20261008-WA0059_sq1kox.jpg';
+                    }}
+                  />
                 </div>
                 <h2 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                   Sign in to continue

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
-const LOGO_URL =
+const PRIMARY_LOGO = '/logo.jpg';
+const BACKUP_LOGO =
   'https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg';
 
 type LogoSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
@@ -14,12 +15,12 @@ interface AnimatedLogoProps {
   testId?: string;
 }
 
-const SIZE_CONFIG: Record<LogoSize, { wrap: string; inner: string; ringWidth: number }> = {
-  sm: { wrap: 'w-12 h-12', inner: 'inset-[3px]', ringWidth: 2 },
-  md: { wrap: 'w-20 h-20', inner: 'inset-[4px]', ringWidth: 3 },
-  lg: { wrap: 'w-32 h-32', inner: 'inset-[5px]', ringWidth: 4 },
-  xl: { wrap: 'w-44 h-44', inner: 'inset-[6px]', ringWidth: 5 },
-  '2xl': { wrap: 'w-56 h-56', inner: 'inset-[7px]', ringWidth: 6 },
+const SIZE_CONFIG: Record<LogoSize, { wrap: string; inner: string; ringWidth: number; px: number }> = {
+  sm: { wrap: 'w-12 h-12', inner: 'inset-[3px]', ringWidth: 2, px: 48 },
+  md: { wrap: 'w-20 h-20', inner: 'inset-[4px]', ringWidth: 3, px: 80 },
+  lg: { wrap: 'w-32 h-32', inner: 'inset-[5px]', ringWidth: 4, px: 128 },
+  xl: { wrap: 'w-44 h-44', inner: 'inset-[6px]', ringWidth: 5, px: 176 },
+  '2xl': { wrap: 'w-56 h-56', inner: 'inset-[7px]', ringWidth: 6, px: 224 },
 };
 
 export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
@@ -29,6 +30,13 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
   testId = 'animated-logo',
 }) => {
   const cfg = SIZE_CONFIG[size];
+  const [imgSrc, setImgSrc] = useState(PRIMARY_LOGO);
+
+  const handleImgError = () => {
+    if (imgSrc !== BACKUP_LOGO) {
+      setImgSrc(BACKUP_LOGO);
+    }
+  };
 
   // MINIMAL — just the logo with subtle hover pulse (for navbar etc.)
   if (variant === 'minimal') {
@@ -36,10 +44,18 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
       <motion.div
         whileHover={{ scale: 1.08, rotate: 4 }}
         transition={{ type: 'spring', stiffness: 320, damping: 14 }}
-        className={`relative ${cfg.wrap} rounded-full overflow-hidden shadow-md ${className}`}
+        className={`relative ${cfg.wrap} rounded-full overflow-hidden shadow-md border border-white/10 dark:border-white/10 border-navy-dark/15 ${className}`}
         data-testid={testId}
       >
-        <img src={LOGO_URL} alt="TGPCOP Logo" className="w-full h-full object-cover" />
+        <img
+          src={imgSrc}
+          alt="TGPCOP Student Council Logo"
+          width={cfg.px}
+          height={cfg.px}
+          className="w-full h-full object-cover"
+          onError={handleImgError}
+          loading="eager"
+        />
       </motion.div>
     );
   }
@@ -48,10 +64,18 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
   if (variant === 'static') {
     return (
       <div
-        className={`relative ${cfg.wrap} rounded-full overflow-hidden shadow-2xl ring-2 ring-orange-burnt/40 ${className}`}
+        className={`relative ${cfg.wrap} rounded-full overflow-hidden shadow-2xl ring-2 ring-orange-burnt/40 border border-white/10 dark:border-white/10 border-navy-dark/15 ${className}`}
         data-testid={testId}
       >
-        <img src={LOGO_URL} alt="TGPCOP Logo" className="w-full h-full object-cover" />
+        <img
+          src={imgSrc}
+          alt="TGPCOP Student Council Logo"
+          width={cfg.px}
+          height={cfg.px}
+          className="w-full h-full object-cover"
+          onError={handleImgError}
+          loading="eager"
+        />
       </div>
     );
   }
@@ -96,9 +120,13 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
           />
           <div className={`absolute ${cfg.inner} rounded-full bg-[#050B18]`} />
           <img
-            src={LOGO_URL}
-            alt="TGPCOP Logo"
-            className="relative w-[88%] h-[88%] rounded-full object-cover shadow-2xl"
+            src={imgSrc}
+            alt="TGPCOP Student Council Logo"
+            width={cfg.px}
+            height={cfg.px}
+            className="relative w-[88%] h-[88%] rounded-full object-cover shadow-2xl z-10"
+            onError={handleImgError}
+            loading="eager"
           />
         </div>
       </div>
@@ -137,11 +165,15 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
           />
           <div className={`absolute ${cfg.inner} rounded-full bg-[#050B18]`} />
           <motion.img
-            src={LOGO_URL}
-            alt="TGPCOP Logo"
-            className="relative w-[88%] h-[88%] rounded-full object-cover"
+            src={imgSrc}
+            alt="TGPCOP Student Council Logo"
+            width={cfg.px}
+            height={cfg.px}
+            className="relative w-[88%] h-[88%] rounded-full object-cover z-10"
             animate={{ scale: [1, 1.04, 1] }}
             transition={{ duration: 3, ease: 'easeInOut', repeat: Infinity }}
+            onError={handleImgError}
+            loading="eager"
           />
         </div>
       </div>
@@ -157,8 +189,12 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
       data-testid={testId}
     >
       {/* Outer ambient glow */}
-      <div className="absolute inset-0 rounded-full blur-2xl opacity-60 pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(214,90,30,0.55) 0%, rgba(255,179,56,0.25) 40%, transparent 70%)' }}
+      <div
+        className="absolute inset-0 rounded-full blur-2xl opacity-60 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(214,90,30,0.55) 0%, rgba(255,179,56,0.25) 40%, transparent 70%)',
+        }}
       />
 
       {/* Rotating gradient ring */}
@@ -178,17 +214,21 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
 
         {/* The actual logo */}
         <motion.img
-          src={LOGO_URL}
+          src={imgSrc}
           alt="TGPCOP Student Council Logo"
-          className="relative w-[88%] h-[88%] rounded-full object-cover shadow-[0_8px_32px_rgba(214,90,30,0.35)]"
+          width={cfg.px}
+          height={cfg.px}
+          className="relative w-[88%] h-[88%] rounded-full object-cover shadow-[0_8px_32px_rgba(214,90,30,0.35)] z-10"
           initial={{ opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+          onError={handleImgError}
+          loading="eager"
         />
 
         {/* Inner highlight glow (top arc) */}
         <div
-          className="absolute inset-[10%] rounded-full pointer-events-none"
+          className="absolute inset-[10%] rounded-full pointer-events-none z-20"
           style={{
             background:
               'radial-gradient(ellipse at top, rgba(255,255,255,0.25) 0%, transparent 50%)',

@@ -51,6 +51,21 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, message: 'Mock email dispatch succeeded' });
     }
 
+    const emailLogoHeader = `
+      <div style="text-align:center;margin-bottom:24px;">
+        <img src="https://tgpcopcouncil.online/logo.jpg" alt="TGPCOP Council Logo" width="60" height="60" style="border-radius:12px;background:#ffffff;padding:4px;display:inline-block;border:1px solid rgba(200,75,14,0.3);box-shadow:0 4px 14px rgba(0,0,0,0.3);" />
+        <div style="color:#ffffff;font-weight:800;font-size:15px;letter-spacing:1px;margin-top:10px;">TGPCOP STUDENT COUNCIL</div>
+        <div style="color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;">Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur</div>
+      </div>
+    `;
+
+    const emailFooter = `
+      <div style="text-align:center;margin-top:28px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);font-size:11px;color:rgba(255,255,255,0.5);">
+        <p style="margin:2px 0;">Tulsiramji Gaikwad-Patil College of Pharmacy · Student Council Portal</p>
+        <p style="margin:2px 0;"><a href="https://tgpcopcouncil.online" style="color:#C84B0E;text-decoration:none;">tgpcopcouncil.online</a></p>
+      </div>
+    `;
+
     let emailBody = {};
 
     if (action === 'sendQuestionEmail') {
@@ -60,23 +75,22 @@ export default async function handler(req, res) {
         to: [{ email: memberEmail, name: directedTo }],
         subject: `New Student Question — ${directedTo}`,
         htmlContent: `
-          <div style="font-family:sans-serif;max-width:600px;margin:auto;
-          background:#0D1B3E;color:white;padding:30px;border-radius:12px;">
-            <h2 style="color:#C84B0E;margin-top:0;">📬 New Question Received</h2>
+          <div style="font-family:sans-serif;max-width:600px;margin:auto;background:#0D1B3E;color:white;padding:30px;border-radius:14px;border-top:4px solid #C84B0E;">
+            ${emailLogoHeader}
+            <h2 style="color:#C84B0E;margin-top:0;font-size:18px;">📬 New Question Received</h2>
             <p><b>From:</b> ${studentName}</p>
             <p><b>Year:</b> ${studentYear}</p>
             <p><b>Directed To:</b> ${directedTo}</p>
-            <hr style="border:0;border-top:1px solid #C84B0E;margin:20px 0;"/>
+            <hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:20px 0;"/>
             <p><b>Question:</b></p>
-            <p style="background:rgba(255,255,255,0.1);padding:15px;border-radius:8px;line-height:1.6;">
+            <p style="background:rgba(255,255,255,0.08);padding:15px;border-radius:8px;line-height:1.6;">
               ${questionText}
             </p>
             <a href="https://tgpcopcouncil.online/admin"
-              style="background:#C84B0E;color:white;padding:12px 24px;
-              border-radius:8px;text-decoration:none;display:inline-block;
-              margin-top:20px;font-weight:bold;">
+              style="background:#C84B0E;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:20px;font-weight:bold;">
               Login to Admin Panel →
             </a>
+            ${emailFooter}
           </div>
         `
       };
@@ -97,19 +111,18 @@ export default async function handler(req, res) {
         to: [{ email: recipientEmail, name: recipientName }],
         subject: subject,
         htmlContent: `
-          <div style="font-family:sans-serif;max-width:600px;margin:auto;
-          background:#0D1B3E;color:white;padding:30px;border-radius:12px;border-top:4px solid #C84B0E;">
-            <h2 style="color:#C84B0E;margin-top:0;">🔔 ${title}</h2>
+          <div style="font-family:sans-serif;max-width:600px;margin:auto;background:#0D1B3E;color:white;padding:30px;border-radius:14px;border-top:4px solid #C84B0E;">
+            ${emailLogoHeader}
+            <h2 style="color:#C84B0E;margin-top:0;font-size:18px;">🔔 ${title}</h2>
             <hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:20px 0;"/>
             <div style="line-height:1.6;font-size:14px;color:rgba(255,255,255,0.95);">
               ${bodyHtml}
             </div>
             <a href="https://tgpcopcouncil.online/admin"
-              style="background:#C84B0E;color:white;padding:12px 24px;
-              border-radius:8px;text-decoration:none;display:inline-block;
-              margin-top:30px;font-weight:bold;font-size:14px;">
+              style="background:#C84B0E;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:24px;font-weight:bold;font-size:14px;">
               Access Portal Console →
             </a>
+            ${emailFooter}
           </div>
         `
       };
@@ -120,9 +133,9 @@ export default async function handler(req, res) {
         to: [{ email: studentEmail, name: studentName }],
         subject: `📬 Student Council Response: Re: ${directedTo}`,
         htmlContent: `
-          <div style="font-family:sans-serif;max-width:600px;margin:auto;
-          background:#0D1B3E;color:white;padding:30px;border-radius:12px;border-top:4px solid #C84B0E;">
-            <h2 style="color:#C84B0E;margin-top:0;">📬 Student Council Response</h2>
+          <div style="font-family:sans-serif;max-width:600px;margin:auto;background:#0D1B3E;color:white;padding:30px;border-radius:14px;border-top:4px solid #C84B0E;">
+            ${emailLogoHeader}
+            <h2 style="color:#C84B0E;margin-top:0;font-size:18px;">📬 Student Council Response</h2>
             <p>Dear <b>${studentName}</b>,</p>
             <p>The TGPCOP Student Council has responded to your question directed to <b>${directedTo}</b>:</p>
             <hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:20px 0;"/>
@@ -131,14 +144,14 @@ export default async function handler(req, res) {
               "${questionText}"
             </p>
             <p><b>Council Response:</b></p>
-            <p style="background:rgba(200,75,14,0.1);padding:15px;border-radius:8px;
-            border-left:4px solid #C84B0E;line-height:1.6;font-weight:500;color:white;">
+            <p style="background:rgba(200,75,14,0.1);padding:15px;border-radius:8px;border-left:4px solid #C84B0E;line-height:1.6;font-weight:500;color:white;">
               ${replyText}
             </p>
             <p style="margin-top:25px;font-size:12px;color:rgba(255,255,255,0.5);">
               Best regards,<br/>
               <b>TGPCOP Student Council Executive Committee</b>
             </p>
+            ${emailFooter}
           </div>
         `
       };
@@ -149,17 +162,8 @@ export default async function handler(req, res) {
         to: [{ email: studentEmail, name: studentName }],
         subject: `✅ Payment Receipt — TGPCOP Council`,
         htmlContent: `
-          <div style="font-family:sans-serif;max-width:600px;margin:auto;
-          background:#0D1B3E;color:white;padding:30px;border-radius:12px;">
-            <div style="text-align:center;margin-bottom:24px;">
-              <img src="https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg" width="60" style="border-radius:8px;"/>
-              <h2 style="color:#C84B0E;margin:8px 0;font-size:22px;">
-                TGPCOP Student Council
-              </h2>
-              <p style="color:#ffffff80;font-size:12px;margin:0;">
-                Official Payment Receipt
-              </p>
-            </div>
+          <div style="font-family:sans-serif;max-width:600px;margin:auto;background:#0D1B3E;color:white;padding:30px;border-radius:14px;border-top:4px solid #C84B0E;">
+            ${emailLogoHeader}
             <div style="background:#ffffff10;border-radius:12px;padding:20px;border-left:4px solid #C84B0E;">
               <h3 style="color:#F5A623;margin:0 0 16px;font-size:18px;">
                 ✅ Payment Confirmed
@@ -203,9 +207,7 @@ export default async function handler(req, res) {
               Keep this receipt for your records.<br/>
               For queries contact: <a href="mailto:contact@tgpcopcouncil.online" style="color:#C84B0E;text-decoration:none;">contact@tgpcopcouncil.online</a>
             </p>
-            <p style="color:#C84B0E;text-align:center;margin-top:16px;font-size:11px;font-weight:bold;letter-spacing:0.5px;">
-              Tulsiramji Gaikwad Patil College of Pharmacy, Nagpur
-            </p>
+            ${emailFooter}
           </div>
         `
       };
@@ -217,9 +219,9 @@ export default async function handler(req, res) {
         to: [{ email: adminEmail, name: "TGPCOP Student Council President" }],
         subject: `💰 New Payment — ${studentName} — ₹${amount}`,
         htmlContent: `
-          <div style="font-family:sans-serif;max-width:600px;margin:auto;
-          background:#0D1B3E;color:white;padding:30px;border-radius:12px;border-top:4px solid #C84B0E;">
-            <h2 style="color:#C84B0E;margin-top:0;font-size:20px;text-align:center;">🔔 New Payment Collected</h2>
+          <div style="font-family:sans-serif;max-width:600px;margin:auto;background:#0D1B3E;color:white;padding:30px;border-radius:14px;border-top:4px solid #C84B0E;">
+            ${emailLogoHeader}
+            <h2 style="color:#C84B0E;margin-top:0;font-size:18px;text-align:center;">🔔 New Payment Collected</h2>
             <hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:20px 0;"/>
             <div style="line-height:1.6;font-size:14px;color:rgba(255,255,255,0.95);background:#ffffff05;padding:15px;border-radius:8px;border-left:4px solid #C84B0E;">
               <p style="margin:4px 0;"><b>Student:</b> ${studentName}</p>
@@ -227,11 +229,10 @@ export default async function handler(req, res) {
               <p style="margin:4px 0;font-size:16px;color:#F5A623;"><b>Amount:</b> ₹${amount}</p>
             </div>
             <a href="https://tgpcopcouncil.online/admin/payments"
-              style="background:#C84B0E;color:white;padding:12px 24px;
-              border-radius:8px;text-decoration:none;display:block;text-align:center;
-              margin-top:30px;font-weight:bold;font-size:14px;">
+              style="background:#C84B0E;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:block;text-align:center;margin-top:24px;font-weight:bold;font-size:14px;">
               View Admin Payments Ledger →
             </a>
+            ${emailFooter}
           </div>
         `
       };

@@ -155,7 +155,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigateTab }) => {
         <img 
           className="w-full h-full object-cover opacity-35 transition-transform duration-700 group-hover:scale-105" 
           alt="Pharmacy Campus Courtyard" 
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjxLg__qr-pV0YkQ7StLbKZXD2QahrJyqVq7WP58tLpu37sUFdD59V_SQk0ZOWWsVwoq9MPqzotf0T-3hoQAaynMl4yaPOTiwbKRPw4A7LTQzZfhaN0cFUj3dsZCD9WohaXl0C3VLP85IQmPYKAVltRX3Ir9xLzPRDKlXeIa-gyRgbHtCCSxy9o18N3xSRZBNX4jeAId3FU3s1juBvEuF49MQt8OjGRbbKtyfqNG9mcUc4xpd45elCoPhkE9uF0cM915pj6zdtaNc"
+          src="/og-banner.png"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1280&auto=format&fit=crop';
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#080F25] via-[#080F25]/75 to-transparent flex flex-col justify-end p-4">
           <div className="flex items-center gap-2 mb-1">
@@ -257,9 +260,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigateTab }) => {
         >
           <div className="w-12 h-12 rounded-xl bg-orange-burnt/10 border border-orange-burnt/25 overflow-hidden shrink-0 flex items-center justify-center">
             <img 
-              alt="App Logo" 
+              alt="TGPCOP Council Logo" 
+              width={32}
+              height={32}
               className="w-8 h-8 object-cover rounded" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjyoTFvyEFR975TtIY9lyKfrLHfAXGGF7JVgRdFBnE3cjc_gdwumA6XC0MYZ8tDiGPAd-05hNEfr_es_OMw0IXeZI0U3ByOSbo7Aw6AWqidd0bijT8_gmtzYoRal4igXr20dWvPdxxXpI6MAorWCQbO3ZWGMqvhJ1-k2d_VLPgdNUj20x2iOPW87FxHEiITNw-wgKgekzPjPx8DckrX8giHDyjcoz5gw-mLAv8it8EbMsQEgTAoAXLylFsQjS52NE90FdsyerwVJc"
+              src="/logo.jpg"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = 'https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg';
+              }}
             />
           </div>
           <div className="flex-grow">

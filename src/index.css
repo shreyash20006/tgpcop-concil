@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
@@ -783,8 +783,6 @@ canvas { display: block; }
 /* ============================================
    PW-STYLE GRADIENT TEXT
    ============================================ */
-
-.
 
 .pw-gradient-text-warm {
   background: linear-gradient(135deg, #E65100 0%, #F57C00 100%);

@@ -5,11 +5,12 @@ import {
   User, Mail, Phone, BookOpen, Clock, Heart, 
   CheckCircle, MessageSquare, LogOut, 
   BadgeCheck, Loader2, Edit, Fingerprint, Trash2, Sun, Moon,
-  QrCode, Award, Ticket
+  QrCode, Award, Ticket, Download
 } from 'lucide-react';
 import QRCode from 'react-qr-code';
 const QRCodeComponent = (QRCode as any).default || QRCode;
 import { generateCertificatePdf } from '../../lib/certificatePdf';
+import { downloadTicketPdf } from '../../lib/ticketPdf';
 import { supabase } from '../../lib/supabase';
 import { useStudentAuth } from '../../lib/StudentAuthProvider';
 import { useToast } from '../../components/admin/Toast';
@@ -787,8 +788,8 @@ export const Profile: React.FC = () => {
                             </button>
                             {reg.checked_in && (
                               <button
-                                onClick={() => {
-                                  generateCertificatePdf({
+                                onClick={async () => {
+                                  await generateCertificatePdf({
                                     studentName: reg.full_name,
                                     eventName: reg.service?.name || 'Event',
                                     registrationId: reg.registration_id,
@@ -1021,11 +1022,38 @@ export const Profile: React.FC = () => {
                 </div>
 
                 {/* Bottom actions */}
-                <div className="w-full mt-4">
+                <div className="w-full mt-4 flex flex-col gap-2">
+                  <button
+                    onClick={async () => {
+                      try {
+                        await downloadTicketPdf({
+                          eventName: selectedTicket.service?.name || 'Event Pass',
+                          category: selectedTicket.service?.category,
+                          registrationId: selectedTicket.registration_id,
+                          studentName: selectedTicket.full_name,
+                          studentEmail: selectedTicket.email,
+                          college: selectedTicket.college,
+                          branch: selectedTicket.branch,
+                          year: selectedTicket.year,
+                          prn: selectedTicket.prn,
+                          qrPayload: selectedTicket.qr_payload,
+                          paymentStatus: selectedTicket.payment_status,
+                        });
+                        toast.success('Ticket PDF downloaded with official logo!');
+                      } catch (err) {
+                        console.error('Failed to download ticket PDF:', err);
+                        toast.error('Failed to generate ticket PDF');
+                      }
+                    }}
+                    className="w-full py-2 bg-gradient-to-r from-orange-burnt to-[#E06D2B] text-white font-display text-xs font-bold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer shadow-md shadow-orange-burnt/20"
+                  >
+                    <Download className="w-3.5 h-3.5" /> Download Ticket PDF
+                  </button>
+
                   {selectedTicket.checked_in ? (
                     <button
-                      onClick={() => {
-                        generateCertificatePdf({
+                      onClick={async () => {
+                        await generateCertificatePdf({
                           studentName: selectedTicket.full_name,
                           eventName: selectedTicket.service?.name || 'Event',
                           registrationId: selectedTicket.registration_id,
@@ -1037,12 +1065,12 @@ export const Profile: React.FC = () => {
                         });
                         toast.success('Certificate downloaded successfully!');
                       }}
-                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-display text-xs font-bold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer shadow-lg shadow-emerald-600/10"
+                      className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-display text-xs font-bold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer shadow-md shadow-emerald-600/10"
                     >
                       <Award className="w-3.5 h-3.5" /> Download Certificate
                     </button>
                   ) : (
-                    <div className="w-full py-2.5 bg-white/5 border border-white/10 rounded-xl text-center text-white/40 text-[9px] uppercase font-bold tracking-wider">
+                    <div className="w-full py-2 bg-white/5 border border-white/10 rounded-xl text-center text-white/40 text-[9px] uppercase font-bold tracking-wider">
                       Certificate unlocks after Check-in
                     </div>
                   )}

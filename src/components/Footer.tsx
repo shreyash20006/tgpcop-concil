@@ -50,16 +50,24 @@ export const Footer: React.FC = () => {
           {/* Left Column: Brand & Tagline */}
           <div className="md:col-span-4 space-y-6">
             <Link to="/" className="flex items-center space-x-3 group">
-              <div className="relative overflow-hidden w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/10 shadow-lg">
+              <div className="relative overflow-hidden w-10 h-10 rounded-xl bg-[#050B18] flex items-center justify-center shrink-0 border border-white/10 shadow-lg">
+                <GraduationCap className="w-5 h-5 text-orange-burnt/50 absolute" />
                 <img
-                  src="https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg"
-                  alt="TGPCOP Logo"
-                  className="w-full h-full object-cover error-fallback-hide absolute inset-0 transition-transform duration-300 group-hover:scale-108"
+                  src="/logo.jpg"
+                  alt="TGPCOP Student Council Logo"
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-cover relative z-10 transition-transform duration-300 group-hover:scale-108"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
+                    const target = e.target as HTMLImageElement;
+                    if (target.src.includes('/logo.jpg')) {
+                      target.src = 'https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg';
+                    } else {
+                      target.style.display = 'none';
+                    }
                   }}
+                  loading="lazy"
                 />
-                <GraduationCap className="w-5 h-5 text-orange-burnt absolute" />
               </div>
               <div>
                 <span className="font-display font-extrabold text-xl tracking-tight block leading-none text-white group-hover:text-orange-burnt transition-colors">

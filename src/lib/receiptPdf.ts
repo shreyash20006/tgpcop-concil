@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import { supabase } from './supabase';
+import { getLogoBase64 } from './logoBase64';
 
 export interface ReceiptData {
   paymentId: string;
@@ -14,7 +15,7 @@ export interface ReceiptData {
 }
 
 /** Generate a styled PDF receipt and return it as a Blob */
-export function generateReceiptPdf(data: ReceiptData): Blob {
+export function generateReceiptPdf(data: ReceiptData, logoBase64?: string | null): Blob {
   const doc = new jsPDF({ unit: 'mm', format: 'a5', orientation: 'portrait' });
   const W = doc.internal.pageSize.getWidth();
 
@@ -26,14 +27,34 @@ export function generateReceiptPdf(data: ReceiptData): Blob {
   doc.setFillColor(200, 75, 14);      // orange-burnt
   doc.roundedRect(8, 8, W - 16, 28, 3, 3, 'F');
 
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
-  doc.text('TGPCOP STUDENT COUNCIL', W / 2, 18, { align: 'center' });
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Tulsiramji Gaikwad Patil College of Pharmacy', W / 2, 24, { align: 'center' });
-  doc.text('Official Payment Receipt', W / 2, 30, { align: 'center' });
+  if (logoBase64) {
+    // White framed background for official college emblem
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(12, 11, 22, 22, 2, 2, 'F');
+    try {
+      doc.addImage(logoBase64, 'JPEG', 13, 12, 20, 20);
+    } catch {
+      // safe fallback if format parsing fails
+    }
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text('TGPCOP STUDENT COUNCIL', 38, 18);
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Tulsiramji Gaikwad Patil College of Pharmacy', 38, 24);
+    doc.text('Official Payment Receipt', 38, 30);
+  } else {
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.text('TGPCOP STUDENT COUNCIL', W / 2, 18, { align: 'center' });
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Tulsiramji Gaikwad Patil College of Pharmacy', W / 2, 24, { align: 'center' });
+    doc.text('Official Payment Receipt', W / 2, 30, { align: 'center' });
+  }
 
   // ── Status badge ─────────────────────────────────────────────────────────
   const isPaid = data.status === 'completed';
@@ -148,7 +169,8 @@ export async function generateUploadAndDownloadReceipt(
   data: ReceiptData,
   triggerDownload = false
 ): Promise<string | null> {
-  const blob = generateReceiptPdf(data);
+  const logoBase64 = await getLogoBase64();
+  const blob = generateReceiptPdf(data, logoBase64);
 
   if (triggerDownload) {
     const url = URL.createObjectURL(blob);

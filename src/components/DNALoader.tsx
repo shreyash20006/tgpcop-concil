@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 
 const PRIMARY_LOGO = '/logo.png';
-const FALLBACK_LOGO =
-  'https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg';
 
 export const DNALoader: React.FC = () => {
   const [logoSrc, setLogoSrc] = useState(PRIMARY_LOGO);

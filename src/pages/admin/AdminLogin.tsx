@@ -5,7 +5,7 @@ import { Capacitor } from '@capacitor/core';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ShieldCheck, Lock, Mail, Loader2, Zap, FileCheck, ArrowLeft, Fingerprint
+  Lock, Mail, Loader2, Zap, FileCheck, ArrowLeft, Fingerprint
 } from 'lucide-react';
 import { useToast } from '../../components/admin/Toast';
 import { logAction } from '../../lib/logger';

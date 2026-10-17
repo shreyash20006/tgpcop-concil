@@ -2,23 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SESSION_KEY = 'tgpcop-splash-seen';
-const PRIMARY_LOGO = '/logo.jpg';
-const FALLBACK_LOGO =
-  'https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg';
 
 interface SplashIntroProps {
   /** Force show even if seen this session (for dev/preview) */
   force?: boolean;
-  /** Total duration in ms (default 5000ms per 5-second motion graphic spec) */
+  /** Total duration in ms */
   duration?: number;
 }
 
 export const SplashIntro: React.FC<SplashIntroProps> = ({
   force = false,
-  duration = 5000,
+  duration = 3200,
 }) => {
   const [show, setShow] = useState(false);
-  const [logoSrc, setLogoSrc] = useState(PRIMARY_LOGO);
+  const [imgFailed, setImgFailed] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -49,216 +46,135 @@ export const SplashIntro: React.FC<SplashIntroProps> = ({
     document.body.style.overflow = '';
   };
 
-  const dots = [
-    { color: '#0b2a6b', angle: 0, r: 150, dur: 5 },
-    { color: '#1f7a3a', angle: 40, r: 164, dur: 7 },
-    { color: '#f28a1e', angle: 80, r: 178, dur: 9 },
-    { color: '#0b2a6b', angle: 120, r: 150, dur: 5 },
-    { color: '#1f7a3a', angle: 160, r: 164, dur: 7 },
-    { color: '#f28a1e', angle: 200, r: 178, dur: 9 },
-    { color: '#0b2a6b', angle: 240, r: 150, dur: 5 },
-    { color: '#1f7a3a', angle: 280, r: 164, dur: 7 },
-    { color: '#f28a1e', angle: 320, r: 178, dur: 9 },
-  ];
-
   return (
     <AnimatePresence>
       {show && (
         <motion.div
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 1.04 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          exit={{ opacity: 0, scale: 1.03 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="fixed inset-0 z-[10000] flex flex-col items-center justify-center overflow-hidden select-none"
           style={{
-            background: 'radial-gradient(circle at 50% 40%, #ffffff 0%, #dfeaf8 75%, #cedef2 100%)',
-            color: '#0b2a6b',
+            background: 'radial-gradient(circle at 50% 40%, #1b3a8a, #0a1a4d 70%)',
             fontFamily: 'Helvetica, Arial, sans-serif',
           }}
           data-testid="splash-intro"
         >
-          {/* Subtle corporate motion graphic stage (16:9 responsive frame) */}
-          <div className="relative w-[min(80vw,340px)] aspect-[400/430] flex items-center justify-center">
-            {/* Outer rotating tricolor ring 1 */}
-            <motion.div
-              className="absolute pointer-events-none rounded-full"
-              style={{
-                inset: '-14%',
-                border: '3px solid transparent',
-                borderTopColor: '#f28a1e',
-                borderRightColor: '#1f7a3a',
-                borderBottomColor: '#0b2a6b',
-              }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, rotate: 360 }}
-              transition={{
-                opacity: { duration: 1, delay: 0.2 },
-                rotate: { duration: 3, ease: 'linear', repeat: Infinity },
-              }}
-            />
+          <style>{`
+            .tgpcop-logo-box {
+              position: relative;
+              width: 170px;
+              height: 170px;
+              display: grid;
+              place-items: center;
+            }
+            .tgpcop-ring {
+              position: absolute;
+              inset: 0;
+              border-radius: 50%;
+              background: conic-gradient(#4a90ff, #ff9a3c, #ffe9b0, #ff9a3c, #4a90ff);
+              -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
+              mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
+              animation: tgpcop-spin 3s linear infinite;
+            }
+            .tgpcop-glow {
+              position: absolute;
+              inset: -18px;
+              border-radius: 50%;
+              box-shadow: 0 0 40px rgba(255, 154, 60, 0.35);
+              animation: tgpcop-pulse 2.5s ease-in-out infinite;
+            }
+            .tgpcop-logo {
+              width: 100%;
+              height: 100%;
+              padding: 10px;
+              border-radius: 50%;
+              object-fit: cover;
+              animation: tgpcop-pop 1.2s cubic-bezier(.2, 1.4, .4, 1) both, tgpcop-float 3s 1.4s ease-in-out infinite;
+            }
+            .tgpcop-fallback {
+              width: 100%;
+              height: 100%;
+              padding: 10px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: #0d1b3e;
+              color: #ffe9b0;
+              font-weight: 800;
+              font-size: 22px;
+              letter-spacing: 0.08em;
+              text-shadow: 0 0 16px rgba(255, 154, 60, 0.6);
+              border: 2px solid rgba(255, 154, 60, 0.3);
+              animation: tgpcop-pop 1.2s cubic-bezier(.2, 1.4, .4, 1) both, tgpcop-float 3s 1.4s ease-in-out infinite;
+            }
+            .tgpcop-h1 {
+              margin: 34px 0 6px;
+              font-size: clamp(34px, 9vw, 52px);
+              color: #cfe0ff;
+              letter-spacing: .02em;
+              font-weight: 800;
+              line-height: 1.1;
+              text-align: center;
+              animation: tgpcop-up .9s .6s both;
+            }
+            .tgpcop-subtitle {
+              margin: 0;
+              font-size: 12px;
+              letter-spacing: .45em;
+              color: #f28a1e;
+              font-weight: 700;
+              text-align: center;
+              animation: tgpcop-up .9s .9s both;
+            }
+            @keyframes tgpcop-spin {
+              to { transform: rotate(360deg); }
+            }
+            @keyframes tgpcop-pulse {
+              50% { opacity: .4; transform: scale(1.06); }
+            }
+            @keyframes tgpcop-pop {
+              from { transform: scale(0) rotate(-180deg); opacity: 0; }
+              to { transform: none; opacity: 1; }
+            }
+            @keyframes tgpcop-float {
+              50% { transform: translateY(-6px); }
+            }
+            @keyframes tgpcop-up {
+              from { opacity: 0; transform: translateY(14px); }
+              to { opacity: 1; transform: none; }
+            }
+          `}</style>
 
-            {/* Outer rotating ring 2 (reverse) */}
-            <motion.div
-              className="absolute pointer-events-none rounded-full"
-              style={{
-                inset: '-24%',
-                border: '2px solid transparent',
-                borderTopColor: '#0b2a6b',
-                borderRightColor: '#f28a1e',
-                borderBottomColor: '#1f7a3a',
-                opacity: 0.5,
-              }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5, rotate: -360 }}
-              transition={{
-                opacity: { duration: 1, delay: 0.5 },
-                rotate: { duration: 5, ease: 'linear', repeat: Infinity },
-              }}
-            />
-
-            {/* Orbiting glowing dots */}
-            <div className="absolute left-1/2 top-1/2 w-0 h-0 pointer-events-none">
-              {dots.map((dot, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute rounded-full"
-                  style={{
-                    width: '8px',
-                    height: '8px',
-                    background: dot.color,
-                    boxShadow: `0 0 10px ${dot.color}90`,
-                  }}
-                  animate={{
-                    rotate: [dot.angle, dot.angle + 360],
-                  }}
-                  transition={{
-                    duration: dot.dur,
-                    ease: 'linear',
-                    repeat: Infinity,
-                  }}
-                  initial={{
-                    transformOrigin: '0 0',
-                    translateX: dot.r,
-                    translateY: -4,
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* Official circular college emblem */}
-            <motion.div
-              className="relative w-full h-full flex items-center justify-center"
-              initial={{ scale: 0, rotate: -200, opacity: 0 }}
-              animate={{
-                scale: [0, 1.08, 1, 1.03, 1, 1.06],
-                rotate: 0,
-                opacity: 1,
-                y: [0, -6, 0, -4, 0],
-              }}
-              transition={{
-                scale: { duration: 4.8, times: [0, 0.35, 0.48, 0.72, 0.88, 1], ease: 'easeInOut' },
-                rotate: { duration: 1.6, ease: [0.2, 1.4, 0.4, 1] },
-                opacity: { duration: 0.6 },
-                y: { duration: 3.2, delay: 1.8, repeat: Infinity, ease: 'easeInOut' },
-              }}
-              style={{
-                filter: 'drop-shadow(0 14px 28px rgba(11,42,107,0.32))',
-              }}
-            >
+          {/* Logo container with spinning conic ring and glow */}
+          <div className="tgpcop-logo-box">
+            <span className="tgpcop-glow" />
+            <span className="tgpcop-ring" />
+            {!imgFailed ? (
               <img
-                src={logoSrc}
-                alt="TGPCOP Students Council logo"
-                className="w-full h-full object-contain"
-                style={{ clipPath: 'circle(48% at 50% 50%)' }}
-                loading="eager"
-                onError={() => {
-                  if (logoSrc !== FALLBACK_LOGO) {
-                    setLogoSrc(FALLBACK_LOGO);
-                  }
-                }}
+                className="tgpcop-logo"
+                src="/logo.png"
+                alt="TGPCOP Logo"
+                onError={() => setImgFailed(true)}
               />
-
-              {/* Light shine sweep effect */}
-              <motion.div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  clipPath: 'circle(48% at 50% 50%)',
-                  background:
-                    'linear-gradient(110deg, transparent 35%, rgba(255,255,255,0.75) 50%, transparent 65%)',
-                  backgroundSize: '250% 100%',
-                }}
-                initial={{ backgroundPosition: '150% 0' }}
-                animate={{ backgroundPosition: ['150% 0', '-50% 0', '-50% 0'] }}
-                transition={{
-                  duration: 3,
-                  delay: 1.8,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                }}
-              />
-            </motion.div>
+            ) : (
+              <div className="tgpcop-fallback">
+                TGPCOP
+              </div>
+            )}
           </div>
 
-          {/* Heading */}
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 1.2, ease: 'easeOut' }}
-            className="mt-8 mb-2 font-display font-extrabold tracking-tight text-center"
-            style={{
-              fontSize: 'clamp(20px, 5.5vw, 32px)',
-              color: '#0b2a6b',
-              letterSpacing: '0.04em',
-            }}
-          >
-            TGPCOP STUDENTS COUNCIL
-          </motion.h1>
+          {/* Title & Subtitle */}
+          <h1 className="tgpcop-h1">TGPCOP</h1>
+          <p className="tgpcop-subtitle">STUDENT COUNCIL</p>
 
-          {/* Tagline: LEAD · LEARN · INSPIRE */}
-          <div className="flex gap-3 font-bold tracking-[0.2em] uppercase text-xs sm:text-sm mt-1">
-            <motion.span
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.9, duration: 0.6 }}
-              style={{ color: '#0b2a6b' }}
-            >
-              LEAD
-            </motion.span>
-            <span style={{ color: '#0b2a6b40' }}>·</span>
-            <motion.span
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 2.2, duration: 0.6 }}
-              style={{ color: '#1f7a3a' }}
-            >
-              LEARN
-            </motion.span>
-            <span style={{ color: '#0b2a6b40' }}>·</span>
-            <motion.span
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 2.5, duration: 0.6 }}
-              style={{ color: '#f28a1e' }}
-            >
-              INSPIRE
-            </motion.span>
-          </div>
-
-          {/* Loading bar progression */}
-          <div className="w-48 h-1 bg-[#0b2a6b]/10 rounded-full overflow-hidden mt-6">
-            <motion.div
-              className="h-full bg-gradient-to-r from-[#0b2a6b] via-[#1f7a3a] to-[#f28a1e] rounded-full"
-              initial={{ x: '-100%' }}
-              animate={{ x: '0%' }}
-              transition={{ duration: 4.2, delay: 0.6, ease: 'easeInOut' }}
-            />
-          </div>
-
-          {/* Quick Skip button in corner for convenience */}
+          {/* Skip intro button */}
           <button
             onClick={handleDismiss}
-            className="absolute bottom-6 right-6 text-xs text-[#0b2a6b]/60 hover:text-[#0b2a6b] font-medium tracking-wider px-3 py-1.5 rounded-full bg-white/70 hover:bg-white border border-[#0b2a6b]/15 transition-all shadow-sm cursor-pointer"
+            className="absolute bottom-6 right-6 text-xs text-white/50 hover:text-white font-medium tracking-wider px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 transition-all cursor-pointer"
           >
-            Skip Intro →
+            Skip →
           </button>
         </motion.div>
       )}

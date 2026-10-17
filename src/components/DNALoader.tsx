@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 
-const PRIMARY_LOGO = '/logo.jpg';
+const PRIMARY_LOGO = '/logo.png';
 const FALLBACK_LOGO =
   'https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg';
 
 export const DNALoader: React.FC = () => {
   const [logoSrc, setLogoSrc] = useState(PRIMARY_LOGO);
+  const [loadError, setLoadError] = useState(false);
 
   return (
     <div className="flex flex-col items-center justify-center space-y-2 select-none" id="dna-loader">
@@ -82,18 +83,28 @@ export const DNALoader: React.FC = () => {
         </svg>
 
         {/* Center Council Logo Emblem */}
-        <div className="relative z-10 w-7 h-7 rounded-full overflow-hidden p-0.5 bg-[#050B18] border border-orange-burnt/40 shadow-md">
-          <img
-            src={logoSrc}
-            alt="TGPCOP Logo"
-            width={28}
-            height={28}
-            className="w-full h-full object-cover rounded-full"
-            loading="eager"
-            onError={() => {
-              if (logoSrc !== FALLBACK_LOGO) setLogoSrc(FALLBACK_LOGO);
-            }}
-          />
+        <div className="relative z-10 w-7 h-7 rounded-full overflow-hidden p-0.5 bg-[#050B18] border border-orange-burnt/40 shadow-md flex items-center justify-center">
+          {!loadError ? (
+            <img
+              src={logoSrc}
+              alt="TGPCOP Logo"
+              width={28}
+              height={28}
+              className="w-full h-full object-cover rounded-full"
+              loading="eager"
+              onError={() => {
+                if (logoSrc === '/logo.png') {
+                  setLogoSrc('/logo.jpg');
+                } else {
+                  setLoadError(true);
+                }
+              }}
+            />
+          ) : (
+            <span className="text-[7px] font-extrabold text-orange-burnt tracking-tighter">
+              TGP
+            </span>
+          )}
         </div>
       </div>
     </div>

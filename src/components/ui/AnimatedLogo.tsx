@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
-const PRIMARY_LOGO = '/logo.jpg';
+const PRIMARY_LOGO = '/logo.png';
+const SECONDARY_LOGO = '/logo.jpg';
 const BACKUP_LOGO =
   'https://res.cloudinary.com/icgawsqe/image/upload/v1791987344/IMG-20261008-WA0059.jpg';
 
@@ -33,7 +34,9 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
   const [imgSrc, setImgSrc] = useState(PRIMARY_LOGO);
 
   const handleImgError = () => {
-    if (imgSrc !== BACKUP_LOGO) {
+    if (imgSrc === PRIMARY_LOGO) {
+      setImgSrc(SECONDARY_LOGO);
+    } else if (imgSrc !== BACKUP_LOGO) {
       setImgSrc(BACKUP_LOGO);
     }
   };

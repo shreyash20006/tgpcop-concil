@@ -3,7 +3,7 @@ import {
   Home, Megaphone, BookOpen, Calendar, User,
   Bell, ArrowLeft, Sparkles, Grid, X,
   Camera, Users, Clock, Phone, Search as SearchIcon,
-  Newspaper, Sun, Moon, ChevronRight
+  Newspaper, Sun, Moon, ChevronRight, CalendarCheck, Rocket
 } from 'lucide-react';
 import { useStudentAuth } from '../../lib/StudentAuthProvider';
 import { DNALoader } from '../../components/DNALoader';
@@ -45,9 +45,13 @@ const NewsScreen = lazy(() => import('../screens/News'));
 const StudyMaterialScreen = lazy(() => import('../../pages/StudyMaterial'));
 const ServicesScreen = lazy(() => import('../../pages/Services'));
 const ServiceDetailScreen = lazy(() => import('../../pages/ServiceDetail'));
+const HostProgramScreen = lazy(() => import('../../pages/HostProgram'));
+const ProgramDetailScreen = lazy(() => import('../../pages/ProgramDetail'));
 
 // More-drawer quick links config
 const MORE_ITEMS = [
+  { label: 'Host Program',    icon: Rocket,        route: '/host',           color: 'text-orange-400',   bg: 'bg-orange-burnt/15', border: 'border-orange-burnt/30' },
+  { label: 'Fest Schedule',   icon: CalendarCheck, route: '/schedule',       color: 'text-orange-400',   bg: 'bg-orange-burnt/10', border: 'border-orange-burnt/25' },
   { label: 'Gallery',         icon: Camera,     route: '/gallery',       color: 'text-purple-400',   bg: 'bg-purple-500/10',   border: 'border-purple-500/20' },
   { label: 'Council',         icon: Users,       route: '/council',       color: 'text-blue-400',     bg: 'bg-blue-500/10',     border: 'border-blue-500/20'   },
   { label: 'Services',        icon: Grid,        route: '/services',      color: 'text-emerald-400',  bg: 'bg-emerald-500/10',  border: 'border-emerald-500/20'},
@@ -184,6 +188,10 @@ export const MobileLayout: React.FC = () => {
     if (p.startsWith('/refunds'))       return 'Refund Policy';
     if (p.startsWith('/search'))        return 'Global Search';
     if (p.startsWith('/exams') || p.startsWith('/exam-schedule')) return 'Exam Timetable';
+    if (p.startsWith('/schedule') || p.startsWith('/event-schedule')) return 'Fest Schedule';
+    if (p.startsWith('/host'))          return 'Host a Program';
+    if (p.startsWith('/programs/'))     return 'Opportunity Details';
+    if (p.startsWith('/programs'))      return 'All Opportunities';
     if (p.startsWith('/news'))          return 'Council News';
     if (p.startsWith('/study-material')) return 'Study Material';
     if (p.startsWith('/profile'))       return 'My Profile';
@@ -314,6 +322,13 @@ export const MobileLayout: React.FC = () => {
                 <Route path="/council"        element={<CouncilScreen />} />
                 <Route path="/exams"          element={<ExamScheduleScreen />} />
                 <Route path="/exam-schedule"  element={<ExamScheduleScreen />} />
+                <Route path="/schedule"       element={<EventsScreen />} />
+                <Route path="/event-schedule" element={<EventsScreen />} />
+                <Route path="/host"           element={<HostProgramScreen />} />
+                <Route path="/host-program"   element={<HostProgramScreen />} />
+                <Route path="/programs"       element={<HostProgramScreen />} />
+                <Route path="/programs/:programId" element={<ProgramDetailScreen />} />
+                <Route path="/opportunity/:programId" element={<ProgramDetailScreen />} />
                 <Route path="/contact"        element={<ContactScreen />} />
                 <Route path="/search"         element={<SearchScreen />} />
                 <Route path="/news"           element={<NewsScreen />} />

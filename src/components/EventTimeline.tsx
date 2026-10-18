@@ -12,7 +12,7 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({ events }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Use live database events if provided, otherwise fallback to static timelineEvents
-  const displayEvents = events || timelineEvents;
+  const displayEvents = events && events.length > 0 ? events : timelineEvents;
 
   // Measure scroll progress relative to this timeline section
   const { scrollYProgress } = useScroll({

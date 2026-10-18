@@ -9,6 +9,7 @@ import {
 import { useToast } from '../components/admin/Toast';
 import { FeaturedExamBanner } from '../components/FeaturedExamBanner';
 import { examsData, type Exam } from '../data/exams';
+import { timelineEvents as staticTimelineEvents } from '../data/events';
 
 export const MyCalendar: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -57,7 +58,8 @@ export const MyCalendar: React.FC = () => {
   };
 
   const getEventsForDay = (day: Date) => {
-    return events.filter(ev => {
+    const listToSearch = events.length > 0 ? events : staticTimelineEvents;
+    return listToSearch.filter(ev => {
       const evDate = new Date(ev.deadline || ev.date);
       const matchesDay = isSameDay(evDate, day);
       if (viewMode === 'bookmarks') {

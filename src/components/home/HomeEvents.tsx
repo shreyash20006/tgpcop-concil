@@ -42,16 +42,53 @@ export const HomeEvents: React.FC<{ events: HomeEvent[] }> = ({ events }) => {
         title="Upcoming Events & Competitions"
         description="Block your dates — scientific quizzes, cultural drives and sports symposiums happening on campus."
         cta={
-          <Link
-            to="/events"
-            className="group inline-flex items-center gap-1.5 font-display font-extrabold text-sm transition-colors text-orange-burnt hover:text-gold-accent"
-            data-testid="view-all-events"
-          >
-            <span>Explore Events</span>
-            <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/schedule"
+              className="inline-flex items-center gap-1.5 font-display font-extrabold text-xs px-3.5 py-2 rounded-xl bg-orange-burnt/15 border border-orange-burnt/30 text-orange-burnt hover:bg-orange-burnt hover:text-white transition-all shadow-sm"
+            >
+              <span>🗓️ Fest Schedule</span>
+            </Link>
+            <Link
+              to="/events"
+              className="group inline-flex items-center gap-1.5 font-display font-extrabold text-sm transition-colors text-white/70 hover:text-white"
+              data-testid="view-all-events"
+            >
+              <span>Explore Events</span>
+              <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </Link>
+          </div>
         }
       />
+
+      {/* 5-Day Gathering & Induction Fest Schedule Feature Card */}
+      <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-orange-burnt/15 via-[#0F1E42] to-orange-burnt/10 border border-orange-burnt/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-xl bg-orange-burnt/20 border border-orange-burnt/35 flex items-center justify-center text-orange-burnt shrink-0">
+            <CalendarDays className="w-6 h-6 animate-pulse" />
+          </div>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-white font-display font-extrabold text-sm sm:text-base">
+                TGPCOP 5-Day Gathering & Induction Week Schedule
+              </span>
+              <span className="text-[10px] font-mono font-bold bg-orange-burnt text-white px-2 py-0.5 rounded-full uppercase">
+                Oct 13 - 17, 2026
+              </span>
+            </div>
+            <p className="text-white/60 text-xs font-sans mt-0.5">
+              Inauguration, Quiz, SciToons, Cultural Stage Events, Traditional Garba, and E-Sports Tournament.
+            </p>
+          </div>
+        </div>
+        <Link
+          to="/schedule"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-burnt hover:bg-[#E06D2B] text-white font-display text-xs font-bold transition-all shadow-lg shadow-orange-burnt/20 shrink-0"
+        >
+          <span>View Day-wise Timetable</span>
+          <ArrowUpRight className="w-4 h-4" />
+        </Link>
+      </div>
 
       <motion.div
         initial="hidden"

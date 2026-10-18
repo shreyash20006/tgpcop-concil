@@ -107,6 +107,8 @@ export const Navbar: React.FC = () => {
   ];
 
   const moreLinks = [
+    { name: 'Host a Program (Unstop)', path: '/host', icon: '🚀', desc: 'Host hackathons, quizzes & cultural fests', highlight: true },
+    { name: 'Fest Schedule 2026', path: '/schedule', icon: '🗓️', desc: '5-Day Induction & Cultural Week timetable', highlight: true },
     { name: 'Achievements', path: '/achievements', icon: '🏆', desc: 'Student hall of fame' },
     { name: 'Vote Now', path: '/vote', icon: '🗳️', desc: 'Participate in active polls' },
     { name: 'Leaderboard', path: '/leaderboard', icon: '🏆', desc: 'Top achievers', desktopOnly: true },

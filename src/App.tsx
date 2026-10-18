@@ -51,6 +51,9 @@ const Terms = lazy(() => import('./pages/Terms'));
 const Refunds = lazy(() => import('./pages/Refunds'));
 const Search = lazy(() => import('./pages/Search'));
 const ExamSchedule = lazy(() => import('./pages/ExamSchedule'));
+const EventSchedule = lazy(() => import('./pages/EventSchedule'));
+const HostProgram = lazy(() => import('./pages/HostProgram'));
+const ProgramDetail = lazy(() => import('./pages/ProgramDetail'));
 const CompleteProfile = lazy(() => import('./pages/CompleteProfile'));
 const BloodDonation = lazy(() => import('./pages/BloodDonation'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -179,6 +182,13 @@ const AppContent: React.FC = () => {
             <Route path="/register/:eventId" element={<MobileEventRegister />} />
             <Route path="/feedback/:eventId" element={<MobileEventFeedback />} />
             <Route path="/blood-donation" element={<BloodDonation />} />
+            <Route path="/schedule" element={<EventSchedule />} />
+            <Route path="/event-schedule" element={<EventSchedule />} />
+            <Route path="/host" element={<HostProgram />} />
+            <Route path="/host-program" element={<HostProgram />} />
+            <Route path="/programs" element={<HostProgram />} />
+            <Route path="/programs/:programId" element={<ProgramDetail />} />
+            <Route path="/opportunity/:programId" element={<ProgramDetail />} />
 
             {/* Secure Admin Routes */}
             <Route path="/admin" element={<AdminLogin />} />
@@ -293,6 +303,13 @@ const AppContent: React.FC = () => {
             <Route path="/services" element={<Services />} />
             <Route path="/services/:serviceId" element={<ServiceDetail />} />
             <Route path="/exam-schedule" element={<ExamSchedule />} />
+            <Route path="/schedule" element={<EventSchedule />} />
+            <Route path="/event-schedule" element={<EventSchedule />} />
+            <Route path="/host" element={<HostProgram />} />
+            <Route path="/host-program" element={<HostProgram />} />
+            <Route path="/programs" element={<HostProgram />} />
+            <Route path="/programs/:programId" element={<ProgramDetail />} />
+            <Route path="/opportunity/:programId" element={<ProgramDetail />} />
 
             {/* Secure Admin Routes */}
             <Route path="/admin" element={<AdminLogin />} />

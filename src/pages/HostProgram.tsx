@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import {
-  Rocket, Sparkles, Plus, Trash2, Calendar, Clock,
-  MapPin, Trophy, Users, ArrowRight, Check,
-  Globe, Phone, Mail, Search,
+  Rocket, Sparkles, Plus, Trash2,
+  Trophy, Users, ArrowRight,
+  Globe, Search,
   Layers, Laptop, Music, HelpCircle,
   Briefcase, GraduationCap, X, Download,
   ChevronRight, ExternalLink
@@ -15,7 +15,7 @@ import {
 } from '../data/hostedPrograms';
 import type {
   HostedProgram, ProgramType, ProgramRound, PrizeBreakdown,
-  ProgramCoordinator, ProgramRegistration
+  ProgramRegistration
 } from '../data/hostedPrograms';
 import { PageHeader } from '../components/PageHeader';
 import { ScienceBackground } from '../components/ScienceBackground';
@@ -1139,10 +1139,10 @@ export const HostProgram: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="p-5 pt-0 grid grid-cols-2 gap-2">
+                    <div className="p-5 pt-0 flex items-center gap-2">
                       <button
                         onClick={() => handleOpenRegistrations(prog)}
-                        className="py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-display text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                        className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-display text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
                       >
                         <Users className="w-3.5 h-3.5 text-orange-burnt" />
                         <span>Applicants</span>
@@ -1150,11 +1150,20 @@ export const HostProgram: React.FC = () => {
 
                       <Link
                         to={`/programs/${prog.id}`}
-                        className="py-2 rounded-xl bg-orange-burnt hover:bg-[#E06D2B] text-white font-display text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+                        className="flex-1 py-2 rounded-xl bg-orange-burnt hover:bg-[#E06D2B] text-white font-display text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
                       >
                         <span>View Page</span>
                         <ExternalLink className="w-3.5 h-3.5" />
                       </Link>
+
+                      <button
+                        type="button"
+                        onClick={(e) => handleDelete(prog.id, e)}
+                        title="Delete Program"
+                        className="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 ))}

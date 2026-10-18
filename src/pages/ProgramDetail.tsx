@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Calendar, Clock, MapPin, Trophy, Users, ArrowLeft,
+  Calendar, Clock, MapPin, Trophy, Users, ArrowLeft, ArrowRight,
   Share2, Check, Phone, Mail, Award, AlertCircle,
   CheckCircle2, ShieldCheck, ChevronRight, X, UserPlus, MessageSquare,
   GraduationCap
@@ -14,7 +14,6 @@ import { downloadICS } from '../utils/ics';
 
 export const ProgramDetail: React.FC = () => {
   const { programId } = useParams<{ programId: string }>();
-  const navigate = useNavigate();
   const [program, setProgram] = useState<HostedProgram | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'rounds' | 'prizes' | 'rules' | 'coordinators'>('overview');
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);

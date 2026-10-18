@@ -6,6 +6,7 @@ import { StatsCard } from '../../components/admin/StatsCard';
 import {
   Calendar, HelpCircle, AlertCircle, Loader2, Clock, ArrowUpRight,
   BadgeCheck, Sparkles, Image as ImageIcon, Megaphone, FileText, TrendingUp,
+  Rocket,
 } from 'lucide-react';
 
 type RecentQuestion = {
@@ -28,6 +29,7 @@ const itemVariants = {
 };
 
 const quickActions = [
+  { path: '/admin/opportunities', label: 'Publish Opportunity (Unstop)', icon: Rocket, color: 'orange' as const },
   { path: '/admin/notices', label: 'Add Announcement', icon: Megaphone, color: 'orange' as const },
   { path: '/admin/events', label: 'Create New Event', icon: Calendar, color: 'gold' as const },
   { path: '/admin/gallery', label: 'Upload Gallery Image', icon: ImageIcon, color: 'orange' as const },

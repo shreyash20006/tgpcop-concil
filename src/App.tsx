@@ -95,6 +95,7 @@ const AdminServicesMgr = lazy(() => import('./pages/admin/AdminServices'));
 const AdminServiceRegistrations = lazy(() => import('./pages/admin/AdminServiceRegistrations'));
 const AdminQrScanner = lazy(() => import('./pages/admin/AdminQrScanner'));
 const AdminAttendance = lazy(() => import('./pages/admin/AdminAttendance'));
+const AdminOpportunities = lazy(() => import('./pages/admin/AdminOpportunities'));
 
 const Services = lazy(() => import('./pages/Services'));
 const ServiceDetail = lazy(() => import('./pages/ServiceDetail'));
@@ -241,6 +242,7 @@ const AppContent: React.FC = () => {
               <Route path="/admin/service-registrations" element={<AdminServiceRegistrations />} />
               <Route path="/admin/qr-scanner" element={<AdminQrScanner />} />
               <Route path="/admin/attendance" element={<AdminAttendance />} />
+              <Route path="/admin/opportunities" element={<AdminOpportunities />} />
             </Route>
 
             {/* Everything else maps to bottom-tabbed MobileLayout */}
@@ -362,6 +364,7 @@ const AppContent: React.FC = () => {
               <Route path="/admin/service-registrations" element={<AdminServiceRegistrations />} />
               <Route path="/admin/qr-scanner" element={<AdminQrScanner />} />
               <Route path="/admin/attendance" element={<AdminAttendance />} />
+              <Route path="/admin/opportunities" element={<AdminOpportunities />} />
             </Route>
 
             {/* Catch-all 404 Route */}
